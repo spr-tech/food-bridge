@@ -1,75 +1,41 @@
-# React + TypeScript + Vite
+# FoodBridge frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The interface tier of FoodBridge: Vite, React and TypeScript. See `CLAUDE.md` for how the
+code is organised and `../docs/` for the intent, spec and decisions.
 
-Currently, two official plugins are available:
+## Pipeline
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+GitHub Actions runs `.github/workflows/frontend.yml` (at the repository root).
 
-## React Compiler
+**What runs**
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **check**: on Node 24, `npm ci`, then `npm run lint`, `npm run typecheck`, `npm test` and
+  `npm run build`, all inside `frontend/`.
+- **deploy**: only after check passes. Uses the Vercel CLI: `vercel pull`, `vercel build --prod`,
+  `vercel deploy --prebuilt --prod`. One deploy runs at a time; a second one waits.
 
-## Expanding the ESLint configuration
+**When**
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- check runs on every push that changes `frontend/` or the workflow file, and on every pull
+  request into `main`.
+- deploy runs only on a push to `main`, which in practice means merging a pull request.
+- Any failing check stops the deploy.
+- Vercel's own Git deploys are turned off in `vercel.json`. Production only changes through this
+  pipeline.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+**Secrets** (GitHub repository secrets, never committed)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- `VERCEL_TOKEN`: a Vercel access token
+- `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID`: which Vercel team and project to deploy to
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+`VITE_API_URL` is not a GitHub secret. It is set in the Vercel project's environment variables,
+and `vercel pull` brings it into the build. Vite builds it into the app, so changing it needs a
+new deploy.
 
-```
+## Running locally
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+cp .env.example .env   # points VITE_API_URL at the mock server
+npm install
+npm run dev
 ```

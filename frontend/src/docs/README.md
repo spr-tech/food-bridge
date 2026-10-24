@@ -15,3 +15,4 @@
 - `lib/`: small helpers (`cn`, formatting).
 - `contexts/`: empty on purpose. Shared state lives in Redux.
 - `styles/tokens.css`: every colour, font and radius. No hard-coded colours elsewhere.
+- `test/setup.ts`: Vitest setup. Test files sit next to what they test, e.g. `lib/format.test.ts`.

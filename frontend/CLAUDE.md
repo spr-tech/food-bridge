@@ -34,7 +34,7 @@ npm test            # Vitest
 npx @stoplight/prism-cli mock ../openapi.yaml   # mock server on http://127.0.0.1:4010
 ```
 
-Before saying a task is done, run `npm run lint`, `npm run typecheck` and `npm run build`. All three must pass. CI runs the same checks and blocks the deploy on failure.
+Before saying a task is done, run `npm run lint`, `npm run typecheck`, `npm test` and `npm run build`. All four must pass. CI runs the same checks and blocks the deploy on failure.
 
 ## Environment
 
@@ -65,6 +65,7 @@ src/
 ├── sections/      # page-level blocks
 ├── services/      # api.ts (the one base createApi); one file per resource, e.g. listings.ts
 ├── styles/        # tokens.css
+├── test/          # setup.ts for Vitest; test files sit next to the code they test
 └── types/         # shared types: Role, RequestStatus, ListingStatus
 ```
 
@@ -72,7 +73,7 @@ src/
 
 - There is exactly one `createApi`, in `src/services/api.ts`, with `endpoints: () => ({})`. Never create a second one.
 - Each feature adds its endpoints in its own file with `api.injectEndpoints({ endpoints: (build) => ({ ... }) })`, for example `src/services/listings.ts`, and exports its generated hooks from there.
-- `baseQuery` is `fetchBaseQuery` with `baseUrl: import.meta.env.VITE_API_URL`. `prepareHeaders` adds:
+- `baseQuery` is `fetchBaseQuery` with `baseUrl: env.apiUrl` from `src/config/env.ts`, which reads `VITE_API_URL`. `prepareHeaders` adds:
   - the auth token
   - a new request ID header on every request (name per `openapi.yaml`, proposed `X-Request-Id`)
 - Every endpoint must exist in `openapi.yaml`. Never call a path that isn't there. Never use `fetch` or axios directly.
@@ -84,7 +85,7 @@ src/
 
 ## Forms (Formik + Yup)
 
-- Every form uses Formik with a Yup schema, defined next to the form, e.g. `src/schema/listingSchema.ts`.
+- Every form uses Formik with a Yup schema. Schemas live in `src/schema/`, one per form, e.g. `src/schema/listingSchema.ts`.
 - Error messages come word for word from the spec (S2 field table).
 - Do NOT use shadcn's `<Form>` component. It is built for React Hook Form and won't work with Formik. Use the shadcn `Input`, `Textarea`, `Select`, `Label` and `Button` directly, wired to Formik.
 - Every field: visible label tied to the input, error linked with `aria-describedby`, `aria-invalid` when invalid, error shown as text (not only a red border).
