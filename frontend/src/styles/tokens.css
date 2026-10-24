@@ -1,0 +1,37 @@
+/* FoodBridge design tokens: the one source for colours, fonts, radius and focus.
+   A Tailwind v4 @theme block, so each token is a CSS variable and a utility
+   (bg-surface, text-text-muted, font-display, rounded-md). */
+@theme static {
+  --color-bg: #f7f6f2;
+  --color-surface: #ffffff;
+  --color-surface-2: #efede6;
+  --color-border: #dedad0;
+  --color-border-input: #8a877c;
+  --color-text: #1c2621;
+  --color-text-muted: #55605a;
+  --color-primary: #1f5c45;
+  --color-primary-hover: #184a37;
+  --color-on-primary: #ffffff;
+  --color-brand-dark: #1f4a3a;
+  --color-accent: #b4532a;
+  --color-logo: #e0a46b;
+  --color-danger: #a8321f;
+  --color-focus: #c2410c;
+
+  /* Status badge pairs: text on its background, each passes 4.5:1 */
+  --color-success: #1f5c45;
+  --color-success-bg: #e3efe6;
+  --color-warning: #8a4b10;
+  --color-warning-bg: #fbecd6;
+  --color-info: #1e4d86;
+  --color-info-bg: #dbe8f7;
+  --color-neutral: #55605a;
+  --color-neutral-bg: #ececea;
+
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --radius-md: 10px;
+
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-display: Fraunces, Georgia, serif;
+}
