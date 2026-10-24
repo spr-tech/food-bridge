@@ -138,9 +138,10 @@ British spelling (organisation, neighbourhood). Sentence case. Buttons start wit
   2. Push the branch with: `git push -u origin <branch>`
   3. Stop. Tell me the branch name, what changed, and how it was checked.
 - Do NOT open pull requests, merge, or turn on auto-merge. I open and merge pull requests myself.
-- Never delete a branch, local or remote. Never push to `main` directly.
-- Never weaken a check to make it pass. Never use `git push --force` or `git reset --hard`.
-- Every feature adds tests for its own behaviour before it's pushed.
+- Never delete a branch, local or remote. Never push to `main` directly, never merge locally into `main`, never use `--admin`.
+- If CI fails on a branch you've pushed, fix the cause on the same branch, push again, and tell me what failed and why.
+- Never weaken a check to make it pass: don't delete or skip tests, loosen lint or type rules, or edit the workflow file unless the task is about the pipeline. Never use `git push --force` or `git reset --hard`.
+- Every feature adds tests for its own behaviour before it's pushed: at least its form validation, its five states, and any business rule it shows on screen (e.g. no Approve button once a listing has an approved request).
 
 ## Working with me (Muizz)
 
