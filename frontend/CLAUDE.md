@@ -133,18 +133,15 @@ British spelling (organisation, neighbourhood). Sentence case. Buttons start wit
 ## Git workflow
 
 - Every task starts on its own branch from an up-to-date `main` (`git pull` first), named `feature/<name>`, `fix/<name>`, `chore/<name>` or `ci/<name>`. Tell me the branch name when you start.
-- Every feature adds tests for its own behaviour before its pull request opens: at least its form validation, its five states, and any business rule it shows on screen (e.g. no Approve button once a listing has an approved request).
-- When a task is done and lint, typecheck, test and build all pass locally:
-  1. Commit with a clear message (e.g. "feat: create listing form").
-  2. Push the branch.
-  3. Open a pull request into `main` with `gh pr create`, with a short summary of what changed and how it was checked.
-  4. Turn on auto-merge with `gh pr merge --auto --merge` (merge commit, and never `--delete-branch`).
-  5. Give me the pull request link.
-- GitHub merges only when the required "check" job passes. If it fails, read the log, fix the cause on the same branch, push again, and tell me what failed and why.
-- Never delete a branch, local or remote.
-- Never merge locally into `main`, never push directly to `main`, never use `--admin` to skip checks.
-- Never weaken a check to make it pass: don't delete or skip tests, loosen lint or type rules, or edit the workflow file unless the task is about the pipeline.
-- Never use `git push --force` or `git reset --hard`.
+- When the task is done and lint, typecheck, test and build all pass locally:
+  1. Commit with a clear message.
+  2. Push the branch with: `git push -u origin <branch>`
+  3. Stop. Tell me the branch name, what changed, and how it was checked.
+- Do NOT open pull requests, merge, or turn on auto-merge. I open and merge pull requests myself.
+- Never delete a branch, local or remote. Never push to `main` directly, never merge locally into `main`, never use `--admin`.
+- If CI fails on a branch you've pushed, fix the cause on the same branch, push again, and tell me what failed and why.
+- Never weaken a check to make it pass: don't delete or skip tests, loosen lint or type rules, or edit the workflow file unless the task is about the pipeline. Never use `git push --force` or `git reset --hard`.
+- Every feature adds tests for its own behaviour before it's pushed: at least its form validation, its five states, and any business rule it shows on screen (e.g. no Approve button once a listing has an approved request).
 
 ## Working with me (Muizz)
 
