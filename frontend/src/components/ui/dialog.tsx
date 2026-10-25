@@ -1,165 +1,207 @@
-// shadcn/ui Dialog (generated), adjusted for FoodBridge: design tokens,
-// the global focus outline instead of shadcn's ring, and no dark mode.
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { Dialog as DialogPrimitive } from "radix-ui"
+// Dialog and ConfirmDialog
+// Owner: Victor
+//
+// Built on Radix Dialog: focus moves in on open and is trapped, Escape closes,
+// focus returns to the opener. Title and description are required props.
+//
+// Needs from teammates (same-named exports expected):
+// - ../../lib/cn.ts          -> cn(...classes)           (Muizz)
+// - ./button.tsx             -> Button with `variant` ("primary" | "secondary" | "danger" | "ghost"),
+//                               `size` ("sm" | "md" | "lg"), `loading` (boolean), forwarded ref (Muizz)
+// - tokens.css variables used: --color-surface, --color-text, --color-text-muted, --color-border,
+//                               --color-focus, --radius, plus --color-text on a dimmed backdrop (see overlay)
+//
+// Usage (plain dialog with a trigger):
+//   <Dialog
+//     trigger={<Button>View details</Button>}
+//     title="Stock count details"
+//     description="Last counted on 22 October."
+//   >
+//     ...body content...
+//   </Dialog>
+//
+// Usage (confirm, destructive):
+//   <ConfirmDialog
+//     trigger={<Button variant="danger">Delete item</Button>}
+//     title="Delete this item?"
+//     description="This removes it from your stock list. You cannot undo this."
+//     confirmLabel="Delete item"
+//     tone="danger"
+//     onConfirm={async () => { await deleteItem(id); }}
+//   />
 
-import { Button } from "@/components/ui/button"
-import { XIcon } from "lucide-react"
+import * as React from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { cn } from "../../lib/cn";
+import { Button } from "./button";
 
-function Dialog({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />
+const focusRing =
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]";
+
+export interface DialogProps {
+  /** Short name of the dialog. Required so screen readers always announce it. */
+  title: React.ReactNode;
+  /** One or two sentences on what the dialog is for. Required for the same reason. */
+  description: React.ReactNode;
+  /** Element that opens the dialog (usually a Button). Focus returns to it on close. */
+  trigger?: React.ReactNode;
+  children?: React.ReactNode;
+  /** Buttons shown at the bottom. */
+  footer?: React.ReactNode;
+  open?: boolean;
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Override where focus lands on open. Call event.preventDefault() then focus your own element. */
+  onOpenAutoFocus?: (event: Event) => void;
+  className?: string;
 }
 
-function DialogTrigger({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
-  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
-}
-
-function DialogPortal({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
-}
-
-function DialogClose({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Close>) {
-  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
-}
-
-function DialogOverlay({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+export const Dialog = React.forwardRef<HTMLDivElement, DialogProps>(function Dialog(
+  {
+    title,
+    description,
+    trigger,
+    children,
+    footer,
+    open,
+    defaultOpen,
+    onOpenChange,
+    onOpenAutoFocus,
+    className,
+  },
+  ref,
+) {
   return (
-    <DialogPrimitive.Overlay
-      data-slot="dialog-overlay"
-      className={cn(
-        "fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-function DialogContent({
-  className,
-  children,
-  showCloseButton = true,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Content> & {
-  showCloseButton?: boolean
-}) {
-  return (
-    <DialogPortal>
-      <DialogOverlay />
-      <DialogPrimitive.Content
-        data-slot="dialog-content"
-        className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl bg-popover p-6 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
-          className
-        )}
-        {...props}
-      >
-        {children}
-        {showCloseButton && (
-          <DialogPrimitive.Close data-slot="dialog-close" asChild>
-            <Button
-              variant="ghost"
-              className="absolute top-4 right-4"
-              size="icon-sm"
+    <DialogPrimitive.Root open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange}>
+      {trigger ? <DialogPrimitive.Trigger asChild>{trigger}</DialogPrimitive.Trigger> : null}
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[var(--color-text)]/50" />
+        <DialogPrimitive.Content
+          ref={ref}
+          onOpenAutoFocus={onOpenAutoFocus}
+          className={cn(
+            "fixed left-1/2 top-1/2 z-50 flex max-h-[85vh] w-[calc(100vw-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col gap-4 overflow-y-auto rounded-[var(--radius)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-[var(--color-text)] shadow-lg",
+            className,
+          )}
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-1">
+              <DialogPrimitive.Title className="text-lg font-semibold">{title}</DialogPrimitive.Title>
+              <DialogPrimitive.Description className="text-sm text-[var(--color-text-muted)]">
+                {description}
+              </DialogPrimitive.Description>
+            </div>
+            <DialogPrimitive.Close
+              aria-label="Close"
+              className={cn(
+                "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius)] text-[var(--color-text)] hover:bg-[var(--color-border)]",
+                focusRing,
+              )}
             >
-              <XIcon
-              />
-              <span className="sr-only">Close</span>
-            </Button>
-          </DialogPrimitive.Close>
-        )}
-      </DialogPrimitive.Content>
-    </DialogPortal>
-  )
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M3 3l10 10M13 3L3 13" />
+              </svg>
+            </DialogPrimitive.Close>
+          </div>
+          {children ? <div className="text-sm">{children}</div> : null}
+          {footer ? <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">{footer}</div> : null}
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
+  );
+});
+
+export interface ConfirmDialogProps
+  extends Omit<DialogProps, "footer" | "children" | "onOpenAutoFocus"> {
+  /** Names the action: "Approve request", not "OK". Required. */
+  confirmLabel: string;
+  /** Defaults to "Cancel". */
+  cancelLabel?: string;
+  /** "danger" for delete, reverse and similar. Focus starts on Cancel in this tone. */
+  tone?: "default" | "danger";
+  /**
+   * Runs when the user confirms. If it returns a promise, the confirm button shows its
+   * loading state until it settles. The dialog closes when it resolves and stays open
+   * if it throws, so handle the error yourself (for example with an error Toast).
+   */
+  onConfirm: () => void | Promise<void>;
+  /** Force the loading state from outside, for example while a mutation is in flight. */
+  loading?: boolean;
+  /** Optional extra content between the description and the buttons. */
+  children?: React.ReactNode;
 }
 
-function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="dialog-header"
-      className={cn("flex flex-col gap-2", className)}
-      {...props}
-    />
-  )
-}
+export const ConfirmDialog = React.forwardRef<HTMLDivElement, ConfirmDialogProps>(function ConfirmDialog(
+  {
+    confirmLabel,
+    cancelLabel = "Cancel",
+    tone = "default",
+    onConfirm,
+    loading = false,
+    open,
+    defaultOpen,
+    onOpenChange,
+    children,
+    ...rest
+  },
+  ref,
+) {
+  const [internalOpen, setInternalOpen] = React.useState(defaultOpen ?? false);
+  const [pending, setPending] = React.useState(false);
+  const cancelRef = React.useRef<HTMLButtonElement>(null);
 
-function DialogFooter({
-  className,
-  showCloseButton = false,
-  children,
-  ...props
-}: React.ComponentProps<"div"> & {
-  showCloseButton?: boolean
-}) {
+  const isControlled = open !== undefined;
+  const isOpen = isControlled ? open : internalOpen;
+  const busy = pending || loading;
+
+  const setOpen = (next: boolean) => {
+    if (!isControlled) setInternalOpen(next);
+    onOpenChange?.(next);
+  };
+
+  // Do not let the dialog close (Escape, overlay click, X) while a confirm is running.
+  const handleOpenChange = (next: boolean) => {
+    if (!next && busy) return;
+    setOpen(next);
+  };
+
+  const handleConfirm = async () => {
+    if (busy) return;
+    setPending(true);
+    try {
+      await onConfirm();
+      setOpen(false);
+    } catch {
+      // Stay open so the user can retry. The caller reports the error.
+    } finally {
+      setPending(false);
+    }
+  };
+
   return (
-    <div
-      data-slot="dialog-footer"
-      className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        className
-      )}
-      {...props}
+    <Dialog
+      {...rest}
+      ref={ref}
+      open={isOpen}
+      onOpenChange={handleOpenChange}
+      onOpenAutoFocus={(event) => {
+        if (tone === "danger") {
+          event.preventDefault();
+          cancelRef.current?.focus();
+        }
+      }}
+      footer={
+        <>
+          <Button ref={cancelRef} variant="secondary" disabled={busy} onClick={() => handleOpenChange(false)}>
+            {cancelLabel}
+          </Button>
+          <Button variant={tone === "danger" ? "danger" : "primary"} loading={busy} onClick={handleConfirm}>
+            {confirmLabel}
+          </Button>
+        </>
+      }
     >
       {children}
-      {showCloseButton && (
-        <DialogPrimitive.Close asChild>
-          <Button variant="outline">Close</Button>
-        </DialogPrimitive.Close>
-      )}
-    </div>
-  )
-}
-
-function DialogTitle({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Title>) {
-  return (
-    <DialogPrimitive.Title
-      data-slot="dialog-title"
-      className={cn("font-heading leading-none font-medium", className)}
-      {...props}
-    />
-  )
-}
-
-function DialogDescription({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Description>) {
-  return (
-    <DialogPrimitive.Description
-      data-slot="dialog-description"
-      className={cn(
-        "text-sm text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-export {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogOverlay,
-  DialogPortal,
-  DialogTitle,
-  DialogTrigger,
-}
+    </Dialog>
+  );
+});

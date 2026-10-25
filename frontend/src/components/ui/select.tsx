@@ -1,191 +1,156 @@
-// shadcn/ui Select (generated), adjusted for FoodBridge: design tokens,
-// the global focus outline instead of shadcn's ring, and no dark mode.
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { Select as SelectPrimitive } from "radix-ui"
-import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
+/**
+ * Select — owner: Ehimare J. Okosun (Team 2)
+ *
+ * Built on Radix Select, which provides the keyboard model: Enter/Space/arrows open it,
+ * arrows move, typing a letter jumps to an option, Enter selects, Escape closes, and focus
+ * goes back to the trigger.
+ *
+ * Use it inside FormField: FormField passes `id`, `aria-describedby`, `aria-invalid` and
+ * `aria-required`, and Select puts them on the trigger, so the visible label, hint and error
+ * are announced the same way as for an Input.
+ *
+ * "Any" in filters: Radix throws if an item's value is "", so `allowAny` uses an internal
+ * sentinel and hands `undefined` back to you. Your code never sees the sentinel.
+ */
+import * as RadixSelect from "@radix-ui/react-select"
+import { Check, ChevronDown, ChevronUp } from "lucide-react"
+import { forwardRef } from "react"
+import { cn } from "../../lib/cn"
 
-function Select({
-  ...props
-}: React.ComponentProps<typeof SelectPrimitive.Root>) {
-  return <SelectPrimitive.Root data-slot="select" {...props} />
+const ANY_VALUE = "__tesa_any__"
+
+export type SelectOption = {
+  /** Must be a non-empty string. */
+  value: string
+  label: string
+  disabled?: boolean
 }
 
-function SelectGroup({
-  className,
-  ...props
-}: React.ComponentProps<typeof SelectPrimitive.Group>) {
+export type SelectProps = {
+  options: SelectOption[]
+  /** `undefined` means nothing chosen (or "Any" when `allowAny` is on). */
+  value: string | undefined
+  onValueChange: (value: string | undefined) => void
+  /** Shown when nothing is chosen and `allowAny` is off. Not a label: always use FormField. */
+  placeholder?: string
+  /** Adds an "Any" option at the top that maps to `undefined`. For filters. */
+  allowAny?: boolean
+  anyLabel?: string
+  disabled?: boolean
+  /** Set `name` to include the value in a native form submit. */
+  name?: string
+  required?: boolean
+  id?: string
+  "aria-describedby"?: string
+  "aria-invalid"?: boolean
+  "aria-required"?: boolean
+  /** Only when there is no visible label, which should be rare. */
+  "aria-label"?: string
+  className?: string
+  contentClassName?: string
+}
+
+export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select(
+  {
+    options,
+    value,
+    onValueChange,
+    placeholder = "Select…",
+    allowAny = false,
+    anyLabel = "Any",
+    disabled,
+    name,
+    required,
+    className,
+    contentClassName,
+    ...triggerAria
+  },
+  ref,
+) {
+  // Radix shows the placeholder when the value is "".
+  const internalValue = value ?? (allowAny ? ANY_VALUE : "")
+
   return (
-    <SelectPrimitive.Group
-      data-slot="select-group"
-      className={cn("scroll-my-1 p-1", className)}
-      {...props}
-    />
-  )
-}
-
-function SelectValue({
-  ...props
-}: React.ComponentProps<typeof SelectPrimitive.Value>) {
-  return <SelectPrimitive.Value data-slot="select-value" {...props} />
-}
-
-function SelectTrigger({
-  className,
-  size = "default",
-  children,
-  ...props
-}: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
-  size?: "sm" | "default"
-}) {
-  return (
-    <SelectPrimitive.Trigger
-      data-slot="select-trigger"
-      data-size={size}
-      className={cn(
-        "flex w-fit items-center justify-between gap-1.5 rounded-md border border-input bg-transparent py-2 pr-2 pl-2.5 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-placeholder:text-muted-foreground data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        className
-      )}
-      {...props}
+    <RadixSelect.Root
+      value={internalValue}
+      onValueChange={(next) => onValueChange(next === ANY_VALUE ? undefined : next)}
+      disabled={disabled}
+      name={name}
+      required={required}
     >
-      {children}
-      <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon className="pointer-events-none size-4 text-muted-foreground" />
-      </SelectPrimitive.Icon>
-    </SelectPrimitive.Trigger>
-  )
-}
-
-function SelectContent({
-  className,
-  children,
-  position = "item-aligned",
-  align = "center",
-  ...props
-}: React.ComponentProps<typeof SelectPrimitive.Content>) {
-  return (
-    <SelectPrimitive.Portal>
-      <SelectPrimitive.Content
-        data-slot="select-content"
-        data-align-trigger={position === "item-aligned"}
-        className={cn("relative z-50 max-h-(--radix-select-content-available-height) min-w-36 origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[align-trigger=true]:animate-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95", position ==="popper"&&"data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1", className )}
-        position={position}
-        align={align}
-        {...props}
+      <RadixSelect.Trigger
+        ref={ref}
+        {...triggerAria}
+        className={cn(
+          "flex h-10 w-full min-w-0 items-center justify-between gap-2 rounded-[var(--radius-md)]",
+          "border border-[var(--color-border-input)] bg-[var(--color-bg)] px-3 text-left text-[var(--color-text)] font-[family-name:var(--font-sans)]",
+          "focus-visible:[outline:var(--focus-ring-width)_solid_var(--color-focus)]",
+          "focus-visible:[outline-offset:var(--focus-ring-offset)]",
+          "data-[placeholder]:text-[var(--color-text-muted)]",
+          "aria-[invalid=true]:border-2 aria-[invalid=true]:border-[var(--color-danger)]",
+          "disabled:cursor-not-allowed disabled:bg-[var(--color-surface)] disabled:opacity-60",
+          className,
+        )}
       >
-        <SelectScrollUpButton />
-        <SelectPrimitive.Viewport
-          data-position={position}
+        <span className="min-w-0 truncate">
+          <RadixSelect.Value placeholder={placeholder} />
+        </span>
+        <RadixSelect.Icon asChild>
+          <ChevronDown aria-hidden="true" className="size-4 shrink-0 text-[var(--color-text-muted)]" />
+        </RadixSelect.Icon>
+      </RadixSelect.Trigger>
+
+      <RadixSelect.Portal>
+        <RadixSelect.Content
+          // "popper" positions it under the trigger and keeps it inside the viewport on phones.
+          position="popper"
+          sideOffset={4}
+          collisionPadding={8}
           className={cn(
-            "data-[position=popper]:h-(--radix-select-trigger-height) data-[position=popper]:w-full data-[position=popper]:min-w-(--radix-select-trigger-width)",
-            position === "popper" && ""
+            "relative z-50 max-h-[var(--radix-select-content-available-height)] min-w-[var(--radix-select-trigger-width)]",
+            "max-w-[calc(100vw-16px)] overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] shadow-lg",
+            contentClassName,
           )}
         >
-          {children}
-        </SelectPrimitive.Viewport>
-        <SelectScrollDownButton />
-      </SelectPrimitive.Content>
-    </SelectPrimitive.Portal>
-  )
-}
+          <RadixSelect.ScrollUpButton className="flex h-6 items-center justify-center text-[var(--color-text-muted)]">
+            <ChevronUp aria-hidden="true" className="size-4" />
+          </RadixSelect.ScrollUpButton>
 
-function SelectLabel({
-  className,
-  ...props
-}: React.ComponentProps<typeof SelectPrimitive.Label>) {
-  return (
-    <SelectPrimitive.Label
-      data-slot="select-label"
-      className={cn("px-2 py-1.5 text-xs text-muted-foreground", className)}
-      {...props}
-    />
-  )
-}
+          <RadixSelect.Viewport className="p-1">
+            {allowAny && <SelectItem value={ANY_VALUE} label={anyLabel} />}
+            {options.map((option) => (
+              <SelectItem key={option.value} {...option} />
+            ))}
+          </RadixSelect.Viewport>
 
-function SelectItem({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<typeof SelectPrimitive.Item>) {
+          <RadixSelect.ScrollDownButton className="flex h-6 items-center justify-center text-[var(--color-text-muted)]">
+            <ChevronDown aria-hidden="true" className="size-4" />
+          </RadixSelect.ScrollDownButton>
+        </RadixSelect.Content>
+      </RadixSelect.Portal>
+    </RadixSelect.Root>
+  )
+})
+
+function SelectItem({ value, label, disabled }: SelectOption) {
   return (
-    <SelectPrimitive.Item
-      data-slot="select-item"
+    <RadixSelect.Item
+      value={value}
+      disabled={disabled}
       className={cn(
-        "relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm select-none focus-visible:-outline-offset-2 focus:bg-muted focus:text-foreground not-data-[variant=destructive]:focus:**:text-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
-        className
+        // min-h-10 keeps every option above the 24×24 px target size, with room for touch.
+        "relative flex min-h-10 cursor-default select-none items-center rounded-[var(--radius-sm)] py-2 pl-8 pr-3 outline-none text-sm",
+        "data-[highlighted]:bg-[var(--color-surface)] data-[highlighted]:text-[var(--color-text)]",
+        "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       )}
-      {...props}
     >
-      <span className="pointer-events-none absolute right-2 flex size-4 items-center justify-center">
-        <SelectPrimitive.ItemIndicator>
-          <CheckIcon className="pointer-events-none" />
-        </SelectPrimitive.ItemIndicator>
-      </span>
-      <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
-    </SelectPrimitive.Item>
+      <RadixSelect.ItemIndicator className="absolute left-2 inline-flex items-center text-[var(--color-primary)]">
+        <Check aria-hidden="true" className="size-4" />
+      </RadixSelect.ItemIndicator>
+      {/* break-words: long labels wrap instead of widening the list off-screen. */}
+      <RadixSelect.ItemText>
+        <span className="break-words">{label}</span>
+      </RadixSelect.ItemText>
+    </RadixSelect.Item>
   )
-}
-
-function SelectSeparator({
-  className,
-  ...props
-}: React.ComponentProps<typeof SelectPrimitive.Separator>) {
-  return (
-    <SelectPrimitive.Separator
-      data-slot="select-separator"
-      className={cn("pointer-events-none -mx-1 my-1 h-px bg-border", className)}
-      {...props}
-    />
-  )
-}
-
-function SelectScrollUpButton({
-  className,
-  ...props
-}: React.ComponentProps<typeof SelectPrimitive.ScrollUpButton>) {
-  return (
-    <SelectPrimitive.ScrollUpButton
-      data-slot="select-scroll-up-button"
-      className={cn(
-        "z-10 flex cursor-default items-center justify-center bg-popover py-1 [&_svg:not([class*='size-'])]:size-4",
-        className
-      )}
-      {...props}
-    >
-      <ChevronUpIcon
-      />
-    </SelectPrimitive.ScrollUpButton>
-  )
-}
-
-function SelectScrollDownButton({
-  className,
-  ...props
-}: React.ComponentProps<typeof SelectPrimitive.ScrollDownButton>) {
-  return (
-    <SelectPrimitive.ScrollDownButton
-      data-slot="select-scroll-down-button"
-      className={cn(
-        "z-10 flex cursor-default items-center justify-center bg-popover py-1 [&_svg:not([class*='size-'])]:size-4",
-        className
-      )}
-      {...props}
-    >
-      <ChevronDownIcon
-      />
-    </SelectPrimitive.ScrollDownButton>
-  )
-}
-
-export {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectScrollDownButton,
-  SelectScrollUpButton,
-  SelectSeparator,
-  SelectTrigger,
-  SelectValue,
 }

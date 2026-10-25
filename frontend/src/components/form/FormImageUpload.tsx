@@ -1,9 +1,13 @@
 // A photo picker wired to Formik, with a preview. The value is a File or null.
 // How photos reach the service is TBC (spec S2); this only collects the file.
+// The shared set has no file picker, so this one is ours, built on the shared FormField
+// and Input. Candidate to add to the shared repo.
 import { useEffect, useState } from 'react'
 import { useField } from 'formik'
+import { FormField } from '@/components/ui/form-field'
 import { Input } from '@/components/ui/input'
-import { FormField, type FormFieldBaseProps } from '@/components/form/FormField'
+import { useFieldError } from '@/components/form/useFieldError'
+import type { FormFieldBaseProps } from '@/components/form/types'
 
 type FormImageUploadProps = FormFieldBaseProps & {
   disabled?: boolean
@@ -11,6 +15,7 @@ type FormImageUploadProps = FormFieldBaseProps & {
 
 export function FormImageUpload({ name, label, hint, required, disabled }: FormImageUploadProps) {
   const [, , helpers] = useField<File | null>(name)
+  const error = useFieldError(name)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
   // Frees the previous preview's memory when it changes and when the field unmounts.
@@ -21,7 +26,7 @@ export function FormImageUpload({ name, label, hint, required, disabled }: FormI
   }, [previewUrl])
 
   return (
-    <FormField name={name} label={label} hint={hint} required={required}>
+    <FormField label={label} hint={hint} error={error} required={required}>
       {(control) => (
         <div className="flex flex-col gap-3">
           <Input
@@ -29,6 +34,7 @@ export function FormImageUpload({ name, label, hint, required, disabled }: FormI
             name={name}
             accept="image/jpeg,image/png"
             disabled={disabled}
+            className="h-auto py-2"
             onChange={(event) => {
               const file = event.currentTarget.files?.[0] ?? null
               void helpers.setValue(file)

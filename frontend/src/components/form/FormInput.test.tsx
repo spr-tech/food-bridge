@@ -22,11 +22,33 @@ function renderField() {
 }
 
 describe('FormInput', () => {
-  it('shows no error before the field is touched', () => {
+  it('shows no error while the user is still in the field', async () => {
+    const user = userEvent.setup()
     const input = renderField()
 
-    expect(input).toHaveAttribute('aria-invalid', 'false')
+    // Typing and clearing makes Formik find the error; it must stay hidden until the
+    // user leaves the field. The shared FormField only adds aria-invalid with an error.
+    await user.type(input, 'a')
+    await user.clear(input)
+
+    expect(input).not.toHaveAttribute('aria-invalid')
     expect(screen.queryByText('Enter the food name')).not.toBeInTheDocument()
+  })
+
+  it('shows the error after a submit even if the field was never touched', async () => {
+    const user = userEvent.setup()
+    render(
+      <Formik initialValues={{ foodName: '' }} validationSchema={schema} onSubmit={() => {}}>
+        <Form noValidate>
+          <FormInput name="foodName" label="Food name" required />
+          <button type="submit">Check</button>
+        </Form>
+      </Formik>,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Check' }))
+
+    expect(screen.getByLabelText(/Food name/)).toHaveAccessibleDescription('Enter the food name')
   })
 
   it('shows the error text and sets aria-invalid after leaving an empty required field', async () => {

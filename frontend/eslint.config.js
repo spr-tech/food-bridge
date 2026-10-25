@@ -20,7 +20,8 @@ export default defineConfig([
     },
   },
   {
-    // shadcn files export style helpers (buttonVariants) next to the component.
+    // Shared component files are copied unchanged; some export a hook or helpers next
+    // to the component (toast.tsx exports useToast).
     files: ['src/components/ui/**/*.tsx'],
     rules: {
       'react-refresh/only-export-components': 'off',

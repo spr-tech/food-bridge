@@ -1,7 +1,7 @@
 // A thin bar at the top while the next page loads. Purely visual, so hidden from
 // screen readers; with reduced motion it appears without animating.
 import { useNavigation } from 'react-router'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/cn'
 
 export function NavProgress() {
   const isLoading = useNavigation().state === 'loading'

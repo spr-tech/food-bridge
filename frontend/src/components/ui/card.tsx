@@ -1,104 +1,188 @@
-// shadcn/ui Card (generated), adjusted for FoodBridge: design tokens,
-// the global focus outline instead of shadcn's ring, and no dark mode.
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import {
+  forwardRef,
+  type HTMLAttributes,
+  type ImgHTMLAttributes,
+  type ReactNode,
+} from "react";
 
-function Card({
-  className,
-  size = "default",
-  ...props
-}: React.ComponentProps<"div"> & { size?: "default" | "sm" }) {
+export interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode;
+  href?: string;
+  linkLabel?: string;
+  image?: string;
+  imageAlt?: string;
+}
+
+export interface CardHeaderProps
+  extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode;
+}
+
+export interface CardBodyProps
+  extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode;
+}
+
+export interface CardFooterProps
+  extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode;
+}
+
+export interface CardImageProps
+  extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> {
+  src?: string;
+  alt: string;
+}
+
+export const Card = forwardRef<HTMLDivElement, CardProps>(
+  function Card(
+    {
+      children,
+      className = "",
+      href,
+      linkLabel,
+      image,
+      imageAlt = "",
+      ...props
+    },
+    ref,
+  ) {
+    const classes = [
+      "relative min-w-0 overflow-hidden rounded-lg border",
+      "border-[var(--color-border)] bg-[var(--color-surface)]",
+      "text-[var(--color-text)]",
+      // The link fills the card, so its own outline would be clipped by
+      // overflow-hidden. Draw the keyboard focus ring on the card instead.
+      "has-[>a:focus-visible]:[outline:var(--focus-ring-width)_solid_var(--color-focus)]",
+      "has-[>a:focus-visible]:[outline-offset:var(--focus-ring-offset)]",
+      className,
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    return (
+      <div ref={ref} className={classes} {...props}>
+        {image !== undefined ? (
+          image ? (
+            <img
+              src={image}
+              alt={imageAlt}
+              className="block aspect-video w-full object-cover"
+            />
+          ) : (
+            <div
+              aria-hidden="true"
+              className="flex aspect-video w-full items-center justify-center bg-[var(--color-bg)] text-[var(--color-text-muted)]"
+            >
+              Image unavailable
+            </div>
+          )
+        ) : null}
+
+        <div className="min-w-0 p-4">
+          {children}
+        </div>
+
+        {href ? (
+          <a
+            href={href}
+            aria-label={linkLabel}
+            className="absolute inset-0 z-10 rounded-lg focus-visible:outline-none"
+          />
+        ) : null}
+      </div>
+    );
+  },
+);
+
+Card.displayName = "Card";
+
+export const CardHeader = forwardRef<
+  HTMLDivElement,
+  CardHeaderProps
+>(function CardHeader(
+  { children, className = "", ...props },
+  ref,
+) {
   return (
     <div
-      data-slot="card"
-      data-size={size}
-      className={cn(
-        "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-xl bg-card py-(--card-spacing) text-sm text-card-foreground shadow-xs ring-1 ring-foreground/10 [--card-spacing:--spacing(6)] has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(4)] *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
-        className
-      )}
+      ref={ref}
+      className={`mb-3 min-w-0 break-words ${className}`}
       {...props}
-    />
-  )
-}
+    >
+      {children}
+    </div>
+  );
+});
 
-function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
+CardHeader.displayName = "CardHeader";
+
+export const CardBody = forwardRef<HTMLDivElement, CardBodyProps>(
+  function CardBody(
+    { children, className = "", ...props },
+    ref,
+  ) {
+    return (
+      <div
+        ref={ref}
+        className={`min-w-0 break-words ${className}`}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  },
+);
+
+CardBody.displayName = "CardBody";
+
+export const CardFooter = forwardRef<
+  HTMLDivElement,
+  CardFooterProps
+>(function CardFooter(
+  { children, className = "", ...props },
+  ref,
+) {
   return (
     <div
-      data-slot="card-header"
-      className={cn(
-        "group/card-header @container/card-header grid auto-rows-min items-start gap-1 rounded-t-xl px-(--card-spacing) has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-(--card-spacing)",
-        className
-      )}
+      ref={ref}
+      className={`mt-4 flex min-w-0 flex-wrap items-center gap-2 ${className}`}
       {...props}
-    />
-  )
-}
+    >
+      {children}
+    </div>
+  );
+});
 
-function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+CardFooter.displayName = "CardFooter";
+
+export const CardImage = forwardRef<
+  HTMLImageElement,
+  CardImageProps
+>(function CardImage(
+  { src, alt, className = "", ...props },
+  ref,
+) {
+  if (!src) {
+    return (
+      <div
+        aria-hidden="true"
+        className={`flex aspect-video w-full items-center justify-center bg-[var(--color-bg)] text-[var(--color-text-muted)] ${className}`}
+      >
+        Image unavailable
+      </div>
+    );
+  }
+
   return (
-    <div
-      data-slot="card-title"
-      className={cn(
-        "font-heading text-base leading-normal font-medium group-data-[size=sm]/card:text-sm",
-        className
-      )}
+    <img
+      ref={ref}
+      src={src}
+      alt={alt}
+      className={`block aspect-video w-full object-cover ${className}`}
       {...props}
     />
-  )
-}
+  );
+});
 
-function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="card-description"
-      className={cn("text-sm text-muted-foreground", className)}
-      {...props}
-    />
-  )
-}
-
-function CardAction({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="card-action"
-      className={cn(
-        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-function CardContent({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="card-content"
-      className={cn("flex flex-col gap-3 px-(--card-spacing)", className)}
-      {...props}
-    />
-  )
-}
-
-function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="card-footer"
-      className={cn(
-        "flex items-center rounded-b-xl px-(--card-spacing) [.border-t]:pt-(--card-spacing)",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-export {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardAction,
-  CardDescription,
-  CardContent,
-}
+CardImage.displayName = "CardImage";

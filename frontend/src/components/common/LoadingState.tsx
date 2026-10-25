@@ -8,7 +8,7 @@ const SLOW_AFTER_MS = 8000
 type LoadingStateProps = {
   // Read by screen readers, e.g. "Loading listings".
   label: string
-  // Skeleton shapes that match the content. Defaults to three rows.
+  // Shared Skeleton shapes that match the content. Defaults to three two-line rows.
   children?: ReactNode
 }
 
@@ -25,9 +25,9 @@ export function LoadingState({ label, children }: LoadingStateProps) {
       <span className="sr-only">{label}</span>
       {children ?? (
         <>
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
+          <Skeleton lines={2} />
+          <Skeleton lines={2} />
+          <Skeleton lines={2} />
         </>
       )}
       <p role="status" className="text-sm text-text-muted">
