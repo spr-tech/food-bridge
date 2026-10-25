@@ -52,7 +52,8 @@ Before saying a task is done, run `npm run lint`, `npm run typecheck`, `npm test
 
 ```
 src/
-├── app/           # router.tsx, store.ts, providers.tsx (Redux Provider + RouterProvider),
+├── app/           # router.tsx, store.ts (makeStore), providers.tsx (Redux Provider + RouterProvider),
+│                  # session.ts (the signed-in session in sessionStorage),
 │                  # devRole.ts (the one temporary role constant)
 ├── assets/        # images, logo-icon-dark.svg and logo-icon-light.svg (icon only; the wordmark is text)
 ├── components/
@@ -67,15 +68,18 @@ src/
 ├── contexts/      # empty, with a .gitkeep (Redux holds shared state)
 ├── docs/          # README.md explaining this structure
 ├── hooks/         # useRole, useIdempotencyKey, useDocumentTitle, useAppStore (typed Redux hooks),
-│                  # useSidebarTheme (sessionStorage), useSignOut, useMediaQuery
+│                  # useSidebarTheme (sessionStorage), useSignOut, useMediaQuery, useNavCounts
 ├── lib/           # cn.ts (from the shared repo), format.ts (dates as "Today, 7:00 PM", quantities)
+├── mocks/         # TEMPORARY simulated service: db.ts (the rules), seed.ts (demo data),
+│                  # simulate.ts (delay and the dev-only ?simulate=error|empty|slow switches)
 ├── pages/         # one thin file per route; a page only composes sections
 ├── schema/        # Yup schemas, one per form
 ├── sections/      # page-level blocks
-├── services/      # api.ts (the one base createApi); one file per resource, e.g. listings.ts
+├── services/      # api.ts (the one base createApi); auth.ts, listings.ts, requests.ts (the hooks
+│                  # screens use); errors.ts (reading status, code and field errors)
 ├── styles/        # tokens.css; layout.css (the app frame and the sidebar flood's exact timings)
-├── test/          # setup.ts for Vitest; test files sit next to the code they test
-└── types/         # shared types: Role, RequestStatus, ListingStatus
+├── test/          # setup.ts for Vitest, render.tsx (renderRoutes, signInAs); tests sit next to their code
+└── types/         # shared types: Role, RequestStatus, ListingStatus; api.ts (Listing, ListingRequest, Session)
 ```
 
 ## RTK Query rules
@@ -86,6 +90,7 @@ src/
   - the auth token
   - a new request ID header on every request (name per `openapi.yaml`, proposed `X-Request-Id`)
 - Every endpoint must exist in `openapi.yaml`. Never call a path that isn't there. Never use `fetch` or axios directly.
+- TEMPORARY, until the API and `openapi.yaml` exist: every endpoint is simulated with `queryFn` calling `src/mocks/`. Screens only ever use the hooks exported from `src/services/`, never `src/mocks/`. When the API arrives, each `queryFn` becomes `query`, and the screens don't change. Keep `src/mocks/db.ts` enforcing the same rules the service must.
 - Request and response types come from `openapi.yaml`. Never use `any`.
 - Use `tagTypes` and `providesTags` / `invalidatesTags` so lists refresh after writes. Tag listings by id, plus a `LIST` tag.
 - Create listing and Request this food send an idempotency key (proposed header `Idempotency-Key`): generate one UUID when the user submits, reuse it on retry of the same submission.
@@ -113,7 +118,7 @@ src/
 
 ## Statuses (use these words everywhere)
 
-- Request: Pending, Approved, Declined, Expired
+- Request: Pending, Approved, Declined, Expired, Cancelled
 - Listing: Available, Reserved, Collected, Expired
 
 Badges always show the word, never colour alone. Map API values to these labels in one place, `src/constants/status.ts`.

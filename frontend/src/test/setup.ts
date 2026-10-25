@@ -3,6 +3,7 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach } from 'vitest'
+import { resetMockDb } from '@/mocks/db'
 
 // Radix (the shared Checkbox and Select) measures elements and captures the pointer.
 // jsdom has neither, so these stand-ins do nothing, as a browser would in a test.
@@ -31,6 +32,10 @@ window.matchMedia ??= (query: string) =>
     dispatchEvent: () => false,
   }) as MediaQueryList
 
+// Each test starts signed out, with the simulated data back at its seed.
 afterEach(() => {
   cleanup()
+  sessionStorage.clear()
+  resetMockDb()
+  window.history.replaceState(null, '', '/')
 })

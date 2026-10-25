@@ -40,6 +40,7 @@ const COLOURS: Record<string, BadgeColours> = {
   'request:APPROVED': 'available',
   'request:DECLINED': 'expired',
   'request:EXPIRED': 'expired',
+  'request:CANCELLED': 'expired',
   'listing:AVAILABLE': 'available',
   'listing:RESERVED': 'reserved',
   'listing:COLLECTED': 'expired',

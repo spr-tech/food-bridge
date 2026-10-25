@@ -12,6 +12,7 @@ export const REQUEST_STATUS: Record<RequestStatus, StatusDisplay> = {
   APPROVED: { label: 'Approved', tone: 'success' },
   DECLINED: { label: 'Declined', tone: 'neutral' },
   EXPIRED: { label: 'Expired', tone: 'neutral' },
+  CANCELLED: { label: 'Cancelled', tone: 'neutral' },
 }
 
 export const LISTING_STATUS: Record<ListingStatus, StatusDisplay> = {

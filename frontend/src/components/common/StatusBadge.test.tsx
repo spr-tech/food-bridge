@@ -13,6 +13,7 @@ const REQUEST_ROWS: [RequestStatus, string, string, string][] = [
   ['APPROVED', 'Approved', '--color-success', 'available'],
   ['DECLINED', 'Declined', '--color-surface', 'expired'],
   ['EXPIRED', 'Expired', '--color-surface', 'expired'],
+  ['CANCELLED', 'Cancelled', '--color-surface', 'expired'],
 ]
 
 const LISTING_ROWS: [ListingStatus, string, string, string][] = [

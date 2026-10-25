@@ -137,7 +137,7 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-const REQUEST_STATUSES: RequestStatus[] = ['PENDING', 'APPROVED', 'DECLINED', 'EXPIRED']
+const REQUEST_STATUSES: RequestStatus[] = ['PENDING', 'APPROVED', 'DECLINED', 'EXPIRED', 'CANCELLED']
 const LISTING_STATUSES: ListingStatus[] = ['AVAILABLE', 'RESERVED', 'COLLECTED', 'EXPIRED']
 
 function wait(ms: number) {
