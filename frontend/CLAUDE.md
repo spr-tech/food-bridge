@@ -54,24 +54,26 @@ Before saying a task is done, run `npm run lint`, `npm run typecheck`, `npm test
 src/
 ├── app/           # router.tsx, store.ts, providers.tsx (Redux Provider + RouterProvider),
 │                  # devRole.ts (the one temporary role constant)
-├── assets/        # images and the logo
+├── assets/        # images, logo-icon-dark.svg and logo-icon-light.svg (icon only; the wordmark is text)
 ├── components/
 │   ├── ui/        # shared components, copied unchanged from the shared repo (never edited here)
 │   ├── form/      # Formik adapters around the shared FormField and controls; export from index.ts
 │   ├── common/    # StatusBadge (our statuses on the shared badge), PageHeader, LoadingState
-│   └── layout/    # RootLayout, AppLayout, Header, DemoBanner, NavProgress, SkipLink
+│   └── layout/    # RootLayout, AppLayout (frame and sidebar flood state), Sidebar, TopBar,
+│                  # PhoneTopBar, AccountMenu, TabBar, Logo, NavIcons, DemoBanner, NavProgress, SkipLink
 ├── config/        # env.ts: reads VITE_API_URL and throws a clear error if it's missing
 ├── constants/     # routes.ts (every path; no hard-coded paths anywhere else), roles.ts,
 │                  # status.ts (labels and tones), listingOptions.ts (categories, units, areas)
 ├── contexts/      # empty, with a .gitkeep (Redux holds shared state)
 ├── docs/          # README.md explaining this structure
-├── hooks/         # useRole, useIdempotencyKey, useDocumentTitle, useAppStore (typed Redux hooks)
+├── hooks/         # useRole, useIdempotencyKey, useDocumentTitle, useAppStore (typed Redux hooks),
+│                  # useSidebarTheme (sessionStorage), useSignOut, useMediaQuery
 ├── lib/           # cn.ts (from the shared repo), format.ts (dates as "Today, 7:00 PM", quantities)
 ├── pages/         # one thin file per route; a page only composes sections
 ├── schema/        # Yup schemas, one per form
 ├── sections/      # page-level blocks
 ├── services/      # api.ts (the one base createApi); one file per resource, e.g. listings.ts
-├── styles/        # tokens.css
+├── styles/        # tokens.css; layout.css (the app frame and the sidebar flood's exact timings)
 ├── test/          # setup.ts for Vitest; test files sit next to the code they test
 └── types/         # shared types: Role, RequestStatus, ListingStatus
 ```

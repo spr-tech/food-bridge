@@ -10,6 +10,7 @@ export const ROUTES = {
   editListing: '/listings/:id/edit',
   yourListings: '/your-listings',
   yourRequests: '/your-requests',
+  requests: '/requests',
   admin: '/admin',
   devForms: '/dev/forms',
 } as const

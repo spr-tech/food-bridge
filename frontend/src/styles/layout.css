@@ -1,0 +1,539 @@
+/* The app frame: sidebar, top bar, phone bars and the sidebar flood (spec section 12).
+   Static sizes come from docs/design/foodbridge-final/source-html/; the flood's timings
+   and easing are copied exactly from foodbridge-sidebar-animation.html.
+
+   AppLayout sets data-sidebar on .fb-app:
+   - "dark": just signed in.
+   - "flooding": the first sidebar click. Cream values, plus the timed transitions.
+   - "cream": after the flood, or on a refresh. Cream values with quick hover
+     transitions only, so a hovered link never waits 0.35s for its white text.
+   The cream layers (.fb-pour, .fb-flow) sit at z-index 0 under the content at 1; the
+   green line sits above everything at 3. */
+
+/* ---- Frame -------------------------------------------------------------------------- */
+
+.fb-app {
+  position: relative;
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.fb-body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.fb-main {
+  flex: 1;
+  min-width: 0;
+  padding: 38px 52px 40px;
+}
+
+/* ---- Sidebar ------------------------------------------------------------------------ */
+
+.fb-side {
+  position: sticky;
+  top: 0;
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+  overflow: hidden auto;
+  padding: 22px 16px 26px;
+  background: var(--color-sidebar-dark);
+  border-right: 1px solid transparent;
+}
+
+.fb-side > :not(.fb-pour) {
+  position: relative;
+  z-index: 1;
+}
+
+.fb-pour {
+  position: absolute;
+  z-index: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 0;
+  border-radius: 60% 60% 0 0 / 40px 40px 0 0;
+  background: var(--color-cream);
+  pointer-events: none;
+}
+
+.fb-side .fb-logo {
+  margin: 0 6px 30px;
+}
+
+.fb-nav {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fb-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  color: var(--color-link-on-dark);
+  font: 500 15px var(--font-sans);
+  text-decoration: none;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.fb-link[aria-current='page'] {
+  font-weight: 600;
+}
+
+.fb-link:hover,
+.fb-link[aria-current='page'] {
+  background: var(--color-pill-on-dark);
+  color: var(--color-on-primary);
+}
+
+.fb-link:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-on-dark);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.fb-count {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-count);
+  color: var(--color-on-count);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.fb-sect {
+  margin: 22px 14px 8px;
+  color: var(--color-muted-on-dark);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.fb-later {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+  padding: 12px 14px;
+  color: var(--color-muted-on-dark);
+  font: 500 15px var(--font-sans);
+  cursor: not-allowed;
+}
+
+.fb-soon {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-surface) 10%, transparent);
+  color: var(--color-footer-on-dark);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.fb-tag {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding: 0 6px;
+  color: var(--color-footer-on-dark);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* ---- Logo --------------------------------------------------------------------------- */
+
+.fb-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fb-logo__icon {
+  position: relative;
+  display: block;
+  height: 34px;
+  aspect-ratio: 120 / 90;
+  flex-shrink: 0;
+}
+
+.fb-logo__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fb-logo__word {
+  font-family: var(--font-sans);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+/* "Food" is a two-colour background clipped to the text: white on top, green below.
+   Moving the background up fills the word green from the bottom. */
+.fb-logo--sidebar .fb-logo__food {
+  background-image: linear-gradient(
+    to top,
+    var(--color-wordmark-food-light) 50%,
+    var(--color-wordmark-food-dark) 50%
+  );
+  background-position: 0 0;
+  background-size: 100% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.fb-logo--sidebar .fb-logo__bridge {
+  color: var(--color-wordmark-bridge-dark);
+}
+
+.fb-logo--cream .fb-logo__icon {
+  height: 26px;
+}
+
+.fb-logo--cream .fb-logo__word {
+  font-size: 19px;
+}
+
+.fb-logo--cream .fb-logo__food {
+  color: var(--color-wordmark-food-light);
+}
+
+.fb-logo--cream .fb-logo__bridge {
+  color: var(--color-wordmark-bridge-light);
+}
+
+/* Forced colours drop backgrounds, which would leave "Food" invisible. */
+@media (forced-colors: active) {
+  .fb-logo--sidebar .fb-logo__food {
+    background: none;
+    color: CanvasText;
+  }
+}
+
+/* ---- Top bar ------------------------------------------------------------------------ */
+
+.fb-top {
+  position: relative;
+  display: flex;
+  height: 68px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  overflow: hidden;
+  padding: 0 32px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.fb-top > :not(.fb-flow) {
+  position: relative;
+  z-index: 1;
+}
+
+.fb-flow {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  border-radius: 0 40px 40px 0;
+  background: var(--color-cream);
+  pointer-events: none;
+}
+
+.fb-avatar {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.fb-account__name {
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.fb-account__role {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.fb-divider {
+  width: 1px;
+  height: 26px;
+  margin: 0 6px;
+  background: var(--color-border);
+}
+
+.fb-signout {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font: 14px var(--font-sans);
+  cursor: pointer;
+}
+
+.fb-signout:hover {
+  color: var(--color-text);
+  text-decoration: underline;
+}
+
+/* ---- Green line --------------------------------------------------------------------- */
+
+.fb-stream {
+  position: absolute;
+  z-index: 3;
+  top: 67px;
+  right: 0;
+  left: 100%;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--color-primary);
+  opacity: 1;
+  pointer-events: none;
+}
+
+/* ---- Cream values (flooding and cream) ---------------------------------------------- */
+
+.fb-app:is([data-sidebar='flooding'], [data-sidebar='cream']) {
+  .fb-side {
+    border-right-color: var(--color-cream-border);
+  }
+  .fb-pour {
+    height: 100%;
+    border-radius: 0;
+  }
+  .fb-link {
+    color: var(--color-link-on-cream);
+  }
+  .fb-link:hover,
+  .fb-link[aria-current='page'] {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+  .fb-link:focus-visible {
+    outline-color: var(--color-focus);
+  }
+  .fb-sect,
+  .fb-later {
+    color: var(--color-muted-on-cream);
+  }
+  .fb-soon {
+    background: var(--color-soon-on-cream);
+    color: var(--color-muted-on-cream);
+  }
+  .fb-tag {
+    color: var(--color-link-on-cream);
+  }
+  .fb-logo__img--dark {
+    opacity: 0;
+  }
+  .fb-logo--sidebar .fb-logo__food {
+    background-position: 0 100%;
+  }
+  .fb-logo--sidebar .fb-logo__bridge {
+    color: var(--color-wordmark-bridge-light);
+  }
+  .fb-top {
+    border-bottom-color: var(--color-cream-border);
+  }
+  .fb-flow {
+    width: 100%;
+    border-radius: 0;
+  }
+  .fb-stream {
+    left: 64px;
+    opacity: 0;
+  }
+}
+
+/* ---- The flood's timings (foodbridge-sidebar-animation.html) ------------------------ */
+
+.fb-app[data-sidebar='flooding'] {
+  .fb-pour {
+    transition:
+      height 0.6s cubic-bezier(0.45, 0, 0.35, 1) 0s,
+      border-radius 0.6s ease 0s;
+  }
+  .fb-tag {
+    transition: color 0.3s ease 0.05s;
+  }
+  .fb-later {
+    transition: color 0.3s ease 0.2s;
+  }
+  .fb-soon {
+    transition:
+      color 0.3s ease 0.2s,
+      background-color 0.25s ease 0.2s;
+  }
+  .fb-sect {
+    transition: color 0.3s ease 0.28s;
+  }
+  .fb-link {
+    transition:
+      color 0.3s ease 0.35s,
+      background-color 0.25s ease 0s;
+  }
+  .fb-side {
+    transition: border-color 0.3s ease 0.35s;
+  }
+  .fb-logo--sidebar .fb-logo__bridge {
+    transition: color 0.3s ease 0.4s;
+  }
+  .fb-logo__img--dark {
+    transition: opacity 0.3s ease 0.45s;
+  }
+  .fb-flow {
+    transition:
+      width 0.75s cubic-bezier(0.25, 0.8, 0.35, 1) 0.5s,
+      border-radius 0.75s ease 0.5s;
+  }
+  .fb-top {
+    transition: border-color 0.3s ease 1.25s;
+  }
+  .fb-stream {
+    transition:
+      left 0.7s cubic-bezier(0.45, 0, 0.25, 1) 1.3s,
+      opacity 0.3s ease 2.25s;
+  }
+  .fb-logo--sidebar .fb-logo__food {
+    transition: background-position 0.45s cubic-bezier(0.45, 0, 0.3, 1) 1.95s;
+  }
+}
+
+/* ---- Phone (below 768px) ------------------------------------------------------------ */
+
+.fb-phone {
+  min-height: 100vh;
+  /* Room for the fixed tab bar, so content never hides behind it. */
+  padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  background: var(--color-bg);
+}
+
+.fb-phone .fb-main {
+  padding: 20px 16px;
+}
+
+.fb-ptop {
+  position: relative;
+  display: flex;
+  height: 60px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: var(--color-cream);
+  border-bottom: 1px solid var(--color-cream-border);
+}
+
+.fb-avatar--small {
+  width: 34px;
+  height: 34px;
+}
+
+.fb-menu {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 6px);
+  right: 16px;
+  display: flex;
+  min-width: 220px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--color-text) 12%, transparent);
+}
+
+.fb-menu .fb-signout {
+  margin-top: 8px;
+  padding: 8px 0 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.fb-tabbar {
+  position: fixed;
+  z-index: 40;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: space-around;
+  margin: 0;
+  padding: 10px 8px calc(14px + env(safe-area-inset-bottom));
+  list-style: none;
+  background: var(--color-cream);
+  border-top: 1px solid var(--color-cream-border);
+}
+
+.fb-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  color: var(--color-link-on-cream);
+  font: 11px var(--font-sans);
+  text-decoration: none;
+}
+
+.fb-tab[aria-current='page'] {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: 700;
+}
+
+/* ---- Demonstration line ------------------------------------------------------------- */
+
+.fb-demo {
+  margin-top: 28px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.fb-phone .fb-demo {
+  margin-top: 20px;
+  font-size: 11.5px;
+}
+
+/* ---- Reduced motion: switch instantly, no line -------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .fb-app,
+  .fb-app * {
+    transition: none !important;
+  }
+  .fb-stream {
+    display: none;
+  }
+}

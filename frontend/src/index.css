@@ -8,6 +8,7 @@
 @import "@fontsource/dm-sans/600.css";
 @import "@fontsource/dm-sans/700.css";
 @import "./styles/tokens.css";
+@import "./styles/layout.css";
 
 /* No dark mode. dark: only matches a .dark class we never set, so stray dark:
    classes can't switch on from the operating system's setting. */

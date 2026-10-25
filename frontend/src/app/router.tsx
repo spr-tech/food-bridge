@@ -67,6 +67,10 @@ export const router = createBrowserRouter([
               import('@/pages/YourRequestsPage').then((m) => ({ Component: m.YourRequestsPage })),
           },
           {
+            path: ROUTES.requests,
+            lazy: () => import('@/pages/RequestsPage').then((m) => ({ Component: m.RequestsPage })),
+          },
+          {
             path: ROUTES.admin,
             lazy: () => import('@/pages/DashboardPage').then((m) => ({ Component: m.DashboardPage })),
           },

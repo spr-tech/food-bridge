@@ -1,8 +1,5 @@
-// The demonstration notice the spec requires at the top of every page.
+// The demonstration notice the spec requires on every page (section 4), as a small line
+// under the page content, where the design places it.
 export function DemoBanner() {
-  return (
-    <div className="bg-logo/25 px-4 py-1.5 text-center text-xs text-text">
-      Demonstration data · all organisations are fictional
-    </div>
-  )
+  return <p className="fb-demo">Demonstration data · organisations and people are fictional</p>
 }
