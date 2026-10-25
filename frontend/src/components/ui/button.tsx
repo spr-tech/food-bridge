@@ -1,68 +1,123 @@
-// shadcn/ui Button (generated), adjusted for FoodBridge: design tokens,
-// the global focus outline instead of shadcn's ring, and no dark mode.
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "@/lib/utils"
-import { Slot } from "radix-ui"
+// Button
+// Owner: Muizz
+//
+// Done when:
+// - [x] Variants: primary, secondary, danger, ghost. Sizes: sm, md, lg
+// - [x] Loading state: spinner, keeps width, aria-busy, blocks second click
+// - [x] Defaults to type="button"
+// - [x] Icon-only buttons require aria-label
+// - [x] Forwards ref, accepts className
+// - [x] Keyboard (checked from code 2026-10-24): native <button>, no tabindex, so it sits in
+//       DOM Tab order; Enter and Space fire click; loading uses aria-disabled, not disabled,
+//       so the button keeps focus and its clicks are swallowed
+// - [ ] Screen reader checked once: pending manual check (Muizz)
+// - [x] Typed props, no `any`, colours from tokens.css
+// - [ ] Reviewed by one other interface engineer
+//
+// - Variants: primary, secondary, danger, ghost. Sizes: sm, md, lg.
+// - loading: shows a spinner, keeps the button's width, sets aria-busy,
+//   and ignores further clicks so a form cannot be submitted twice.
+// - Defaults to type="button" so it never submits a form by accident.
+//   Pass type="submit" explicitly on form submit buttons.
+// - Icon-only buttons must pass iconOnly and an aria-label (TypeScript enforces this).
 
-const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all select-none active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+import { forwardRef, type ButtonHTMLAttributes, type MouseEvent } from "react";
+import { cn } from "../../lib/cn";
+
+type Variant = "primary" | "secondary" | "danger" | "ghost";
+type Size = "sm" | "md" | "lg";
+
+type BaseProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: Variant;
+  size?: Size;
+  loading?: boolean;
+};
+
+export type ButtonProps = BaseProps &
+  ({ iconOnly?: false } | { iconOnly: true; "aria-label": string });
+
+const variantClasses: Record<Variant, string> = {
+  primary:
+    "bg-[var(--color-primary)] text-[var(--color-on-primary)] hover:bg-[var(--color-primary-hover)]",
+  secondary:
+    "bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--color-border-input)] hover:bg-[var(--color-surface)]",
+  danger:
+    "bg-[var(--color-danger)] text-[var(--color-on-danger)] hover:bg-[var(--color-danger-hover)]",
+  ghost:
+    "bg-transparent text-[var(--color-text)] hover:bg-[var(--color-surface)]",
+};
+
+// Smallest size is 32px tall, above the WCAG 2.2 minimum target of 24px.
+const sizeClasses: Record<Size, string> = {
+  sm: "h-8 px-3 text-sm",
+  md: "h-10 px-4 text-sm",
+  lg: "h-12 px-6 text-base",
+};
+
+const iconOnlySizeClasses: Record<Size, string> = {
+  sm: "h-8 w-8",
+  md: "h-10 w-10",
+  lg: "h-12 w-12",
+};
+
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary-hover",
-        outline:
-          "border-border bg-background shadow-xs hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
-        ghost:
-          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
-        destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20",
-        link: "text-primary underline-offset-4 hover:underline",
-      },
-      size: {
-        default:
-          "h-9 gap-1.5 px-2.5 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
-        xs: "h-6 gap-1 rounded-[min(var(--radius-md),8px)] px-2 text-xs in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-8 gap-1 rounded-[min(var(--radius-md),10px)] px-2.5 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5",
-        lg: "h-10 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
-        icon: "size-9",
-        "icon-xs":
-          "size-6 rounded-[min(var(--radius-md),8px)] in-data-[slot=button-group]:rounded-md [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm":
-          "size-8 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-md",
-        "icon-lg": "size-10",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
+    variant = "primary",
+    size = "md",
+    loading = false,
+    iconOnly = false,
+    type = "button",
+    disabled,
+    className,
+    children,
+    onClick,
+    ...rest
+  },
+  ref,
+) {
+  // While loading we use aria-disabled instead of disabled, so the button keeps
+  // keyboard focus and screen readers can still find it. Clicks are swallowed.
+  function handleClick(event: MouseEvent<HTMLButtonElement>) {
+    if (loading) {
+      event.preventDefault();
+      return;
+    }
+    onClick?.(event);
   }
-)
-
-function Button({
-  className,
-  variant = "default",
-  size = "default",
-  asChild = false,
-  ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
-  }) {
-  const Comp = asChild ? Slot.Root : "button"
 
   return (
-    <Comp
-      data-slot="button"
-      data-variant={variant}
-      data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
-  )
-}
+    <button
+      ref={ref}
+      type={type}
+      disabled={disabled}
+      aria-disabled={loading || disabled || undefined}
+      aria-busy={loading || undefined}
+      onClick={handleClick}
+      className={cn(
+        "relative inline-flex items-center justify-center gap-2 font-medium",
+        "rounded-[var(--radius-md)] font-[family-name:var(--font-sans)]",
+        "transition-colors",
+        "focus-visible:[outline:var(--focus-ring-width)_solid_var(--color-focus)]",
+        "focus-visible:[outline-offset:var(--focus-ring-offset)]",
+        "disabled:cursor-not-allowed disabled:opacity-50",
+        loading && "cursor-wait",
+        variantClasses[variant],
+        iconOnly ? iconOnlySizeClasses[size] : sizeClasses[size],
+        className,
+      )}
+      {...rest}
+    >
+      {/* Content stays in place (just invisible) while loading, so the width
+          doesn't jump and the accessible name is still read out. */}
+      <span className={cn("inline-flex items-center gap-2", loading && "opacity-0")}>
+        {children}
+      </span>
+      {loading && (
+        <span className="absolute inset-0 flex items-center justify-center" aria-hidden="true">
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent motion-reduce:animate-none" />
+        </span>
+      )}
+    </button>
+  );
+});
 
-export { Button, buttonVariants }

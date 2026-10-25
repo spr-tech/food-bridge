@@ -4,7 +4,7 @@ import logo from '@/assets/logo.svg'
 import { ROLE_CONFIG } from '@/constants/roles'
 import { ROUTES } from '@/constants/routes'
 import { useRole } from '@/hooks/useRole'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/cn'
 
 export function Header() {
   const { homePath, organisationName, nav } = ROLE_CONFIG[useRole()]
@@ -27,8 +27,8 @@ export function Header() {
                   end
                   className={({ isActive }) =>
                     cn(
-                      'block rounded-md px-3 py-1.5 text-sm text-text-muted hover:bg-muted hover:text-text',
-                      isActive && 'bg-success-bg font-semibold text-primary hover:bg-success-bg',
+                      'block rounded-md px-3 py-1.5 text-sm text-text-muted hover:bg-surface-hover hover:text-text',
+                      isActive && 'bg-status-available-bg font-semibold text-primary hover:bg-status-available-bg',
                     )
                   }
                 >

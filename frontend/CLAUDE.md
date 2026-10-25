@@ -25,7 +25,7 @@ If the spec and `openapi.yaml` disagree, `openapi.yaml` wins. Flag the mismatch 
 - Vite + React + TypeScript (strict)
 - React Router for routing
 - Redux Toolkit + RTK Query for server data, using the `injectEndpoints` pattern
-- shadcn/ui components in `src/components/ui/`
+- UI components from the shared component set (github.com/spr-tech/interface-eng-shared-components), copied into `src/components/ui/`
 - Formik for forms, Yup for validation schemas
 - Tailwind CSS, colours and fonts from `src/styles/tokens.css`
 - Fonts: Fraunces (headings) and DM Sans (body) via `@fontsource`
@@ -56,9 +56,9 @@ src/
 │                  # devRole.ts (the one temporary role constant)
 ├── assets/        # images and the logo
 ├── components/
-│   ├── ui/        # shadcn primitives (as generated, plus our token, focus and no-dark-mode fixes)
-│   ├── form/      # reusable Formik inputs, sharing one FormField wrapper; export from index.ts
-│   ├── common/    # StatusBadge, PageHeader, LoadingState, EmptyState, ErrorState
+│   ├── ui/        # shared components, copied unchanged from the shared repo (never edited here)
+│   ├── form/      # Formik adapters around the shared FormField and controls; export from index.ts
+│   ├── common/    # StatusBadge (our statuses on the shared badge), PageHeader, LoadingState
 │   └── layout/    # RootLayout, AppLayout, Header, DemoBanner, NavProgress, SkipLink
 ├── config/        # env.ts: reads VITE_API_URL and throws a clear error if it's missing
 ├── constants/     # routes.ts (every path; no hard-coded paths anywhere else), roles.ts,
@@ -66,7 +66,7 @@ src/
 ├── contexts/      # empty, with a .gitkeep (Redux holds shared state)
 ├── docs/          # README.md explaining this structure
 ├── hooks/         # useRole, useIdempotencyKey, useDocumentTitle, useAppStore (typed Redux hooks)
-├── lib/           # utils.ts (cn), format.ts (dates as "Today, 7:00 PM", quantities)
+├── lib/           # cn.ts (from the shared repo), format.ts (dates as "Today, 7:00 PM", quantities)
 ├── pages/         # one thin file per route; a page only composes sections
 ├── schema/        # Yup schemas, one per form
 ├── sections/      # page-level blocks
@@ -94,18 +94,20 @@ src/
 
 - Every form uses Formik with a Yup schema. Schemas live in `src/schema/`, one per form, e.g. `src/schema/listingSchema.ts`.
 - Error messages come word for word from the spec (S2 field table).
-- Do NOT use shadcn's `<Form>` component. It is built for React Hook Form and won't work with Formik. Use the shadcn `Input`, `Textarea`, `Select`, `Label` and `Button` directly, wired to Formik.
-- Every field: visible label tied to the input, error linked with `aria-describedby`, `aria-invalid` when invalid, error shown as text (not only a red border).
+- Build fields with the adapters in `src/components/form/` (FormInput, FormTextarea, FormSelect, FormCheckbox, FormDateTime, FormImageUpload). They wrap the shared FormField and controls and show an error only after the field is left or the form submitted (`useFieldError`). Submit with the shared `Button` and `type="submit"`.
+- Every field: visible label tied to the input, error linked with `aria-describedby`, `aria-invalid` when invalid, error shown as text (not only a red border). The shared FormField does this; the shared Checkbox can't show an error itself, so FormCheckbox puts it in the checkbox's description.
 - On submit with errors, move focus to the first invalid field.
 - Submit buttons show a loading state and ignore extra presses while submitting.
 - Client validation is for speed. The service validates again, and its 400 errors map back onto the fields.
 
-## shadcn/ui
+## UI components (shared component set)
 
-- Add components with `npx shadcn@latest add <name>`. They land in `src/components/ui/`.
-- Restyle them to use the tokens in `src/styles/tokens.css`. No hard-coded colours.
+- UI components come from the shared repo, github.com/spr-tech/interface-eng-shared-components. Its README is the reference for every prop; `.claude/skills/shared-components/` tells Claude Code when to use which.
+- The copied files in `src/components/ui/` (and `src/lib/cn.ts`) are never edited here. Fixes go to the shared repo first, then are copied in unchanged. Record the shared commit in `../docs/decisions.md` each time.
+- FoodBridge-specific behaviour lives in our own wrappers: `src/components/form/` (Formik adapters) and `src/components/common/` (for example StatusBadge, which maps our statuses to the shared tones).
+- Change the look through token values in `src/styles/tokens.css`, never the names the shared components read. No hard-coded colours.
 - Keep Radix's keyboard and focus behaviour intact. Don't remove focus rings.
-- Don't add a component library besides shadcn.
+- Don't add another component library. If the shared set can't cover a need, say so and propose it for the shared repo.
 
 ## Statuses (use these words everywhere)
 

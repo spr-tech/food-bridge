@@ -1,13 +1,9 @@
-// A dropdown wired to Formik, built on the shadcn (Radix) Select.
+// A dropdown wired to Formik, on the shared FormField and Select.
 import { useField } from 'formik'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { FormField, type FormFieldBaseProps } from '@/components/form/FormField'
+import { FormField } from '@/components/ui/form-field'
+import { Select } from '@/components/ui/select'
+import { useFieldError } from '@/components/form/useFieldError'
+import type { FormFieldBaseProps } from '@/components/form/types'
 import type { Option } from '@/constants/listingOptions'
 
 type FormSelectProps = FormFieldBaseProps & {
@@ -18,32 +14,25 @@ type FormSelectProps = FormFieldBaseProps & {
 
 export function FormSelect({ name, label, hint, required, options, placeholder, disabled }: FormSelectProps) {
   const [field, , helpers] = useField<string>(name)
+  const error = useFieldError(name)
 
   return (
-    <FormField name={name} label={label} hint={hint} required={required}>
+    <FormField label={label} hint={hint} error={error} required={required}>
       {(control) => (
         <Select
+          {...control}
           name={name}
-          value={field.value ?? ''}
+          options={options}
+          placeholder={placeholder}
+          value={field.value || undefined}
           disabled={disabled}
-          onValueChange={(value) => void helpers.setValue(value)}
-          // Radix Select has no blur, so closing it counts as leaving the field.
-          // No validation here: it would run on the value from before the choice.
-          onOpenChange={(open) => {
-            if (!open) void helpers.setTouched(true, false)
+          // The shared Select has no blur or close event, so choosing an option is what
+          // marks it touched. An untouched empty Select still shows its error on submit.
+          onValueChange={(value) => {
+            void helpers.setValue(value ?? '')
+            void helpers.setTouched(true, false)
           }}
-        >
-          <SelectTrigger {...control} className="w-full">
-            <SelectValue placeholder={placeholder} />
-          </SelectTrigger>
-          <SelectContent>
-            {options.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        />
       )}
     </FormField>
   )

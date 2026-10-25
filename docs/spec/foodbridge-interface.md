@@ -13,7 +13,7 @@ Items marked **TBC** need agreement with the service engineers (Adedayo, Esther)
 - Vite + React + TypeScript, React Router for navigation, RTK Query for server data.
 - API endpoints are hand-written with RTK Query's `injectEndpoints` for now, with types taken from `/openapi.yaml`. Once that document exists we decide whether to generate them with `@rtk-query/codegen-openapi`. No direct fetch calls, and no calls to paths that are not in the document.
 - API address comes from `VITE_API_URL`: the mock server while building, the Render service from Friday onward. Monday runs against Render only.
-- UI built from shadcn/ui components (Radix-based) and `/src/styles/tokens.css`. No hard-coded colours, no `any`.
+- UI built from the interface engineers' shared component set (github.com/spr-tech/interface-eng-shared-components, Radix-based), copied unchanged into `frontend/src/components/ui/`, with FoodBridge's values in `frontend/src/styles/tokens.css`. No hard-coded colours, no `any`.
 - Every request sends a request ID header so one user's journey can be followed in the service logs. Header name **TBC** (proposed `X-Request-Id`, a new UUID per request).
 - Create listing and Request this food send an idempotency key, so a repeat submission records once. Header name **TBC** (proposed `Idempotency-Key`, one UUID per form submission, reused on retry).
 

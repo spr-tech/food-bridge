@@ -1,37 +1,82 @@
 /* FoodBridge design tokens: the one source for colours, fonts, radius and focus.
    A Tailwind v4 @theme block, so each token is a CSS variable and a utility
-   (bg-surface, text-text-muted, font-display, rounded-md). */
+   (bg-surface, text-text-muted, font-display, rounded-md).
+
+   The shared components (src/components/ui/) read the names in the first group by
+   name: change their values, never their names. Values come from spec section 12.
+   Every text pair passes 4.5:1 and every border and focus pair 3:1; the ratios are
+   in docs/decisions.md (2026-10-25, shared component set). */
 @theme static {
-  --color-bg: #f7f6f2;
-  --color-surface: #ffffff;
-  --color-surface-2: #efede6;
-  --color-border: #dedad0;
-  --color-border-input: #8a877c;
-  --color-text: #1c2621;
-  --color-text-muted: #55605a;
+  /* Read by the shared components */
+  --color-bg: #f7f6f2; /* the page, and the fill of inputs, selects and checkboxes */
+  --color-surface: #ffffff; /* cards, dialogs, toasts */
+  --color-surface-hover: #efede6;
+  --color-border: #e4e2dc; /* decorative lines and card edges */
+  --color-border-input: #8a877c; /* form control edges, must stay 3:1 or more */
+  --color-text: #1e2a24;
+  --color-text-muted: #5f6963;
+
   --color-primary: #1f5c45;
   --color-primary-hover: #184a37;
   --color-on-primary: #ffffff;
-  --color-brand-dark: #1f4a3a;
-  --color-accent: #b4532a;
-  --color-logo: #e0a46b;
   --color-danger: #a8321f;
-  --color-focus: #c2410c;
-
-  /* Status badge pairs: text on its background, each passes 4.5:1 */
-  --color-success: #1f5c45;
-  --color-success-bg: #e3efe6;
+  --color-danger-hover: #8a2819;
+  --color-on-danger: #ffffff;
+  --color-success: #2f6b4c;
+  --color-on-success: #ffffff;
   --color-warning: #8a4b10;
-  --color-warning-bg: #fbecd6;
+  --color-on-warning: #ffffff;
   --color-info: #1e4d86;
-  --color-info-bg: #dbe8f7;
-  --color-neutral: #55605a;
-  --color-neutral-bg: #ececea;
+  --color-on-info: #ffffff;
 
+  --color-focus: #c2410c;
   --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
+
+  --radius-sm: 6px;
   --radius-md: 10px;
+  --radius: var(--radius-md); /* alias read by Dialog and Toast; change --radius-md instead */
 
   --font-sans: "DM Sans", system-ui, sans-serif;
   --font-display: Fraunces, Georgia, serif;
+
+  /* FoodBridge only */
+  --color-surface-2: #efede6;
+  --color-brand-dark: #1f4a3a;
+  --color-accent: #b4532a;
+  --color-logo: #e0a46b;
+
+  /* Status badges (spec section 12). StatusBadge sets these on the shared badge.
+     Approved uses the available pair; Declined and Collected use the expired pair. */
+  --color-status-available-bg: #e3efe6;
+  --color-status-available-text: #2f6b4c;
+  --color-status-reserved-bg: #fbe4dc;
+  --color-status-reserved-text: #a8432a;
+  --color-status-pending-bg: #fbecdc;
+  --color-status-pending-text: #8a4b10;
+  --color-status-expired-bg: #ecebe8;
+  --color-status-expired-text: #5f6963;
+
+  /* Sidebar, top bar and phone bars (spec section 12) */
+  --color-cream: #f4f0e6;
+  --color-cream-border: #e6e0d1;
+  --color-sidebar-dark: #1d4637;
+  --color-pill-on-dark: #2f6a52;
+  --color-link-on-dark: #d2ded6;
+  --color-muted-on-dark: #9fb2a6;
+  --color-footer-on-dark: #cbd8cf;
+  --color-link-on-cream: #2d5a46;
+  --color-muted-on-cream: #4f6b5d;
+  --color-soon-on-cream: #e9e4d7;
+  --color-count: #e0a46b;
+  --color-on-count: #1d4637;
+  --color-focus-on-dark: #f0a24b;
+  --color-wordmark-bridge-dark: #f0a24b;
+  --color-wordmark-bridge-light: #b85f1f;
+
+  /* Card buttons and chips (spec section 12) */
+  --color-disabled-bg: #eceae4;
+  --color-disabled-text: #7a817c;
+  --color-chip-bg: #efeee9;
+  --color-chip-text: #4a514c;
 }

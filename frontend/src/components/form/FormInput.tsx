@@ -1,17 +1,19 @@
-// A text-style input (text, email, password, number) wired to Formik.
-import type { ComponentProps } from 'react'
+// A text-style input (text, email, password, number) wired to Formik, on the shared
+// FormField and Input.
 import { useField } from 'formik'
-import { Input } from '@/components/ui/input'
-import { FormField, type FormFieldBaseProps } from '@/components/form/FormField'
+import { FormField } from '@/components/ui/form-field'
+import { Input, type InputProps } from '@/components/ui/input'
+import { useFieldError } from '@/components/form/useFieldError'
+import type { FormFieldBaseProps } from '@/components/form/types'
 
-type FormInputProps = FormFieldBaseProps &
-  Omit<ComponentProps<typeof Input>, 'name' | 'id' | 'required' | 'value'>
+type FormInputProps = FormFieldBaseProps & Omit<InputProps, 'name' | 'id' | 'required' | 'value'>
 
 export function FormInput({ name, label, hint, required, ...inputProps }: FormInputProps) {
   const [field] = useField<string>(name)
+  const error = useFieldError(name)
 
   return (
-    <FormField name={name} label={label} hint={hint} required={required}>
+    <FormField label={label} hint={hint} error={error} required={required}>
       {(control) => <Input {...inputProps} {...field} value={field.value ?? ''} {...control} />}
     </FormField>
   )
