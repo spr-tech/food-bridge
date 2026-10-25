@@ -1,6 +1,6 @@
 # FoodBridge frontend
 
-FoodBridge coordinates surplus food: donors list food, recipients request it, the donor approves one request. This folder is the interface tier. The Java service lives in `../backend/` and is not ours to edit.
+FoodBridge coordinates surplus food: donors list food, recipients request it, the donor approves one request. This repository is the interface tier. The Java service lives in a separate repository owned by the service engineers (link TODO); never edit it from here.
 
 Built for the TeSA Cohort 6 capstone. Monday 26 Oct 2026 is the MVP checkpoint: donor lists food, recipient requests it, donor approves, all against the deployed service.
 
@@ -12,6 +12,8 @@ Built for the TeSA Cohort 6 capstone. Monday 26 Oct 2026 is the MVP checkpoint: 
 - `../docs/decisions.md`: agreed decisions. Check before changing anything structural
 
 If the spec and `openapi.yaml` disagree, `openapi.yaml` wins. Flag the mismatch instead of guessing.
+
+`../openapi.yaml` stays the contract path. If the contract's source moves to the backend repository, the copy here is read-only: it is only updated by syncing from the source, never edited directly.
 
 ## Design
 
@@ -130,7 +132,7 @@ British spelling (organisation, neighbourhood). Sentence case. Buttons start wit
 
 ## Don't
 
-- Don't edit `openapi.yaml` or anything in `../backend/`. Contract changes need both tiers' agreement and a line in `../docs/decisions.md`
+- Don't edit `openapi.yaml` or the service's repository. Contract changes need both tiers' agreement and a line in `../docs/decisions.md`
 - Don't hard-code data in components. Data comes from the API (the mock server while building)
 - Don't store tokens in `localStorage` until the auth approach is agreed (see decisions file)
 - Don't add dependencies without asking first
@@ -138,7 +140,7 @@ British spelling (organisation, neighbourhood). Sentence case. Buttons start wit
 
 ## Git workflow
 
-- Every task starts on its own branch from an up-to-date `main` (`git pull` first), named `feature/<name>`, `fix/<name>`, `chore/<name>` or `ci/<name>`. Tell me the branch name when you start.
+- Every task starts on its own branch from an up-to-date `main` (`git pull` first), named `feature/<name>`, `fix/<name>`, `chore/<name>`, `ci/<name>` or `docs/<name>` (documentation only). Tell me the branch name when you start.
 - When the task is done and lint, typecheck, test and build all pass locally:
   1. Commit with a clear message.
   2. Push the branch with: `git push -u origin <branch>`
