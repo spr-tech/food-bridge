@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FoodBridge · sidebar flood animation (final)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+/* Reference for Claude Code. Final approved behaviour: cream rises from the bottom of the sidebar,
+   floods the top bar from the left, then a green line runs from the right and fills "Food". */
+body{margin:0;padding:32px;background:#e9e6de;font-family:"DM Sans",system-ui,sans-serif}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.fb{position:relative;display:grid;grid-template-columns:248px minmax(0,1fr);border-radius:14px;overflow:hidden;border:1px solid #ddd8cc;min-height:560px;background:#f7f6f2;max-width:1200px;margin:0 auto}
+.sd{position:relative;background:#1d4637;color:#d2ded6;padding:22px 16px;display:flex;flex-direction:column;overflow:hidden}
+.sd>*:not(.pour){position:relative;z-index:1}
+.sd .pour{position:absolute;z-index:0;background:#f4f0e6;pointer-events:none;left:0;right:0;bottom:0;height:0;border-radius:60% 60% 0 0/40px 40px 0 0;transition:height .45s cubic-bezier(.5,0,.3,1) .35s,border-radius .45s ease .35s}
+.fb.lt .sd .pour{height:100%;border-radius:0;transition:height .6s cubic-bezier(.45,0,.35,1) 0s,border-radius .6s ease 0s}
+.tb{position:relative;height:68px;background:#fff;border-bottom:1px solid #e4e2dc;display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:0 28px;color:#1e2a24;font-size:14px;overflow:hidden}
+.tb>*:not(.flow){position:relative;z-index:1}
+.tb .flow{position:absolute;z-index:0;background:#f4f0e6;pointer-events:none;left:0;top:0;bottom:0;width:0;border-radius:0 40px 40px 0;transition:width .35s cubic-bezier(.4,0,.6,1) 0s,border-radius .35s ease 0s}
+.fb.lt .tb .flow{width:100%;border-radius:0;transition:width .75s cubic-bezier(.25,.8,.35,1) .5s,border-radius .75s ease .5s}
+.stream{position:absolute;z-index:3;top:67px;right:0;left:100%;height:3px;border-radius:3px;background:#1f5c45;pointer-events:none;opacity:1;transition:left .01s linear 0s,opacity .01s linear 0s}
+.fb.lt .stream{left:64px;opacity:0;transition:left .7s cubic-bezier(.45,0,.25,1) 1.3s,opacity .3s ease 2.25s}
+.wm{font-weight:700;font-size:22px;margin:0 6px 30px;display:flex;align-items:center;gap:10px}
+.wf{background:linear-gradient(to top,#1f5c45 50%,#fff 50%);background-size:100% 200%;background-position:0 0;-webkit-background-clip:text;background-clip:text;color:transparent;transition:background-position .01s linear 0s}
+.fb.lt .wf{background-position:0 100%;transition:background-position .45s cubic-bezier(.45,0,.3,1) 1.95s}
+.wb{color:#f0a24b;transition:color .3s ease .4s}.fb.lt .wb{color:#b85f1f}
+.sh,.sn,.tg,.sp,.nl{transition:color .3s ease,background-color .25s ease}
+.tg{transition-delay:.05s}.sn,.sp{transition-delay:.2s}.sh{transition-delay:.28s}.nl{transition-delay:.35s,0s}
+.nl{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;font:500 15px "DM Sans",sans-serif;cursor:pointer;margin:0 0 4px;width:100%;text-align:left;border:none;background:transparent;color:#d2ded6}
+.fb.lt .nl{color:#2d5a46}
+.nl:hover,.nl.on{background:#2f6a52;color:#fff}
+.fb.lt .nl:hover,.fb.lt .nl.on{background:#1f5c45;color:#fff}
+.nl:focus-visible{outline:2px solid #f0a24b;outline-offset:2px}
+.ct{margin-left:auto;background:#e0a46b;color:#1d4637;font-size:12px;font-weight:700;border-radius:999px;padding:2px 8px}
+.sh{font-size:11px;letter-spacing:.09em;font-weight:700;color:#9fb2a6;margin:22px 14px 8px}.fb.lt .sh{color:#5f7a6b}
+.sn{display:flex;align-items:center;gap:12px;padding:10px 14px;font-size:14.5px;color:#9fb2a6}.fb.lt .sn{color:#5f7a6b}
+.sp{margin-left:auto;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;background:rgba(255,255,255,.1)}.fb.lt .sp{background:#e9e4d7;color:#4f6b5d}
+.tg{margin-top:auto;font-size:13px;line-height:1.4;padding:0 8px;display:flex;gap:10px;align-items:center;color:#d2ded6}.fb.lt .tg{color:#2d5a46}
+.avt{width:38px;height:38px;border-radius:50%;background:#1f5c45;color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px}
+.card{background:#fff;border:1px solid #e4e2dc;border-radius:16px;padding:16px;color:#1e2a24}
+.controls{max-width:1200px;margin:16px auto 0;display:flex;gap:12px;align-items:center;font-size:14px;color:#4b5550}
+.controls button{font:600 14px "DM Sans";padding:9px 16px;border-radius:10px;border:1px solid #cfd6d0;background:#fff;cursor:pointer}
+@media (prefers-reduced-motion: reduce){.fb *,.fb .pour,.fb .flow,.fb .stream,.fb .wf{transition:none!important}}
+</style></head><body>
+<h1 class="sr-only">FoodBridge sidebar flood animation reference</h1>
+<div class="fb" id="fb">
+  <div class="stream" aria-hidden="true"></div>
+  <aside class="sd">
+    <div class="pour" aria-hidden="true"></div>
+    <div class="wm"><svg height="32" viewBox="0 0 120 90" aria-hidden="true"><circle cx="27" cy="16" r="10" fill="#f2b134"/><path d="M12 74 V46 a15 13 0 0 1 30 0 V74 Z" fill="#f2b134"/><circle cx="93" cy="16" r="10" fill="#e0843c"/><path d="M78 74 V46 a15 13 0 0 1 30 0 V74 Z" fill="#e0843c"/><path id="br" d="M6 82 C12 54 38 40 60 40 C82 40 108 54 114 82 H97 C91 64 77 55 60 55 C43 55 29 64 23 82 Z" fill="#9fd3ae" style="transition:fill .3s ease .45s"/><path d="M49 37 a11 8 0 0 1 22 0 Z" fill="#e0843c"/><path id="bw" d="M43 37 H77 a17 12 0 0 1 -34 0 Z" fill="#f3efe3" style="transition:fill .3s ease .45s"/><path d="M61 28 c1 -7 6 -10 12 -10 c-1 6 -5 10 -12 10 Z" fill="#7cc48f"/></svg><span><span class="wf">Food</span><span class="wb">Bridge</span></span></div>
+    <button class="nl on"><i class="ti ti-search" aria-hidden="true"></i>Find food</button>
+    <button class="nl"><i class="ti ti-list-details" aria-hidden="true"></i>Your requests<span class="ct">2</span></button>
+    <div class="sh">COMING SOON</div>
+    <div class="sn" aria-disabled="true"><i class="ti ti-calendar" aria-hidden="true"></i>Collections<span class="sp">Soon</span></div>
+    <div class="sn" aria-disabled="true"><i class="ti ti-leaf" aria-hidden="true"></i>Impact<span class="sp">Soon</span></div>
+    <div class="tg"><i class="ti ti-building-bridge" style="font-size:26px;color:#e0a46b" aria-hidden="true"></i><span>Together we<br>reduce food waste.</span></div>
+  </aside>
+  <div>
+    <div class="tb"><div class="flow" aria-hidden="true"></div><div class="avt">HC</div><div><div style="font-weight:600">Hope Community Kitchen</div><div style="font-size:12px;color:#5f6963">Recipient</div></div><span style="display:flex;gap:6px;align-items:center;margin-left:10px;color:#4b5550"><i class="ti ti-logout"></i>Sign out</span></div>
+    <div style="padding:38px 52px">
+      <div style="font-family:Fraunces,serif;font-weight:600;font-size:40px;color:#1e2a24">Find food</div>
+      <div style="color:#5f6963;margin:6px 0 24px">Discover surplus food from local businesses and organisations in your area.</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+        <div class="card"><b style="font-family:Fraunces;font-size:18px">Bread &amp; pastries</b><div style="color:#5f6963;font-size:13px;margin-top:6px">20 packs · Yaba · Pickup by 7:00 PM</div></div>
+        <div class="card"><b style="font-family:Fraunces;font-size:18px">Jollof rice &amp; chicken</b><div style="color:#5f6963;font-size:13px;margin-top:6px">15 portions · Surulere · Pickup by 8:00 PM</div></div>
+        <div class="card"><b style="font-family:Fraunces;font-size:18px">Vegetable stew</b><div style="color:#5f6963;font-size:13px;margin-top:6px">10 containers · Ikeja · Pickup by 6:30 PM</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="controls"><button id="rs">Replay (demo only, not in the app)</button><span>Click a sidebar link to play the animation.</span></div>
+<script>
+var fb=document.getElementById('fb');
+function setLogo(l){document.getElementById('br').setAttribute('fill',l?'#1f5c45':'#9fd3ae');document.getElementById('bw').setAttribute('fill',l?'#1f4a3a':'#f3efe3');}
+document.querySelectorAll('.nl').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.nl').forEach(function(x){x.classList.remove('on')});b.classList.add('on');fb.classList.add('lt');setLogo(true);});});
+document.getElementById('rs').addEventListener('click',function(){fb.classList.remove('lt');setLogo(false);});
+</script></body></html>
