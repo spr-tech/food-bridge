@@ -3,6 +3,10 @@
 The interface tier of FoodBridge: Vite, React and TypeScript. See `CLAUDE.md` for how the
 code is organised and `../docs/` for the intent, spec and decisions.
 
+The service lives in its own repository: TODO (link). It must allow this site's address,
+https://frontend-six-zeta-39.vercel.app, in its CORS (Cross-Origin Resource Sharing) settings, or
+the browser blocks every call from the app to the service.
+
 ## Pipeline
 
 GitHub Actions runs `.github/workflows/frontend.yml` (at the repository root).
