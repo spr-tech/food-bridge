@@ -71,8 +71,11 @@
   --color-count: #e0a46b;
   --color-on-count: #1d4637;
   --color-focus-on-dark: #f0a24b;
+  --color-wordmark-food-dark: #ffffff;
+  --color-wordmark-food-light: #1f5c45;
   --color-wordmark-bridge-dark: #f0a24b;
   --color-wordmark-bridge-light: #b85f1f;
+  --color-text-secondary: #4b5550; /* Sign out, card details */
 
   /* Card buttons and chips (spec section 12) */
   --color-disabled-bg: #eceae4;

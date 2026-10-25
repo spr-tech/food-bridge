@@ -1,4 +1,4 @@
-// Display formatting for dates and quantities. Times are always shown in Lagos
+// Display formatting for dates, quantities and names. Times are always shown in Lagos
 // time, so everyone sees the same "Collect by" time whatever their device's zone.
 import type { UnitOption } from '@/constants/listingOptions'
 
@@ -61,4 +61,15 @@ const numberFormat = new Intl.NumberFormat('en-GB')
 // "40 loaves", "1 loaf".
 export function formatQuantity(count: number, unit: UnitOption): string {
   return `${numberFormat.format(count)} ${count === 1 ? unit.singular : unit.label}`
+}
+
+// Up to two initials for an avatar, from the first two words of a name:
+// "Mama's Oven" gives "MO", "Hope Community Kitchen" gives "HC".
+export function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter((word) => /\p{L}/u.test(word))
+    .slice(0, 2)
+    .map((word) => (word.match(/\p{L}/u)?.[0] ?? '').toUpperCase())
+    .join('')
 }

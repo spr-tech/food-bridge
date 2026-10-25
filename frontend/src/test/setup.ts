@@ -17,6 +17,20 @@ Element.prototype.setPointerCapture ??= () => {}
 Element.prototype.releasePointerCapture ??= () => {}
 Element.prototype.scrollIntoView ??= () => {}
 
+// jsdom has no media queries. By default nothing matches (a phone-width screen); tests
+// that need the desktop layout replace window.matchMedia with one that matches.
+window.matchMedia ??= (query: string) =>
+  ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    addListener: () => {},
+    removeListener: () => {},
+    dispatchEvent: () => false,
+  }) as MediaQueryList
+
 afterEach(() => {
   cleanup()
 })
