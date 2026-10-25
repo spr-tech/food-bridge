@@ -13,6 +13,11 @@ Built for the TeSA Cohort 6 capstone. Monday 26 Oct 2026 is the MVP checkpoint: 
 
 If the spec and `openapi.yaml` disagree, `openapi.yaml` wins. Flag the mismatch instead of guessing.
 
+## Design
+
+- Build every screen from `../docs/design/foodbridge-final/`. Read `source-html/` and `foodbridge-sidebar-animation.html` for exact values; don't approximate from the PNGs. Before pushing a screen, list any difference from its design.
+- Spec section 12 ("Visual design") lists the deliberate differences from the design files (contrast fixes, one `h1`, phone Sign out). Where they disagree, section 12 wins.
+
 ## Stack
 
 - Vite + React + TypeScript (strict)
@@ -121,7 +126,7 @@ Loading (skeletons), Empty (first use, inviting copy and an action), Error (plai
 
 ## Copy
 
-British spelling (organisation, neighbourhood). Sentence case. Buttons start with a verb. Real Lagos place names, fictional organisations only. Every page shows "Demonstration data · all organisations are fictional".
+British spelling (organisation, neighbourhood). Sentence case. Buttons start with a verb. Real Lagos place names, fictional organisations only. Every page shows "Demonstration data · organisations and people are fictional".
 
 ## Don't
 
