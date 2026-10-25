@@ -230,6 +230,30 @@
 
 /* ---- Top bar ------------------------------------------------------------------------ */
 
+.fb-logo--dark .fb-logo__food {
+  color: var(--color-wordmark-food-dark);
+}
+
+.fb-logo--dark .fb-logo__bridge {
+  color: var(--color-wordmark-bridge-dark);
+}
+
+.fb-logo--lg .fb-logo__icon {
+  height: 48px;
+}
+
+.fb-logo--lg .fb-logo__word {
+  font-size: 28px;
+}
+
+.fb-logo--md .fb-logo__icon {
+  height: 32px;
+}
+
+.fb-logo--md .fb-logo__word {
+  font-size: 21px;
+}
+
 .fb-top {
   position: relative;
   display: flex;

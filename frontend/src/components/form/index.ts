@@ -2,7 +2,10 @@
 // in src/components/ui/. Import from "@/components/form".
 export type { FormFieldBaseProps } from '@/components/form/types'
 export { useFieldError } from '@/components/form/useFieldError'
+export { FocusFirstError } from '@/components/form/FocusFirstError'
+export { focusField } from '@/components/form/focusField'
 export { FormInput } from '@/components/form/FormInput'
+export { FormPasswordInput } from '@/components/form/FormPasswordInput'
 export { FormTextarea } from '@/components/form/FormTextarea'
 export { FormSelect } from '@/components/form/FormSelect'
 export { FormCheckbox } from '@/components/form/FormCheckbox'

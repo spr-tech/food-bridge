@@ -53,18 +53,20 @@ Before saying a task is done, run `npm run lint`, `npm run typecheck`, `npm test
 ```
 src/
 ├── app/           # router.tsx, store.ts (makeStore), providers.tsx (Redux Provider + RouterProvider),
-│                  # session.ts (the signed-in session in sessionStorage),
-│                  # devRole.ts (the one temporary role constant)
+│                  # session.ts (the signed-in session in sessionStorage; the role comes from it)
 ├── assets/        # images, logo-icon-dark.svg and logo-icon-light.svg (icon only; the wordmark is text)
 ├── components/
 │   ├── ui/        # shared components, copied unchanged from the shared repo (never edited here)
 │   ├── form/      # Formik adapters around the shared FormField and controls; export from index.ts
+│                  # (plus FormPasswordInput, and FocusFirstError for focus on the first invalid field)
 │   ├── common/    # StatusBadge (our statuses on the shared badge), PageHeader, LoadingState
-│   └── layout/    # RootLayout, AppLayout (frame and sidebar flood state), Sidebar, TopBar,
-│                  # PhoneTopBar, AccountMenu, TabBar, Logo, NavIcons, DemoBanner, NavProgress, SkipLink
+│   └── layout/    # RequireSession and RequireRole (route guards), RootLayout, AppLayout (frame and
+│                  # sidebar flood state), Sidebar, TopBar, PhoneTopBar, AccountMenu, TabBar, Logo,
+│                  # NavIcons, DemoBanner, NavProgress, SkipLink
 ├── config/        # env.ts: reads VITE_API_URL and throws a clear error if it's missing
 ├── constants/     # routes.ts (every path; no hard-coded paths anywhere else), roles.ts,
-│                  # status.ts (labels and tones), listingOptions.ts (categories, units, areas)
+│                  # status.ts (labels and tones), listingOptions.ts (categories, units, areas),
+│                  # demoAccounts.ts (the sign-in page's list)
 ├── contexts/      # empty, with a .gitkeep (Redux holds shared state)
 ├── docs/          # README.md explaining this structure
 ├── hooks/         # useRole, useIdempotencyKey, useDocumentTitle, useAppStore (typed Redux hooks),
@@ -74,7 +76,7 @@ src/
 │                  # simulate.ts (delay and the dev-only ?simulate=error|empty|slow switches)
 ├── pages/         # one thin file per route; a page only composes sections
 ├── schema/        # Yup schemas, one per form
-├── sections/      # page-level blocks
+├── sections/      # page-level blocks, one folder per screen, e.g. sections/sign-in/
 ├── services/      # api.ts (the one base createApi); auth.ts, listings.ts, requests.ts (the hooks
 │                  # screens use); errors.ts (reading status, code and field errors)
 ├── styles/        # tokens.css; layout.css (the app frame and the sidebar flood's exact timings)

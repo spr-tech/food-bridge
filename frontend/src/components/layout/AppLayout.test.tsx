@@ -3,7 +3,8 @@
 import { act, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { AppLayout } from '@/components/layout/AppLayout'
+import { SESSION_STORAGE_KEY } from '@/app/session'
+import { RequireSession } from '@/components/layout/RequireSession'
 import { ROUTES } from '@/constants/routes'
 import { SIDEBAR_STORAGE_KEY } from '@/hooks/useSidebarTheme'
 import { renderRoutes, signInAs } from '@/test/render'
@@ -29,7 +30,7 @@ function renderLayout(path: string = ROUTES.yourListings) {
     [
       { path: ROUTES.signIn, element: <h1>Sign in</h1> },
       {
-        element: <AppLayout />,
+        element: <RequireSession />,
         children: [
           { path: ROUTES.yourListings, element: <h1>Your listings</h1> },
           { path: ROUTES.createListing, element: <h1>Share food</h1> },
@@ -101,7 +102,7 @@ describe('AppLayout sidebar', () => {
     expect(sidebarState()).toBe('cream')
   })
 
-  it('starts dark green again after signing out', async () => {
+  it('signs out: clears the session and starts dark green at the next sign-in', async () => {
     const user = userEvent.setup()
     sessionStorage.setItem(SIDEBAR_STORAGE_KEY, 'cream')
     const { unmount } = renderLayout()
@@ -110,9 +111,11 @@ describe('AppLayout sidebar', () => {
 
     expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument()
     expect(sessionStorage.getItem(SIDEBAR_STORAGE_KEY)).toBeNull()
+    expect(sessionStorage.getItem(SESSION_STORAGE_KEY)).toBeNull()
 
     unmount()
-    renderLayout()
+    signInAs('recipient')
+    renderLayout(ROUTES.listings)
     expect(sidebarState()).toBe('dark')
   })
 

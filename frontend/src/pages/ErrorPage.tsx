@@ -3,7 +3,7 @@
 import { Link } from 'react-router'
 import { PageHeader } from '@/components/common/PageHeader'
 import { DemoBanner } from '@/components/layout/DemoBanner'
-import { ROLE_CONFIG } from '@/constants/roles'
+import { homePathFor } from '@/constants/roles'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useRole } from '@/hooks/useRole'
 
@@ -11,7 +11,7 @@ const TITLE = 'Something went wrong'
 
 export function ErrorPage() {
   useDocumentTitle(TITLE)
-  const { homePath } = ROLE_CONFIG[useRole()]
+  const homePath = homePathFor(useRole())
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-12">

@@ -13,9 +13,9 @@ import { TopBar } from '@/components/layout/TopBar'
 import { ROLE_CONFIG } from '@/constants/roles'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useNavCounts } from '@/hooks/useNavCounts'
-import { useRole } from '@/hooks/useRole'
 import { useSidebarTheme } from '@/hooks/useSidebarTheme'
 import { useSignOut } from '@/hooks/useSignOut'
+import type { Session } from '@/types/api'
 
 const MAIN_ID = 'main-content'
 export const DESKTOP_QUERY = '(min-width: 768px)'
@@ -23,8 +23,10 @@ export const DESKTOP_QUERY = '(min-width: 768px)'
 // The flood's last step (the green line fading) ends at 2.25s + 0.3s.
 const FLOOD_MS = 2600
 
-export function AppLayout() {
-  const { organisationName, roleLabel, nav } = ROLE_CONFIG[useRole()]
+// Rendered by RequireSession, which only does so with a session.
+export function AppLayout({ session }: { session: Session }) {
+  const { organisationName } = session
+  const { roleLabel, nav } = ROLE_CONFIG[session.role]
   const counts = useNavCounts()
   const isDesktop = useMediaQuery(DESKTOP_QUERY)
   const signOut = useSignOut()
