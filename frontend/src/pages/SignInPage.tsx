@@ -34,8 +34,8 @@ export function SignInPage() {
       <div className="lg:hidden">
         <SignInPanelPhone />
       </div>
-      <div className="flex flex-col items-center px-5 py-[22px] lg:justify-center lg:px-8 lg:py-12">
-        <div className="w-full max-w-[440px]">
+      <div className="flex flex-col items-center px-5 py-5.5 lg:justify-center lg:px-8 lg:py-12">
+        <div className="w-full max-w-110">
           <SignInForm sessionEnded={params.get('reason') === 'session-ended'} />
           <DemoBanner />
         </div>

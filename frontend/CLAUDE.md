@@ -103,9 +103,9 @@ src/
 
 - Every form uses Formik with a Yup schema. Schemas live in `src/schema/`, one per form, e.g. `src/schema/listingSchema.ts`.
 - Error messages come word for word from the spec (S2 field table).
-- Build fields with the adapters in `src/components/form/` (FormInput, FormTextarea, FormSelect, FormCheckbox, FormDateTime, FormImageUpload). They wrap the shared FormField and controls and show an error only after the field is left or the form submitted (`useFieldError`). Submit with the shared `Button` and `type="submit"`.
+- Build fields with the adapters in `src/components/form/` (FormInput, FormPasswordInput, FormTextarea, FormSelect, FormCheckbox, FormDate, FormTime, FormImageUpload). They wrap the shared FormField and controls and show an error only after the field is left or the form submitted (`useFieldError`). Submit with the shared `Button` and `type="submit"`.
 - Every field: visible label tied to the input, error linked with `aria-describedby`, `aria-invalid` when invalid, error shown as text (not only a red border). The shared FormField does this; the shared Checkbox can't show an error itself, so FormCheckbox puts it in the checkbox's description.
-- On submit with errors, move focus to the first invalid field.
+- On submit with errors, move focus to the first invalid field: put `<FocusFirstError order={[...]} />` inside the form, and use `focusField(name)` after mapping a 400.
 - Submit buttons show a loading state and ignore extra presses while submitting.
 - Client validation is for speed. The service validates again, and its 400 errors map back onto the fields.
 

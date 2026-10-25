@@ -2,22 +2,33 @@
 // headline, description and three icons, with two faint rings in the corner. Phone: a
 // short header with the logo and headline only, so the form fits one screen.
 // The headline is styled text, not a heading: "Welcome back" is the page's h1.
-import type { ReactNode } from 'react'
-import { Logo } from '@/components/layout/Logo'
+import type { ReactNode } from "react";
+import { Logo } from "@/components/layout/Logo";
 
-const HEADLINE = 'Good food deserves another table.'
+const HEADLINE = "Good food deserves another table.";
 
 function PanelIcon({ children }: { children: ReactNode }) {
   return (
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--color-count)" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+    <svg
+      width="34"
+      height="34"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="var(--color-count)"
+      strokeWidth={1.9}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
       {children}
     </svg>
-  )
+  );
 }
 
 const POINTS: { label: [string, string]; icon: ReactNode }[] = [
   {
-    label: ['Reduce', 'food waste'],
+    label: ["Reduce", "food waste"],
     icon: (
       <>
         <rect x="3" y="3" width="18" height="18" rx="3" />
@@ -27,7 +38,7 @@ const POINTS: { label: [string, string]; icon: ReactNode }[] = [
     ),
   },
   {
-    label: ['Support', 'communities'],
+    label: ["Support", "communities"],
     icon: (
       <>
         <circle cx="8" cy="8" r="3" />
@@ -37,13 +48,16 @@ const POINTS: { label: [string, string]; icon: ReactNode }[] = [
     ),
   },
   {
-    label: ['Build a', 'stronger Lagos'],
-    icon: <path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z" />,
+    label: ["Build a", "stronger Lagos"],
+    icon: (
+      <path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z" />
+    ),
   },
-]
+];
 
-const RING = 'pointer-events-none absolute rounded-full border-solid'
-const RING_COLOUR = 'border-[color-mix(in_srgb,var(--color-surface)_5%,transparent)]'
+const RING = "pointer-events-none absolute rounded-full border-solid";
+const RING_COLOUR =
+  "border-[color-mix(in_srgb,var(--color-surface)_5%,transparent)]";
 
 export function SignInPanelDesktop() {
   return (
@@ -52,18 +66,18 @@ export function SignInPanelDesktop() {
       <p className="relative mt-14 mb-6 max-w-[560px] font-display text-[clamp(44px,4.6vw,66px)] leading-[1.04] font-semibold">
         {HEADLINE}
       </p>
-      <p className="relative m-0 max-w-[430px] text-[17px] leading-[1.65] text-footer-on-dark">
-        A practical way for food businesses, community groups and charities to share surplus food
-        and reduce waste in Lagos.
+      <p className="relative m-0 max-w-107.5 text-[17px] leading-[1.65] text-footer-on-dark">
+        A practical way for food businesses, community groups and charities to
+        share surplus food and reduce waste in Lagos.
       </p>
       <ul className="relative mt-auto flex pt-10">
         {POINTS.map((point, index) => (
           <li
-            key={point.label.join(' ')}
+            key={point.label.join(" ")}
             className={
               index === 0
-                ? 'flex flex-col gap-3 pr-[34px]'
-                : 'flex flex-col gap-3 border-l border-[color-mix(in_srgb,var(--color-surface)_18%,transparent)] px-[34px]'
+                ? "flex flex-col gap-3 pr-8.5"
+                : "flex flex-col gap-3 border-l border-[color-mix(in_srgb,var(--color-surface)_18%,transparent)] px-[34px]"
             }
           >
             <PanelIcon>{point.icon}</PanelIcon>
@@ -75,21 +89,29 @@ export function SignInPanelDesktop() {
           </li>
         ))}
       </ul>
-      <div aria-hidden="true" className={`${RING} ${RING_COLOUR} -right-[230px] -bottom-[250px] size-[700px] border-[70px]`} />
       <div
         aria-hidden="true"
-        className={`${RING} -right-[90px] -bottom-[110px] size-[420px] border-[44px] border-[color-mix(in_srgb,var(--color-surface)_4%,transparent)]`}
+        className={`${RING} ${RING_COLOUR} -right-[230px] -bottom-[250px] size-[700px] border-[70px]`}
+      />
+      <div
+        aria-hidden="true"
+        className={`${RING} -right-[90px] -bottom-27.5 size-105 border-[44px] border-[color-mix(in_srgb,var(--color-surface)_4%,transparent)]`}
       />
     </div>
-  )
+  );
 }
 
 export function SignInPanelPhone() {
   return (
     <div className="relative overflow-hidden bg-sidebar-dark px-5 pt-[22px] pb-[26px] text-on-dark-heading">
       <Logo variant="dark" size="md" />
-      <p className="relative mt-[18px] mb-0 font-display text-[30px] leading-[1.1] font-semibold">{HEADLINE}</p>
-      <div aria-hidden="true" className={`${RING} ${RING_COLOUR} -right-[110px] -bottom-[150px] size-[300px] border-[38px]`} />
+      <p className="relative mt-4.5 mb-0 font-display text-[30px] leading-[1.1] font-semibold">
+        {HEADLINE}
+      </p>
+      <div
+        aria-hidden="true"
+        className={`${RING} ${RING_COLOUR} -right-27.5 -bottom-37.5 size-75 border-38`}
+      />
     </div>
-  )
+  );
 }
