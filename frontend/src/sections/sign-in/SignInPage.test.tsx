@@ -1,11 +1,12 @@
 // Sign in (spec S1): validation, wrong details, an unreachable service, the session it
-// saves, where each role lands, ?next=, the phone chips and show password.
+// saves, where each role lands, ?next=, the demo accounts filling in the form, and show
+// password.
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { getSession, SESSION_STORAGE_KEY } from '@/app/session'
 import { ROUTES } from '@/constants/routes'
-import { DEMO_PASSWORD } from '@/mocks/seed'
+import { DEMO_PASSWORD } from '@/constants/demoAccounts'
 import { SignInPage } from '@/pages/SignInPage'
 import { renderRoutes, signInAs } from '@/test/render'
 
@@ -131,15 +132,46 @@ describe('Sign in', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Your session ended. Sign in again.')
   })
 
-  it('fills in the email from a demo account chip and moves to the password', async () => {
+  it('fills in the email and password from a phone chip, then moves focus to Sign in', async () => {
     const user = userEvent.setup()
     renderSignIn()
 
     await user.click(screen.getByRole('button', { name: 'Administrator' }))
 
     expect(emailField()).toHaveValue('admin@foodbridge.test')
-    expect(passwordField()).toHaveFocus()
-    expect(passwordField()).toHaveValue('')
+    expect(passwordField()).toHaveValue(DEMO_PASSWORD)
+    expect(screen.getByRole('button', { name: 'Sign in' })).toHaveFocus()
+  })
+
+  it("fills in both from an account in the desktop box, which shows the role and email", async () => {
+    const user = userEvent.setup()
+    renderSignIn()
+    const recipient = screen.getByRole('button', { name: 'Recipient, recipient@foodbridge.test' })
+
+    await user.click(recipient)
+
+    expect(emailField()).toHaveValue('recipient@foodbridge.test')
+    expect(passwordField()).toHaveValue(DEMO_PASSWORD)
+    expect(screen.getByRole('button', { name: 'Sign in' })).toHaveFocus()
+  })
+
+  it('works with the keyboard: Enter on an account fills the form, Enter on Sign in signs in', async () => {
+    const user = userEvent.setup()
+    renderSignIn()
+
+    screen.getByRole('button', { name: 'Donor, donor@foodbridge.test' }).focus()
+    await user.keyboard('{Enter}')
+    expect(screen.getByRole('button', { name: 'Sign in' })).toHaveFocus()
+    await user.keyboard('{Enter}')
+
+    expect(await screen.findByRole('heading', { name: 'Donor home' })).toBeInTheDocument()
+  })
+
+  it('says where the password comes from', () => {
+    renderSignIn()
+
+    expect(screen.getByText(/Choose one to fill in the email and password\. Password in the README\.$/)).toBeInTheDocument()
+    expect(screen.getByText('Tap one to fill in the email and password. Password in the README.')).toBeInTheDocument()
   })
 
   it('shows and hides the password', async () => {

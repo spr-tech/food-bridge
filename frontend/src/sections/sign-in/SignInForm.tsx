@@ -1,11 +1,14 @@
 // The sign-in form (spec S1): email and password with show/hide, then the demo accounts.
+// Choosing a demo account fills in its email and the demo password and moves focus to
+// Sign in, so the user still signs in themselves.
 // On success the session is saved and SignInPage sends the user on (to ?next= or their
 // home page). Wrong details keep the email filled in.
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Form, Formik } from 'formik'
 import { saveSession } from '@/app/session'
-import { FocusFirstError, FormInput, FormPasswordInput, focusField } from '@/components/form'
+import { FocusFirstError, FormInput, FormPasswordInput } from '@/components/form'
 import { Button } from '@/components/ui/button'
+import { DEMO_PASSWORD, type DemoAccount } from '@/constants/demoAccounts'
 import { useAppDispatch } from '@/hooks/useAppStore'
 import { signInSchema, type SignInValues } from '@/schema/signInSchema'
 import { DemoAccountChips, DemoAccountsBox } from '@/sections/sign-in/DemoAccounts'
@@ -41,6 +44,7 @@ export function SignInForm({ sessionEnded }: { sessionEnded: boolean }) {
   const [signIn] = useSignIn()
   const dispatch = useAppDispatch()
   const [formError, setFormError] = useState<string | null>(null)
+  const signInButton = useRef<HTMLButtonElement>(null)
 
   async function handleSubmit(values: SignInValues) {
     setFormError(null)
@@ -78,43 +82,45 @@ export function SignInForm({ sessionEnded }: { sessionEnded: boolean }) {
         validationSchema={signInSchema}
         onSubmit={handleSubmit}
       >
-        {({ isSubmitting, setFieldValue }) => (
-          <Form noValidate className="flex flex-col gap-4 lg:gap-5">
-            <FocusFirstError order={FIELD_ORDER} />
-            <FormInput
-              name="email"
-              label="Email address"
-              type="email"
-              autoComplete="email"
-              placeholder="you@organisation.test"
-              icon={<MailIcon />}
-              autoFocus
-            />
-            <FormPasswordInput
-              name="password"
-              label="Password"
-              autoComplete="current-password"
-              icon={<LockIcon />}
-            />
-            <Button type="submit" size="lg" loading={isSubmitting} className="mt-1 w-full">
-              Sign in
-            </Button>
+        {({ isSubmitting, setFieldValue }) => {
+          function pick(account: DemoAccount) {
+            void setFieldValue('email', account.email)
+            void setFieldValue('password', DEMO_PASSWORD)
+            signInButton.current?.focus()
+          }
 
-            <div className="lg:hidden">
-              <DemoAccountChips
-                onPick={(email) => {
-                  void setFieldValue('email', email)
-                  focusField('password')
-                }}
+          return (
+            <Form noValidate className="flex flex-col gap-4 lg:gap-5">
+              <FocusFirstError order={FIELD_ORDER} />
+              <FormInput
+                name="email"
+                label="Email address"
+                type="email"
+                autoComplete="email"
+                placeholder="you@organisation.test"
+                icon={<MailIcon />}
+                autoFocus
               />
-            </div>
-          </Form>
-        )}
-      </Formik>
+              <FormPasswordInput
+                name="password"
+                label="Password"
+                autoComplete="current-password"
+                icon={<LockIcon />}
+              />
+              <Button ref={signInButton} type="submit" size="lg" loading={isSubmitting} className="mt-1 w-full">
+                Sign in
+              </Button>
 
-      <div className="hidden lg:block">
-        <DemoAccountsBox />
-      </div>
+              <div className="lg:hidden">
+                <DemoAccountChips onPick={pick} />
+              </div>
+              <div className="hidden lg:block">
+                <DemoAccountsBox onPick={pick} />
+              </div>
+            </Form>
+          )
+        }}
+      </Formik>
     </>
   )
 }

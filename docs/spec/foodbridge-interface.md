@@ -94,9 +94,9 @@ Badges always show the word, never colour alone.
 
 ### S1. Sign in, `/sign-in`
 
-**Shows:** email, password, Sign in button, and a demo accounts box listing each role and email (passwords are in the README).
+**Shows:** email, password, Sign in button, and a demo accounts box with a button per account, showing its role and email (the password is also in the README).
 
-**Demo accounts:** one per role, matching the service: donor (Mama's Oven, Yaba) `donor@foodbridge.test`, recipient (Hope Community Kitchen) `recipient@foodbridge.test`, administrator `admin@foodbridge.test`. The emails are **TBC** until the service engineers confirm their own. Other organisations in the sample data (for example Ajegunle Food Bank and Grace Shelter) have no login. On a phone the accounts are tap-to-fill chips (Donor, Recipient, Administrator) under "Try a demo account" and "Tap one to fill in the email. Password in the README."; tapping one fills the email field only.
+**Demo accounts:** one per role, matching the service: donor (Mama's Oven, Yaba) `donor@foodbridge.test`, recipient (Hope Community Kitchen) `recipient@foodbridge.test`, administrator `admin@foodbridge.test`. The emails are **TBC** until the service engineers confirm their own. Other organisations in the sample data (for example Ajegunle Food Bank and Grace Shelter) have no login. On desktop each account in the box is a button (icon, role and email) with a visible hover and focus state, under "Use these accounts to explore the app. Choose one to fill in the email and password. Password in the README." On a phone the accounts are chips (Donor, Recipient, Administrator) under "Try a demo account" and "Tap one to fill in the email and password. Password in the README." On both, choosing an account (click, tap, or Enter or Space from the keyboard) fills in its email and the demo password, then moves focus to Sign in; it doesn't sign in by itself. The demo password must match the service's.
 
 **States:**
 - Loading: the Sign in button shows its loading state.
@@ -372,6 +372,7 @@ No grey or black states anywhere in the sidebar: every state is dark green, crea
 ### Desktop layout (768px and up)
 
 - A 248px sidebar beside the content. Content padding 38px 52px.
+- **Page container:** every signed-in page (its heading and content) sits in one shared container. Where the content area is wider than the page's max width, the page is centred in it, not left-aligned. Max widths: Listing details 800px, Share food 860px, Find food (All listings for administrators) 1080px, and 1080px for every other page (Your listings, Your requests, Requests and those to come). On a phone the page fills the width, as before.
 - **Sidebar**, top to bottom:
   - the logo
   - the role's links
@@ -437,7 +438,7 @@ No grey or black states anywhere in the sidebar: every state is dark green, crea
 **Sign in (S1).**
 - **Desktop:** two halves.
   - Left: the dark green panel with the wordmark and the headline "Good food deserves another table." (Fraunces 66px, styled text, not a heading). Then the description "A practical way for food businesses, community groups and charities to share surplus food and reduce waste in Lagos." and three icons: "Reduce food waste", "Support communities", "Build a stronger Lagos".
-  - Right: the `h1` "Welcome back", "Sign in to your FoodBridge account.", Email address, Password, the Sign in button, then the Demo accounts box ("Use these accounts to explore the app. Password in the README.").
+  - Right: the `h1` "Welcome back", "Sign in to your FoodBridge account.", Email address, Password, the Sign in button, then the Demo accounts box ("Use these accounts to explore the app. Choose one to fill in the email and password. Password in the README."), one button per account.
 - **Phone:** a short dark green header with the logo and the headline only, then the form and the demo account chips (S1), so the page fits one screen.
 
 **Find food (S3).**

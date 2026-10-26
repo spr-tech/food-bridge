@@ -127,7 +127,7 @@ export function ShareFoodForm() {
   return (
     <Formik<ListingFormValues> initialValues={initialValues} validationSchema={listingSchema} onSubmit={handleSubmit}>
       {({ isSubmitting, dirty }) => (
-        <Form noValidate className="max-w-215">
+        <Form noValidate>
           <LeaveGuard active={dirty && !leavingOnPurpose} />
           <FocusFirstError order={FIELD_ORDER} />
           <Card className="shadow-[0_1px_2px_rgb(0_0_0/0.03),0_8px_22px_rgb(30_42_36/0.05)]">
