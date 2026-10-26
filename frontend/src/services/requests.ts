@@ -2,8 +2,9 @@
 // Screens use these hooks only. Every write refreshes the listing it touches, the lists
 // and the navigation counts.
 import * as db from '@/mocks/db'
-import { simulate } from '@/mocks/simulate'
+import { simulate, simulateRivalApproval, simulateWrite } from '@/mocks/simulate'
 import { api, LIST_QUERY_OPTIONS } from '@/services/api'
+import { listingsApi } from '@/services/listings'
 import type { ListingRequest } from '@/types/api'
 
 // What changes when a request on this listing changes.
@@ -39,7 +40,7 @@ const requestsApi = api.injectEndpoints({
       { listingId: string; note?: string | null; idempotencyKey: string }
     >({
       queryFn: ({ listingId, note, idempotencyKey }) =>
-        simulate((actor) => db.createRequest(actor, { listingId, note }, idempotencyKey)),
+        simulateWrite((actor) => db.createRequest(actor, { listingId, note }, idempotencyKey)),
       invalidatesTags: (_result, _error, { listingId }) => [...touched(listingId)],
     }),
 
@@ -50,14 +51,17 @@ const requestsApi = api.injectEndpoints({
       { requestId: string; listingId: string; decision: 'APPROVED' | 'DECLINED' }
     >({
       queryFn: ({ requestId, decision }) =>
-        simulate((actor) => db.decideRequest(actor, { requestId, decision })),
+        simulateWrite((actor) => {
+          if (decision === 'APPROVED') simulateRivalApproval(requestId)
+          return db.decideRequest(actor, { requestId, decision })
+        }),
       invalidatesTags: (_result, _error, { listingId }) => [...touched(listingId)],
     }),
 
     // TEMPORARY: simulated until the API exists. Replace the inside with an
     // injectEndpoints endpoint; the screen must not change.
     cancelRequest: build.mutation<ListingRequest, { requestId: string; listingId: string }>({
-      queryFn: ({ requestId }) => simulate((actor) => db.cancelRequest(actor, { requestId })),
+      queryFn: ({ requestId }) => simulateWrite((actor) => db.cancelRequest(actor, { requestId })),
       invalidatesTags: (_result, _error, { listingId }) => [...touched(listingId)],
     }),
 
@@ -75,6 +79,43 @@ const requestsApi = api.injectEndpoints({
       ],
     }),
   }),
+})
+
+// Approve is the one optimistic update (spec S5 and section 6). The listing's requests
+// change at once (this one Approved and first, the other pending ones Declined) and the
+// listing shows Reserved. If the service refuses or can't be reached, both go back; then
+// invalidatesTags, which runs after a failure as well as a success, fetches the true state.
+// Added here rather than in injectEndpoints so it can name the endpoints it patches.
+requestsApi.enhanceEndpoints({
+  endpoints: {
+    decideRequest: {
+      async onQueryStarted({ requestId, listingId, decision }, { dispatch, queryFulfilled }) {
+        if (decision !== 'APPROVED') return
+        const patches = [
+          dispatch(
+            requestsApi.util.updateQueryData('getListingRequests', listingId, (draft) => {
+              for (const request of draft) {
+                if (request.id === requestId) request.status = 'APPROVED'
+                else if (request.status === 'PENDING') request.status = 'DECLINED'
+              }
+              draft.sort((a, b) => Number(b.status === 'APPROVED') - Number(a.status === 'APPROVED'))
+            }),
+          ),
+          dispatch(
+            listingsApi.util.updateQueryData('getListing', listingId, (draft) => {
+              draft.status = 'RESERVED'
+              draft.pendingRequestCount = 0
+            }),
+          ),
+        ]
+        try {
+          await queryFulfilled
+        } catch {
+          for (const patch of patches.reverse()) patch.undo()
+        }
+      },
+    },
+  },
 })
 
 type QueryOptions = { skip?: boolean }

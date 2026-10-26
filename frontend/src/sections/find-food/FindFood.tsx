@@ -14,6 +14,7 @@ import { FormField } from '@/components/ui/form-field'
 import { Select } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CATEGORIES, PICKUP_AREAS } from '@/constants/listingOptions'
+import { useNow } from '@/hooks/useNow'
 import { useSessionEnded } from '@/hooks/useSessionEnded'
 import { formatUpdated } from '@/lib/format'
 import { ListingCard } from '@/sections/find-food/ListingCard'
@@ -36,16 +37,6 @@ const STATUS_OPTIONS = [
 function countMessage(total: number, availableOnly: boolean): string {
   const noun = total === 1 ? 'listing' : 'listings'
   return availableOnly ? `${total} ${noun} available` : `${total} ${noun}`
-}
-
-// Re-renders every 30 seconds, so "Updated 2 minutes ago" stays true.
-function useNow(intervalMs = 30_000): number {
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), intervalMs)
-    return () => window.clearInterval(timer)
-  }, [intervalMs])
-  return now
 }
 
 export function FindFood() {
@@ -104,7 +95,7 @@ export function FindFood() {
   if (listings.isLoading) {
     body = (
       <LoadingState label="Loading listings">
-        <ul className="grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-4.5 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }, (_, index) => (
             <li key={index}>
               <Skeleton shape="card" />
@@ -140,7 +131,7 @@ export function FindFood() {
   } else {
     body = (
       <>
-        <ul className="grid gap-[14px] sm:grid-cols-2 md:gap-[18px] lg:grid-cols-3">
+        <ul className="grid gap-3.5 sm:grid-cols-2 md:gap-4.5 lg:grid-cols-3">
           {items.map((listing, index) => (
             <li key={listing.id}>
               <ListingCard
@@ -173,7 +164,7 @@ export function FindFood() {
   }
 
   return (
-    <div className="max-w-[1080px]">
+    <div className="max-w-270">
       <FilterBar
         query={query}
         onQueryChange={setQuery}

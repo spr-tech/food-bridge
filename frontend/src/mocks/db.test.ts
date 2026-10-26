@@ -4,8 +4,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { clearSession } from '@/app/session'
 import * as db from '@/mocks/db'
-import { DEMO_PASSWORD } from '@/mocks/seed'
-import { simulate } from '@/mocks/simulate'
+import { ACCOUNTS, DEMO_PASSWORD } from '@/mocks/seed'
+import { simulate, simulateRivalApproval, simulateWrite } from '@/mocks/simulate'
 import { signInAs } from '@/test/render'
 import type { CreateListingInput } from '@/types/api'
 
@@ -48,10 +48,15 @@ afterEach(() => {
 
 describe('sign in', () => {
   it('signs a demo account in with its role and organisation', () => {
-    const session = db.signIn('Recipient2@FoodBridge.test', DEMO_PASSWORD)
+    const session = db.signIn('Recipient@FoodBridge.test', DEMO_PASSWORD)
 
-    expect(session).toMatchObject({ role: 'recipient', organisationName: 'Ajegunle Food Bank' })
+    expect(session).toMatchObject({ role: 'recipient', organisationName: 'Hope Community Kitchen' })
     expect(session.token).toBeTruthy()
+  })
+
+  it('has one demo account per role; the other organisations have no login', () => {
+    expect(ACCOUNTS.map((account) => account.role)).toEqual(['donor', 'recipient', 'admin'])
+    expectError(() => db.signIn('recipient2@foodbridge.test', DEMO_PASSWORD), 401, 'INVALID_CREDENTIALS')
   })
 
   it('refuses a wrong password with 401 INVALID_CREDENTIALS', () => {
@@ -105,11 +110,11 @@ describe('one approved request per listing', () => {
 describe('making a request', () => {
   it('refuses a request on an expired listing with 409 LISTING_EXPIRED', () => {
     // lst-14 (Akara and pap) passed its deadline two hours ago.
-    expectError(() => db.createRequest(signInAs('recipient2'), { listingId: 'lst-14' }, 'key-1'), 409, 'LISTING_EXPIRED')
+    expectError(() => db.createRequest(signInAs('recipient'), { listingId: 'lst-14' }, 'key-1'), 409, 'LISTING_EXPIRED')
   })
 
   it('refuses a request on a reserved listing with 409 LISTING_NOT_AVAILABLE', () => {
-    expectError(() => db.createRequest(signInAs('recipient3'), { listingId: 'lst-02' }, 'key-1'), 409, 'LISTING_NOT_AVAILABLE')
+    expectError(() => db.createRequest(signInAs('recipient'), { listingId: 'lst-07' }, 'key-1'), 409, 'LISTING_NOT_AVAILABLE')
   })
 
   it('refuses the same recipient requesting twice with 409 ALREADY_REQUESTED', () => {
@@ -122,23 +127,23 @@ describe('making a request', () => {
   })
 
   it('records one request for a repeated idempotency key', () => {
-    const recipient = signInAs('recipient2')
+    const recipient = signInAs('recipient')
 
-    const first = db.createRequest(recipient, { listingId: 'lst-06' }, 'same-key')
-    const again = db.createRequest(recipient, { listingId: 'lst-06' }, 'same-key')
+    const first = db.createRequest(recipient, { listingId: 'lst-09' }, 'same-key')
+    const again = db.createRequest(recipient, { listingId: 'lst-09' }, 'same-key')
 
     expect(again.id).toBe(first.id)
-    expect(db.listMyRequests(recipient).filter((r) => r.listingId === 'lst-06')).toHaveLength(1)
+    expect(db.listMyRequests(recipient).filter((r) => r.listingId === 'lst-09')).toHaveLength(1)
   })
 
   it('reads a pending request as EXPIRED once its listing passes its deadline', () => {
-    const recipient = signInAs('recipient2')
-    db.createRequest(recipient, { listingId: 'lst-06' }, 'key-1')
+    const recipient = signInAs('recipient')
+    db.createRequest(recipient, { listingId: 'lst-09' }, 'key-1')
 
     vi.useFakeTimers({ now: Date.now() + 7 * 60 * 60 * 1000 })
 
-    expect(db.listMyRequests(recipient).find((r) => r.listingId === 'lst-06')?.status).toBe('EXPIRED')
-    expect(db.getListing(recipient, 'lst-06').status).toBe('EXPIRED')
+    expect(db.listMyRequests(recipient).find((r) => r.listingId === 'lst-09')?.status).toBe('EXPIRED')
+    expect(db.getListing(recipient, 'lst-09').status).toBe('EXPIRED')
   })
 })
 
@@ -152,7 +157,8 @@ describe('cancelling a request', () => {
   })
 
   it('refuses anyone else with 403', () => {
-    expectError(() => db.cancelRequest(signInAs('recipient2'), { requestId: 'req-01' }), 403, 'NOT_OWNER')
+    // req-02 is Ajegunle Food Bank's, not Hope Community Kitchen's.
+    expectError(() => db.cancelRequest(signInAs('recipient'), { requestId: 'req-02' }), 403, 'NOT_OWNER')
     expectError(() => db.cancelRequest(signInAs('donor'), { requestId: 'req-01' }), 403, 'NOT_OWNER')
   })
 
@@ -294,6 +300,43 @@ describe('simulate switches', () => {
     await vi.advanceTimersByTimeAsync(1)
 
     expect(await pending).toEqual({ data: 'done' })
+  })
+
+  it('?simulate=offline fails saves as a dropped connection and leaves reads alone', async () => {
+    window.history.replaceState(null, '', '/?simulate=offline')
+    let saved = false
+
+    const save = await simulateWrite(() => {
+      saved = true
+    })
+    const read = await simulate(() => 'listings')
+
+    expect(save).toMatchObject({ error: { status: 'FETCH_ERROR' } })
+    expect(saved).toBe(false)
+    expect(read).toEqual({ data: 'listings' })
+  })
+
+  it('?simulate=conflict approves another pending request first, once per page load', () => {
+    window.history.replaceState(null, '', '/?simulate=conflict')
+    const donor = signInAs('donor')
+
+    simulateRivalApproval('req-02')
+    expectError(() => db.decideRequest(donor, { requestId: 'req-02', decision: 'APPROVED' }), 409, 'LISTING_ALREADY_RESERVED')
+    expect(requestStatus('req-01', 'lst-01')).toBe('APPROVED')
+    expect(requestStatus('req-02', 'lst-01')).toBe('DECLINED')
+
+  })
+
+  it('?simulate=conflict fires only once per page load', () => {
+    window.history.replaceState(null, '', '/?simulate=conflict')
+    signInAs('donor')
+
+    // The first approval spends it, even on a listing with no other pending request.
+    simulateRivalApproval('req-09')
+    simulateRivalApproval('req-02')
+
+    expect(requestStatus('req-01', 'lst-01')).toBe('PENDING')
+    expect(requestStatus('req-02', 'lst-01')).toBe('PENDING')
   })
 
   it("passes the store's errors on as RTK Query errors", async () => {

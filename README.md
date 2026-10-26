@@ -18,20 +18,22 @@ its own repository, owned by the service engineers: TODO (link).
 
 ## Demo accounts (simulated)
 
-Every organisation is fictional. All five accounts use the password **`FoodBridge-demo-2026`**.
+One account per role, matching the service's. Every organisation is fictional. All three accounts
+use the password **`FoodBridge-demo-2026`**. The emails are to be confirmed (TBC) with the service
+engineers.
 
 | Role | Email | Organisation |
 | --- | --- | --- |
 | Donor | `donor@foodbridge.test` | Mama's Oven, Yaba |
 | Recipient | `recipient@foodbridge.test` | Hope Community Kitchen |
-| Recipient 2 | `recipient2@foodbridge.test` | Ajegunle Food Bank |
-| Recipient 3 | `recipient3@foodbridge.test` | Grace Shelter |
 | Administrator | `admin@foodbridge.test` | FoodBridge demo admin |
 
 Until the service exists, the app runs on simulated data in the browser tab
 (`frontend/src/mocks/`), and the demonstration line on every page says "(simulated)". The data
 lasts for the tab, so you can sign out and back in as another account and see each other's
-changes. Closing the tab starts it again from the sample data.
+changes. Closing the tab starts it again from the sample data. The sample data also has other
+fictional organisations without a login (Ajegunle Food Bank and Grace Shelter among the
+recipients), so a listing can have several requests and some of them are declined.
 
 ## Still to come
 

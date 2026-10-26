@@ -28,7 +28,7 @@ export function SignInPage() {
 
   return (
     <main className="grid min-h-screen bg-bg lg:grid-cols-2">
-      <div className="hidden lg:flex lg:flex-col [&>*]:flex-1">
+      <div className="hidden lg:flex lg:flex-col *:flex-1">
         <SignInPanelDesktop />
       </div>
       <div className="lg:hidden">

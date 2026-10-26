@@ -19,6 +19,7 @@ If the spec and `openapi.yaml` disagree, `openapi.yaml` wins. Flag the mismatch 
 
 - Build every screen from `../docs/design/foodbridge-final/`. Read `source-html/` and `foodbridge-sidebar-animation.html` for exact values; don't approximate from the PNGs. Before pushing a screen, list any difference from its design.
 - Spec section 12 ("Visual design") lists the deliberate differences from the design files (contrast fixes, one `h1`, phone Sign out). Where they disagree, section 12 wins.
+- Use canonical Tailwind classes; only use an arbitrary value when no standard class gives exactly that value. ESLint enforces this (`better-tailwindcss/enforce-canonical-classes`) in className and `cn()`, but not in plain string constants, so check those by hand.
 
 ## Stack
 
@@ -59,7 +60,8 @@ src/
 │   ├── ui/        # shared components, copied unchanged from the shared repo (never edited here)
 │   ├── form/      # Formik adapters around the shared FormField and controls; export from index.ts
 │                  # (plus FormPasswordInput, and FocusFirstError for focus on the first invalid field)
-│   ├── common/    # StatusBadge (our statuses on the shared badge), PageHeader, LoadingState
+│   ├── common/    # StatusBadge (our statuses on the shared badge), PageHeader, LoadingState,
+│   │              # ListingPhoto, MetaIcons, CancelRequestButton (shared by S4 and S7)
 │   └── layout/    # RequireSession and RequireRole (route guards), RootLayout, AppLayout (frame and
 │                  # sidebar flood state), Sidebar, TopBar, PhoneTopBar, AccountMenu, TabBar, Logo,
 │                  # NavIcons, DemoBanner, NavProgress, SkipLink
@@ -70,17 +72,20 @@ src/
 ├── contexts/      # empty, with a .gitkeep (Redux holds shared state)
 ├── docs/          # README.md explaining this structure
 ├── hooks/         # useRole, useIdempotencyKey, useDocumentTitle, useAppStore (typed Redux hooks),
-│                  # useSidebarTheme (sessionStorage), useSignOut, useMediaQuery, useNavCounts
+│                  # useSidebarTheme (sessionStorage), useSignOut, useMediaQuery, useNavCounts,
+│                  # useNow, useRequestFood (Request food on a card and on S4)
 ├── lib/           # cn.ts (from the shared repo), format.ts (dates as "Today, 7:00 PM", quantities)
 ├── mocks/         # TEMPORARY simulated service: db.ts (the rules), seed.ts (demo data),
-│                  # simulate.ts (delay and the dev-only ?simulate=error|empty|slow switches)
+│                  # simulate.ts (delay, the dev-only ?simulate=error|empty|slow switches, and
+│                  # the demo switches ?simulate=offline|conflict, in every build while simulated)
 ├── pages/         # one thin file per route; a page only composes sections
 ├── schema/        # Yup schemas, one per form
 ├── sections/      # page-level blocks, one folder per screen, e.g. sections/sign-in/
 ├── services/      # api.ts (the one base createApi); auth.ts, listings.ts, requests.ts (the hooks
 │                  # screens use); errors.ts (reading status, code and field errors)
 ├── styles/        # tokens.css; layout.css (the app frame and the sidebar flood's exact timings)
-├── test/          # setup.ts for Vitest, render.tsx (renderRoutes, signInAs); tests sit next to their code
+├── test/          # setup.ts for Vitest, render.tsx (renderRoutes, signInAs, findToastAction),
+│                  # mockDb.ts (moveDeadline); tests sit next to their code
 └── types/         # shared types: Role, RequestStatus, ListingStatus; api.ts (Listing, ListingRequest, Session)
 ```
 

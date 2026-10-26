@@ -5,6 +5,11 @@ export type Option = {
   label: string
 }
 
+// The on-screen label for a value, e.g. "yaba" gives "Yaba"; an unknown value is shown as sent.
+export function optionLabel(options: Option[], value: string): string {
+  return options.find((option) => option.value === value)?.label ?? value
+}
+
 export type UnitOption = Option & {
   singular: string
 }

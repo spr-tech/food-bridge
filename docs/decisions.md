@@ -59,3 +59,19 @@ PROPOSED: the codes and request statuses need confirming in openapi.yaml. Agreed
 2026-10-25  A recipient can cancel their own request while it is still PENDING. New request status CANCELLED (on screen "Cancelled", neutral tone). Only the recipient who made the request can cancel it (403 otherwise); only a PENDING request can be cancelled (409 REQUEST_NOT_PENDING otherwise). A cancelled request no longer counts as pending (navigation counts, a listing's pending requests) and doesn't stop the recipient requesting that listing again. Cancelling an approved request is out of scope for now. The simulated store enforces this (useCancelRequest); the Cancel button comes in batch 2 on Your requests and Listing details.
 Why: a recipient whose plans change should free the food for others instead of leaving the donor waiting.
 PROPOSED: a new rule for the service. Agreed by: Muizz Jamiu, TODO (service engineer)
+
+2026-10-26  Canonical Tailwind classes, enforced by ESLint. Added eslint-plugin-better-tailwindcss 4.10.0 (dev dependency) with one rule, enforce-canonical-classes (rootFontSize 16, collapse off), for every file except the copied shared components in src/components/ui/. 29 classes in our files were replaced with their canonical form (for example md:p-[26px] became md:p-6.5); each pair was checked to compute the same value at the default 16px root font size. Arbitrary values stay only where no standard class gives exactly that value. Collapsing pairs ("text-3xl leading-tight" into "text-3xl/tight") is off, because it changes the line height when a responsive size follows. The rule reads className and cn(), not plain string constants.
+Why: the editor flagged arbitrary values that have a standard class; a lint rule keeps new code consistent and CI enforces it.
+Agreed by: Muizz Jamiu
+
+2026-10-26  One demo account per role, matching the service: donor@foodbridge.test (Mama's Oven), recipient@foodbridge.test (Hope Community Kitchen) and admin@foodbridge.test, all with the README's password. The emails are TBC until the service engineers confirm theirs. In the simulated store, Ajegunle Food Bank and Grace Shelter become organisations without a login, so a listing can still have several requests and some can be declined. Replaces the five accounts in the 2026-10-25 simulated data entry.
+Why: the sign-in page should offer the accounts the service will have, no more.
+Agreed by: Muizz Jamiu. Emails TBC: TODO (service engineer)
+
+2026-10-26  Demo switch ?simulate=offline: while the data is simulated, every save (publish, request, approve, decline, cancel) fails as if the connection dropped, in every build including the deployed demo; reads still work. Dev and demo only: it lives in frontend/src/mocks/simulate.ts and goes when the simulated layer does. The dev-only switches (error, empty, slow) stay dev-only.
+Why: the simulated data lives in one browser tab, so a dropped connection and its rollback can't otherwise be shown live.
+Agreed by: Muizz Jamiu
+
+2026-10-26  Demo switch ?simulate=conflict: while the data is simulated, in every build including the deployed demo, the next approval is refused with 409 LISTING_ALREADY_RESERVED, as if another approval had landed first: the simulated store approves another pending request on the same listing just before (it needs one; lst-01 has three). Once per page load. Dev and demo only: it lives in frontend/src/mocks/ and goes when the simulated layer does.
+Why: the optimistic approve's rollback and its conflict message can't otherwise be shown live, because the simulated data lives in one browser tab.
+Agreed by: Muizz Jamiu

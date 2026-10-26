@@ -83,7 +83,6 @@ describe('Sign in', () => {
   it.each([
     ['donor@foodbridge.test', 'Donor home'],
     ['recipient@foodbridge.test', 'Recipient home'],
-    ['recipient3@foodbridge.test', 'Recipient home'],
     ['admin@foodbridge.test', 'Admin home'],
   ])('sends %s to their home page', async (email, home) => {
     renderSignIn()
@@ -96,10 +95,10 @@ describe('Sign in', () => {
   it('saves the session (token, role, organisation) in sessionStorage', async () => {
     renderSignIn()
 
-    await signInWith('recipient2@foodbridge.test', DEMO_PASSWORD)
+    await signInWith('recipient@foodbridge.test', DEMO_PASSWORD)
 
     await waitFor(() => expect(sessionStorage.getItem(SESSION_STORAGE_KEY)).not.toBeNull())
-    expect(getSession()).toMatchObject({ role: 'recipient', organisationName: 'Ajegunle Food Bank' })
+    expect(getSession()).toMatchObject({ role: 'recipient', organisationName: 'Hope Community Kitchen' })
     expect(getSession()?.token).toBeTruthy()
   })
 
@@ -136,9 +135,9 @@ describe('Sign in', () => {
     const user = userEvent.setup()
     renderSignIn()
 
-    await user.click(screen.getByRole('button', { name: 'Recipient 3' }))
+    await user.click(screen.getByRole('button', { name: 'Administrator' }))
 
-    expect(emailField()).toHaveValue('recipient3@foodbridge.test')
+    expect(emailField()).toHaveValue('admin@foodbridge.test')
     expect(passwordField()).toHaveFocus()
     expect(passwordField()).toHaveValue('')
   })
@@ -156,11 +155,13 @@ describe('Sign in', () => {
     expect(passwordField()).toHaveAttribute('type', 'password')
   })
 
-  it('lists every demo account with its email', () => {
+  it('lists one demo account per role, with its email', () => {
     renderSignIn()
 
-    for (const email of ['donor@', 'recipient@', 'recipient2@', 'recipient3@', 'admin@']) {
+    for (const email of ['donor@', 'recipient@', 'admin@']) {
       expect(screen.getByText(`${email}foodbridge.test`)).toBeInTheDocument()
     }
+    expect(screen.queryByText(/recipient\d@foodbridge\.test/)).not.toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: /^(Donor|Recipient|Administrator)$/ })).toHaveLength(3)
   })
 })

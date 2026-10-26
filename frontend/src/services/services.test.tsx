@@ -58,7 +58,7 @@ describe('simulated hooks', () => {
   })
 
   it("refreshes the recipient's requests after requesting and cancelling", async () => {
-    signInAs('recipient2')
+    signInAs('recipient')
     const { result } = renderHook(
       () => ({ mine: useMyRequests(), create: useCreateRequest(), cancel: useCancelRequest() }),
       { wrapper: wrapper() },
@@ -68,12 +68,12 @@ describe('simulated hooks', () => {
 
     let requestId = ''
     await act(async () => {
-      requestId = (await result.current.create[0]({ listingId: 'lst-06', idempotencyKey: 'key-1' }).unwrap()).id
+      requestId = (await result.current.create[0]({ listingId: 'lst-09', idempotencyKey: 'key-1' }).unwrap()).id
     })
     await waitFor(() => expect(result.current.mine.data).toHaveLength(before + 1))
 
     await act(async () => {
-      await result.current.cancel[0]({ requestId, listingId: 'lst-06' }).unwrap()
+      await result.current.cancel[0]({ requestId, listingId: 'lst-09' }).unwrap()
     })
     await waitFor(() =>
       expect(result.current.mine.data?.find((r) => r.id === requestId)?.status).toBe('CANCELLED'),

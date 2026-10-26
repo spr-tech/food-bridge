@@ -83,7 +83,7 @@ export function FormImageUpload({ name, label, hint, required, disabled }: FormI
               if (!disabled) choose(event.dataTransfer.files[0] ?? null)
             }}
             className={cn(
-              'flex cursor-pointer items-center gap-3 rounded-xl border-[1.5px] border-dashed border-dropzone-border bg-dropzone-bg p-[18px] text-sm text-text-secondary md:gap-4 md:p-[26px] md:text-[15px]',
+              'flex cursor-pointer items-center gap-3 rounded-xl border-[1.5px] border-dashed border-dropzone-border bg-dropzone-bg p-4.5 text-sm text-text-secondary md:gap-4 md:p-6.5 md:text-[15px]',
               'peer-focus-visible:[outline:var(--focus-ring-width)_solid_var(--color-focus)] peer-focus-visible:[outline-offset:var(--focus-ring-offset)]',
               dragging && 'border-primary',
               error && 'border-danger',

@@ -9,7 +9,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ROUTES } from '@/constants/routes'
 import * as db from '@/mocks/db'
 import { BrowsePage } from '@/pages/BrowsePage'
-import { renderRoutes, signInAs } from '@/test/render'
+import { moveDeadline } from '@/test/mockDb'
+import { findToastAction, renderRoutes, signInAs } from '@/test/render'
 
 // Rendering a dozen cards in jsdom takes a while; allow for a busy test run.
 vi.setConfig({ testTimeout: 15_000 })
@@ -37,14 +38,6 @@ function cardFor(foodName: string): HTMLElement {
   const card = heading.closest('li')
   if (!card) throw new Error(`No card for ${foodName}`)
   return card
-}
-
-// Changes a listing's deadline in the simulated store, as if time had passed.
-function moveDeadline(listingId: string, iso: string) {
-  const stored = JSON.parse(sessionStorage.getItem(db.MOCK_DB_STORAGE_KEY) ?? '{}')
-  const listing = stored.listings.find((item: { id: string }) => item.id === listingId)
-  listing.deadline = iso
-  sessionStorage.setItem(db.MOCK_DB_STORAGE_KEY, JSON.stringify(stored))
 }
 
 beforeEach(() => {
@@ -243,19 +236,17 @@ describe('Find food: cards', () => {
     window.history.replaceState(null, '', '/?simulate=error')
 
     await user.click(screen.getByRole('button', { name: 'Request food: Coconut bread' }))
-    const toast = (await screen.findByText("Your request wasn't sent. Try again.")).closest('li')
-    if (!toast) throw new Error('No toast')
+    const tryAgain = await findToastAction("Your request wasn't sent. Try again.", 'Try again')
 
     window.history.replaceState(null, '', '/')
-    await user.click(within(toast).getByRole('button', { name: 'Try again' }))
+    await user.click(tryAgain)
 
     expect(await screen.findByText('Request sent')).toBeInTheDocument()
     expect(db.listMyRequests(signInAs('recipient')).filter((r) => r.listingId === 'lst-13')).toHaveLength(1)
   })
 
   it('offers Request food again after the recipient cancelled their request', async () => {
-    // Seed: Grace Shelter cancelled her request on the fried rice (req-11).
-    signInAs('recipient3')
+    // Seed: Hope Community Kitchen cancelled its request on the fried rice (req-11).
     renderFindFood()
     await screen.findByRole('heading', { level: 2, name: 'Fried rice and turkey' })
 

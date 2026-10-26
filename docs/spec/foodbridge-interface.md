@@ -96,7 +96,7 @@ Badges always show the word, never colour alone.
 
 **Shows:** email, password, Sign in button, and a demo accounts box listing each role and email (passwords are in the README).
 
-**Demo accounts:** donor (Mama's Oven, Yaba), recipient (Hope Community Kitchen), recipient 2 (Ajegunle Food Bank), recipient 3 (Grace Shelter), administrator. All emails use `@foodbridge.test`. On a phone they are tap-to-fill chips (Donor, Recipient, Recipient 2, Recipient 3, Administrator) under "Try a demo account" and "Tap one to fill in the email. Password in the README."; tapping one fills the email field only.
+**Demo accounts:** one per role, matching the service: donor (Mama's Oven, Yaba) `donor@foodbridge.test`, recipient (Hope Community Kitchen) `recipient@foodbridge.test`, administrator `admin@foodbridge.test`. The emails are **TBC** until the service engineers confirm their own. Other organisations in the sample data (for example Ajegunle Food Bank and Grace Shelter) have no login. On a phone the accounts are tap-to-fill chips (Donor, Recipient, Administrator) under "Try a demo account" and "Tap one to fill in the email. Password in the README."; tapping one fills the email field only.
 
 **States:**
 - Loading: the Sign in button shows its loading state.
@@ -169,28 +169,38 @@ No preview card: removed on purpose (section 12).
 
 ### S4. Listing details (recipient view), `/listings/:id`
 
-**Shows:** image or placeholder, status badge, food name, donor and category, quantity, pickup area, collect by time, when it was listed, description, and one action.
+**Shows:** image or placeholder, status badge, food name, donor and category, quantity, pickup area, collect by time, when it was listed ("Listed Today, 9:30 AM"), description, and one action. A listing with no description leaves the Description heading out.
 
 **Action, by situation:**
 
 | Situation | What the recipient sees |
 |---|---|
 | Available, not yet requested | "Request this food" button, with "The donor approves one request. You'll see the result in Your requests." |
-| Already requested by this recipient | The request's status badge in place of the button |
+| Already requested by this recipient | "Your request" with the request's status badge in place of the button; while it is Pending, a "Cancel request" button too |
 | Reserved for someone else | "Already reserved", no button |
 | Expired | Expired badge, no button, and "The collection deadline has passed, so this listing can't be requested." |
+| Collected | No action line; the Collected badge says it |
+
+A cancelled request doesn't count: the recipient can request the listing again.
+
+**Cancel request** (only the recipient's own request, only while Pending; the service enforces both):
+1. Confirmation dialog, danger tone: "Cancel this request?" and "The donor will no longer see it.", with "Keep request" and "Cancel request".
+2. On success: the toast "Request cancelled", and "Request this food" is available again (focus moves to it).
+3. 409 `REQUEST_NOT_PENDING` (the donor decided first, or it expired): the toast "This request can no longer be cancelled.", and the page refreshes to the request's true status.
+4. 500 or no connection: the toast "Your request wasn't cancelled. Try again." with a Try again action.
 
 **States:**
 - Loading: skeleton for image and details. Request this food shows its loading state, cannot be pressed twice, and reuses its idempotency key on retry.
 - Error, listing can't be loaded: "We couldn't load this listing." with "Try again".
+- Error, not found (404): "This listing no longer exists." with a link to "Find food" (recipients) or "Your listings" (donors).
 - Error, expired while viewing (409): "This listing expired before your request was saved." The page refreshes to the Expired view.
 - Success: badge changes to Pending, with the toast "Request sent".
-- Confirmation: no dialog needed. A request can be withdrawn later (after Monday).
+- Confirmation: no dialog before requesting. Cancel request asks first (above).
 - Empty: not applicable.
 
 ### S5. Listing details (donor view), `/listings/:id`
 
-**Shows:** the same listing details as S4, plus a requests panel listing each request with the organisation, area, request time, note, status badge, and Approve and Decline buttons on Pending requests.
+**Shows:** the same listing details as S4 (with "Back to Your listings"), plus a requests panel under the `h2` "Requests", with "Updated [time]". Each request shows the organisation, area, request time ("Requested Today, 2:10 PM"), note, status badge, and Approve and Decline buttons on Pending requests.
 
 **Rules shown on screen:**
 - One approved request per listing. Once one is approved, the panel shows it at the top and every other request shows Declined, with no Approve buttons.
@@ -199,13 +209,15 @@ No preview card: removed on purpose (section 12).
 
 **Approve flow (this is the optimistic update, see section 6):**
 1. Donor presses Approve.
-2. Confirmation dialog: "Approve this request?" and "[Organisation] will be the only recipient for [quantity] [food]. The other [n] pending requests will be declined." Cancel and Approve request buttons.
+2. Confirmation dialog: "Approve this request?" and "[Organisation] will be the only recipient for [food] ([quantity])." followed by "The other [n] pending requests will be declined." ("The other pending request will be declined." for one; left out for none). For example: "Hope Community Kitchen will be the only recipient for Wholewheat bread loaves (40 loaves). The other 2 pending requests will be declined." Cancel and Approve request buttons.
 3. On Approve request, the panel updates immediately: this request Approved, the others Declined.
 4. If the service confirms: toast "Request approved".
 5. If the service refuses because another request was already approved (409): the panel puts itself back to the service's true state, and the toast says "This listing already has an approved request. Your approval was not saved." Focus moves to the request that is actually approved.
 6. If the connection fails: the panel puts itself back, and the toast says "Your approval wasn't saved because the connection dropped. Try again." with a Try again action.
+7. Other refusals also put the panel back, then show the true state: a server error (500), "Your approval wasn't saved. Try again." with Try again; the listing expired (409), "This listing expired before your approval was saved."; the request is no longer Pending (409), "This request can no longer be approved."
+8. If the panel's refresh after a failure also fails, it keeps showing the state it put itself back to.
 
-**Decline flow:** a confirmation dialog, "Decline this request?" ("[Organisation] will be told their request was declined."), then the badge changes to Declined with the toast "Request declined". Decline is not optimistic.
+**Decline flow:** a confirmation dialog, "Decline this request?" ("[Organisation] will be told their request was declined."), with Cancel and "Decline request", then the badge changes to Declined with the toast "Request declined". Decline is not optimistic. If the request is no longer Pending (409): "This request can no longer be declined." and the panel shows the true state. Server error or no connection: "Your decline wasn't saved. Try again." with Try again, and nothing changes.
 
 **States:**
 - Loading: skeletons for details and the requests panel.
@@ -476,7 +488,7 @@ Google sign-in, Create account, the notifications bell, Dashboard, Transactions,
 | Focus ring on cream | `#f0a24b` (1.85:1) | `#c2410c` (4.55:1) | Focus must stay visible, 3:1 |
 | Sign-in headline | A second `h1` | Styled text, not a heading | One `h1` per screen |
 | Desktop sign-in wordmark | "FoodBridge" in Fraunces | DM Sans 700, "Food" white, "Bridge" `#f0a24b` | One wordmark everywhere |
-| Demo accounts | Four, "Admin" on the phone | S1's five, "Administrator" | Matches the seeded accounts |
+| Demo accounts | Four, "Admin" on the phone | S1's three, one per role, "Administrator" | Matches the service's accounts |
 | Share food: Description | Marked required | Optional, with the 500-character counter | S2 rules |
 | Share food: Time | Not marked required | Required | The deadline needs a time |
 | Share food: required fields | Asterisk not explained | "Fields marked * are required." | Instructions for every user |
