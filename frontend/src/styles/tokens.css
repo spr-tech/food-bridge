@@ -76,6 +76,10 @@
   --color-wordmark-bridge-dark: #f0a24b;
   --color-wordmark-bridge-light: #b85f1f;
   --color-text-secondary: #4b5550; /* Sign out, card details */
+  --color-on-dark-heading: #f3efe3; /* sign-in panel headline */
+  --color-on-dark-label: #e6ede8; /* sign-in panel icon labels */
+  --color-dropzone-border: #c9d6cc; /* Share food photo drop zone */
+  --color-dropzone-bg: #f3f7f3;
 
   /* Card buttons and chips (spec section 12) */
   --color-disabled-bg: #eceae4;

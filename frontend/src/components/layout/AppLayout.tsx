@@ -6,15 +6,16 @@ import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router'
 import { DemoBanner } from '@/components/layout/DemoBanner'
 import { PhoneTopBar } from '@/components/layout/PhoneTopBar'
-import { Sidebar, type NavCounts } from '@/components/layout/Sidebar'
+import { Sidebar } from '@/components/layout/Sidebar'
 import { SkipLink } from '@/components/layout/SkipLink'
 import { TabBar } from '@/components/layout/TabBar'
 import { TopBar } from '@/components/layout/TopBar'
 import { ROLE_CONFIG } from '@/constants/roles'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { useRole } from '@/hooks/useRole'
+import { useNavCounts } from '@/hooks/useNavCounts'
 import { useSidebarTheme } from '@/hooks/useSidebarTheme'
 import { useSignOut } from '@/hooks/useSignOut'
+import type { Session } from '@/types/api'
 
 const MAIN_ID = 'main-content'
 export const DESKTOP_QUERY = '(min-width: 768px)'
@@ -22,12 +23,11 @@ export const DESKTOP_QUERY = '(min-width: 768px)'
 // The flood's last step (the green line fading) ends at 2.25s + 0.3s.
 const FLOOD_MS = 2600
 
-// TODO: pending counts for Requests and Your requests come from the service once those
-// endpoints exist (spec S8). Until then no count is shown.
-const NO_COUNTS: NavCounts = {}
-
-export function AppLayout() {
-  const { organisationName, roleLabel, nav } = ROLE_CONFIG[useRole()]
+// Rendered by RequireSession, which only does so with a session.
+export function AppLayout({ session }: { session: Session }) {
+  const { organisationName } = session
+  const { roleLabel, nav } = ROLE_CONFIG[session.role]
+  const counts = useNavCounts()
   const isDesktop = useMediaQuery(DESKTOP_QUERY)
   const signOut = useSignOut()
   const { theme, turnCream } = useSidebarTheme()
@@ -61,7 +61,7 @@ export function AppLayout() {
         <SkipLink targetId={MAIN_ID} />
         <PhoneTopBar organisationName={organisationName} roleLabel={roleLabel} onSignOut={signOut} />
         {main}
-        <TabBar items={nav} counts={NO_COUNTS} />
+        <TabBar items={nav} counts={counts} />
       </div>
     )
   }
@@ -70,7 +70,7 @@ export function AppLayout() {
     <div className="fb-app" data-sidebar={flooding ? 'flooding' : theme}>
       <SkipLink targetId={MAIN_ID} />
       <div className="fb-stream" aria-hidden="true" />
-      <Sidebar items={nav} counts={NO_COUNTS} onLinkClick={handleSidebarLinkClick} />
+      <Sidebar items={nav} counts={counts} onLinkClick={handleSidebarLinkClick} />
       <div className="fb-body">
         <TopBar organisationName={organisationName} roleLabel={roleLabel} onSignOut={signOut} />
         {main}

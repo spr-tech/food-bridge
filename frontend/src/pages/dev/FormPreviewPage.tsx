@@ -9,10 +9,11 @@ import { PageHeader } from '@/components/common/PageHeader'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import {
   FormCheckbox,
-  FormDateTime,
+  FormDate,
   FormImageUpload,
   FormInput,
   FormSelect,
+  FormTime,
   FormTextarea,
 } from '@/components/form'
 import { Button } from '@/components/ui/button'
@@ -39,7 +40,8 @@ type PreviewValues = {
   foodName: string
   description: string
   category: string
-  deadline: string
+  collectionDate: string
+  collectionTime: string
   photo: File | null
   confirm: boolean
 }
@@ -48,7 +50,8 @@ const EMPTY: PreviewValues = {
   foodName: '',
   description: '',
   category: '',
-  deadline: '',
+  collectionDate: '',
+  collectionTime: '',
   photo: null,
   confirm: false,
 }
@@ -57,7 +60,8 @@ const FILLED: PreviewValues = {
   foodName: 'Wholewheat bread loaves',
   description: 'Baked this morning, bagged in tens.',
   category: 'bakery',
-  deadline: '2026-10-26T19:00',
+  collectionDate: '2026-10-26',
+  collectionTime: '19:00',
   photo: null,
   confirm: true,
 }
@@ -67,7 +71,8 @@ const SAMPLE_ERRORS: FormikErrors<PreviewValues> = {
   foodName: 'Enter the food name',
   description: 'Use 500 characters or fewer',
   category: 'Choose a category',
-  deadline: 'The deadline must be later than now',
+  collectionDate: 'Choose a collection date',
+  collectionTime: 'The deadline must be later than now',
   photo: 'Choose a JPG or PNG file of 5 MB or less',
   confirm: 'Confirm the food is safe to share',
 }
@@ -76,7 +81,8 @@ const ALL_TOUCHED: FormikTouched<PreviewValues> = {
   foodName: true,
   description: true,
   category: true,
-  deadline: true,
+  collectionDate: true,
+  collectionTime: true,
   photo: true,
   confirm: true,
 }
@@ -84,7 +90,8 @@ const ALL_TOUCHED: FormikTouched<PreviewValues> = {
 const schema = Yup.object({
   foodName: Yup.string().trim().required('Enter the food name'),
   category: Yup.string().required('Choose a category'),
-  deadline: Yup.string().required('The deadline must be later than now'),
+  collectionDate: Yup.string().required('Choose a collection date'),
+  collectionTime: Yup.string().required('Choose a collection time'),
   confirm: Yup.boolean().oneOf([true], 'Confirm the food is safe to share'),
 })
 
@@ -108,7 +115,8 @@ function renderFields(disabled = false): ReactNode {
         required
         disabled={disabled}
       />
-      <FormDateTime name="deadline" label="Collection deadline" required disabled={disabled} />
+      <FormDate name="collectionDate" label="Collection date" required disabled={disabled} />
+      <FormTime name="collectionTime" label="Time" required disabled={disabled} />
       <FormImageUpload name="photo" label="Photo" hint="JPG or PNG, up to 5 MB." disabled={disabled} />
       <FormCheckbox name="confirm" label="The food is safe to share" required disabled={disabled} />
     </>
@@ -137,7 +145,7 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-const REQUEST_STATUSES: RequestStatus[] = ['PENDING', 'APPROVED', 'DECLINED', 'EXPIRED']
+const REQUEST_STATUSES: RequestStatus[] = ['PENDING', 'APPROVED', 'DECLINED', 'EXPIRED', 'CANCELLED']
 const LISTING_STATUSES: ListingStatus[] = ['AVAILABLE', 'RESERVED', 'COLLECTED', 'EXPIRED']
 
 function wait(ms: number) {

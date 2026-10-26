@@ -16,7 +16,7 @@ export function FormTextarea({ name, label, hint, required, ...textareaProps }: 
   return (
     <FormField label={label} hint={hint} error={error} required={required}>
       {(control) => (
-        <Textarea {...textareaProps} {...field} value={field.value ?? ''} {...control} />
+        <Textarea {...textareaProps} {...field} value={field.value ?? ''} data-field={name} {...control} />
       )}
     </FormField>
   )

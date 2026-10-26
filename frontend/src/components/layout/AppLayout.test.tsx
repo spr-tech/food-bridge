@@ -1,12 +1,13 @@
 // AppLayout: the sidebar's dark-to-cream flood and its session memory, the Coming soon
 // items, the current link, and the phone layout replacing the sidebar.
-import { act, render, screen } from '@testing-library/react'
+import { act, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { AppLayout } from '@/components/layout/AppLayout'
+import { SESSION_STORAGE_KEY } from '@/app/session'
+import { RequireSession } from '@/components/layout/RequireSession'
 import { ROUTES } from '@/constants/routes'
 import { SIDEBAR_STORAGE_KEY } from '@/hooks/useSidebarTheme'
+import { renderRoutes, signInAs } from '@/test/render'
 
 const originalMatchMedia = window.matchMedia
 
@@ -23,23 +24,24 @@ function setScreen(width: 'desktop' | 'phone') {
   })) as typeof window.matchMedia
 }
 
-// The test runs as a donor (src/app/devRole.ts): Your listings, Share food, Requests.
+// Signed in as the demo donor: Your listings, Share food, Requests.
 function renderLayout(path: string = ROUTES.yourListings) {
-  const router = createMemoryRouter(
+  return renderRoutes(
     [
       { path: ROUTES.signIn, element: <h1>Sign in</h1> },
       {
-        element: <AppLayout />,
+        element: <RequireSession />,
         children: [
           { path: ROUTES.yourListings, element: <h1>Your listings</h1> },
           { path: ROUTES.createListing, element: <h1>Share food</h1> },
           { path: ROUTES.requests, element: <h1>Requests</h1> },
+          { path: ROUTES.listings, element: <h1>Find food</h1> },
+          { path: ROUTES.yourRequests, element: <h1>Your requests</h1> },
         ],
       },
     ],
     { initialEntries: [path] },
   )
-  return render(<RouterProvider router={router} />)
 }
 
 function sidebarState() {
@@ -48,6 +50,7 @@ function sidebarState() {
 
 beforeEach(() => {
   setScreen('desktop')
+  signInAs('donor')
 })
 
 afterEach(() => {
@@ -78,7 +81,7 @@ describe('AppLayout sidebar', () => {
     })
     expect(sidebarState()).toBe('cream')
 
-    await user.click(screen.getByRole('link', { name: 'Requests' }))
+    await user.click(screen.getByRole('link', { name: /^Requests/ }))
     expect(sidebarState()).toBe('cream')
   })
 
@@ -99,7 +102,7 @@ describe('AppLayout sidebar', () => {
     expect(sidebarState()).toBe('cream')
   })
 
-  it('starts dark green again after signing out', async () => {
+  it('signs out: clears the session and starts dark green at the next sign-in', async () => {
     const user = userEvent.setup()
     sessionStorage.setItem(SIDEBAR_STORAGE_KEY, 'cream')
     const { unmount } = renderLayout()
@@ -108,9 +111,11 @@ describe('AppLayout sidebar', () => {
 
     expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument()
     expect(sessionStorage.getItem(SIDEBAR_STORAGE_KEY)).toBeNull()
+    expect(sessionStorage.getItem(SESSION_STORAGE_KEY)).toBeNull()
 
     unmount()
-    renderLayout()
+    signInAs('recipient')
+    renderLayout(ROUTES.listings)
     expect(sidebarState()).toBe('dark')
   })
 
@@ -152,7 +157,7 @@ describe('AppLayout on a phone', () => {
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument()
     expect(sidebarState()).toBeUndefined()
     expect(screen.getAllByRole('navigation', { name: 'Main' })).toHaveLength(1)
-    expect(screen.getByRole('link', { name: 'Requests' })).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('link', { name: /^Requests/ })).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('button', { name: "Account, Mama's Oven" })).toBeInTheDocument()
   })
 
@@ -162,5 +167,21 @@ describe('AppLayout on a phone', () => {
     expect(screen.getByRole('complementary')).toBeInTheDocument()
     expect(screen.getAllByRole('navigation', { name: 'Main' })).toHaveLength(1)
     expect(screen.queryByRole('button', { name: /Account/ })).not.toBeInTheDocument()
+  })
+})
+
+describe('AppLayout navigation counts', () => {
+  it("shows the donor's pending requests across their listings beside Requests", async () => {
+    renderLayout()
+
+    // Seed: three recipients waiting on the wholewheat loaves.
+    const link = await screen.findByRole('link', { name: 'Requests, 3 pending' })
+    expect(within(link).getByText('3')).toBeInTheDocument()
+  })
+
+  it('shows no count before the data has loaded', () => {
+    renderLayout()
+
+    expect(screen.getByRole('link', { name: 'Requests' })).toBeInTheDocument()
   })
 })

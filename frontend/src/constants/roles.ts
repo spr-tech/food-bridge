@@ -1,4 +1,5 @@
-// What each role sees: its home page, organisation name, role label and navigation.
+// What each role sees: its home page, role label and navigation. The organisation name
+// comes from the signed-in session.
 import type { NavIconName } from '@/components/layout/NavIcons'
 import { ROUTES } from '@/constants/routes'
 import type { Role } from '@/types/role'
@@ -11,8 +12,6 @@ export type NavItem = {
 
 type RoleConfig = {
   homePath: string
-  // TODO: comes from the signed-in account once auth exists.
-  organisationName: string
   roleLabel: string
   nav: NavItem[]
 }
@@ -20,7 +19,6 @@ type RoleConfig = {
 export const ROLE_CONFIG: Record<Role, RoleConfig> = {
   donor: {
     homePath: ROUTES.yourListings,
-    organisationName: "Mama's Oven",
     roleLabel: 'Donor',
     nav: [
       { label: 'Your listings', to: ROUTES.yourListings, icon: 'home' },
@@ -30,7 +28,6 @@ export const ROLE_CONFIG: Record<Role, RoleConfig> = {
   },
   recipient: {
     homePath: ROUTES.listings,
-    organisationName: 'Hope Community Kitchen',
     roleLabel: 'Recipient',
     nav: [
       { label: 'Find food', to: ROUTES.listings, icon: 'search' },
@@ -40,7 +37,6 @@ export const ROLE_CONFIG: Record<Role, RoleConfig> = {
   // Not designed yet (after Monday): the same frame with its own two links.
   admin: {
     homePath: ROUTES.admin,
-    organisationName: 'FoodBridge demo admin',
     roleLabel: 'Administrator',
     nav: [
       { label: 'Dashboard', to: ROUTES.admin, icon: 'home' },
@@ -54,3 +50,8 @@ export const COMING_SOON: { label: string; icon: NavIconName }[] = [
   { label: 'Collections', icon: 'calendar' },
   { label: 'Impact', icon: 'impact' },
 ]
+
+// Where "home" is: the role's home page, or sign in when signed out.
+export function homePathFor(role: Role | null): string {
+  return role ? ROLE_CONFIG[role].homePath : ROUTES.signIn
+}

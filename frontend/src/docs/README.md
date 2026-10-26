@@ -1,8 +1,8 @@
 # How src/ is organised
 
-- `app/`: wiring. Router, store, providers, and the temporary `devRole.ts`.
+- `app/`: wiring. Router, store, providers, and `session.ts` (the signed-in session, where the role comes from).
 - `pages/`: one thin file per route. A page only puts sections together and sets its title.
-- `sections/`: the page-level blocks that pages are made of.
+- `sections/`: the page-level blocks that pages are made of, one folder per screen.
 - `components/`: `ui/` holds the shared component set, copied unchanged from
   github.com/spr-tech/interface-eng-shared-components (never edited here). `form/` holds the
   Formik adapters around the shared controls, `common/` our own patterns (StatusBadge,
@@ -11,6 +11,9 @@
   shared EmptyState and ErrorState directly.
 - `services/`: RTK Query. `api.ts` is the one `createApi`; each resource adds endpoints in its
   own file with `injectEndpoints`.
+- `mocks/`: TEMPORARY. The simulated service the endpoints call until the API exists: the
+  rules (`db.ts`), the demo data (`seed.ts`) and the delay and `?simulate=` switches. Screens
+  never import from here.
 - `schema/`: Yup schemas, one per form.
 - `hooks/`: shared hooks, including the typed Redux hooks in `useAppStore.ts`.
 - `constants/`: routes, roles, status labels and form options. Paths come only from `routes.ts`.

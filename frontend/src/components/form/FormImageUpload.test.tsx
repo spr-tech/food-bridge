@@ -40,7 +40,10 @@ describe('FormImageUpload', () => {
     await user.click(screen.getByRole('button', { name: 'Check' }))
 
     expect(picker).toHaveAttribute('aria-invalid', 'true')
-    expect(picker).toHaveAccessibleDescription('Choose a photo')
+    // The error, then the drop zone's hint.
+    expect(picker).toHaveAccessibleDescription(
+      'Choose a photo JPG or PNG, up to 5 MB. A placeholder is shown if you skip this.',
+    )
   })
 
   it('stores the chosen file and shows a preview', async () => {

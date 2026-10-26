@@ -52,30 +52,36 @@ Before saying a task is done, run `npm run lint`, `npm run typecheck`, `npm test
 
 ```
 src/
-├── app/           # router.tsx, store.ts, providers.tsx (Redux Provider + RouterProvider),
-│                  # devRole.ts (the one temporary role constant)
+├── app/           # router.tsx, store.ts (makeStore), providers.tsx (Redux Provider + RouterProvider),
+│                  # session.ts (the signed-in session in sessionStorage; the role comes from it)
 ├── assets/        # images, logo-icon-dark.svg and logo-icon-light.svg (icon only; the wordmark is text)
 ├── components/
 │   ├── ui/        # shared components, copied unchanged from the shared repo (never edited here)
 │   ├── form/      # Formik adapters around the shared FormField and controls; export from index.ts
+│                  # (plus FormPasswordInput, and FocusFirstError for focus on the first invalid field)
 │   ├── common/    # StatusBadge (our statuses on the shared badge), PageHeader, LoadingState
-│   └── layout/    # RootLayout, AppLayout (frame and sidebar flood state), Sidebar, TopBar,
-│                  # PhoneTopBar, AccountMenu, TabBar, Logo, NavIcons, DemoBanner, NavProgress, SkipLink
+│   └── layout/    # RequireSession and RequireRole (route guards), RootLayout, AppLayout (frame and
+│                  # sidebar flood state), Sidebar, TopBar, PhoneTopBar, AccountMenu, TabBar, Logo,
+│                  # NavIcons, DemoBanner, NavProgress, SkipLink
 ├── config/        # env.ts: reads VITE_API_URL and throws a clear error if it's missing
 ├── constants/     # routes.ts (every path; no hard-coded paths anywhere else), roles.ts,
-│                  # status.ts (labels and tones), listingOptions.ts (categories, units, areas)
+│                  # status.ts (labels and tones), listingOptions.ts (categories, units, areas),
+│                  # demoAccounts.ts (the sign-in page's list)
 ├── contexts/      # empty, with a .gitkeep (Redux holds shared state)
 ├── docs/          # README.md explaining this structure
 ├── hooks/         # useRole, useIdempotencyKey, useDocumentTitle, useAppStore (typed Redux hooks),
-│                  # useSidebarTheme (sessionStorage), useSignOut, useMediaQuery
+│                  # useSidebarTheme (sessionStorage), useSignOut, useMediaQuery, useNavCounts
 ├── lib/           # cn.ts (from the shared repo), format.ts (dates as "Today, 7:00 PM", quantities)
+├── mocks/         # TEMPORARY simulated service: db.ts (the rules), seed.ts (demo data),
+│                  # simulate.ts (delay and the dev-only ?simulate=error|empty|slow switches)
 ├── pages/         # one thin file per route; a page only composes sections
 ├── schema/        # Yup schemas, one per form
-├── sections/      # page-level blocks
-├── services/      # api.ts (the one base createApi); one file per resource, e.g. listings.ts
+├── sections/      # page-level blocks, one folder per screen, e.g. sections/sign-in/
+├── services/      # api.ts (the one base createApi); auth.ts, listings.ts, requests.ts (the hooks
+│                  # screens use); errors.ts (reading status, code and field errors)
 ├── styles/        # tokens.css; layout.css (the app frame and the sidebar flood's exact timings)
-├── test/          # setup.ts for Vitest; test files sit next to the code they test
-└── types/         # shared types: Role, RequestStatus, ListingStatus
+├── test/          # setup.ts for Vitest, render.tsx (renderRoutes, signInAs); tests sit next to their code
+└── types/         # shared types: Role, RequestStatus, ListingStatus; api.ts (Listing, ListingRequest, Session)
 ```
 
 ## RTK Query rules
@@ -86,6 +92,7 @@ src/
   - the auth token
   - a new request ID header on every request (name per `openapi.yaml`, proposed `X-Request-Id`)
 - Every endpoint must exist in `openapi.yaml`. Never call a path that isn't there. Never use `fetch` or axios directly.
+- TEMPORARY, until the API and `openapi.yaml` exist: every endpoint is simulated with `queryFn` calling `src/mocks/`. Screens only ever use the hooks exported from `src/services/`, never `src/mocks/`. When the API arrives, each `queryFn` becomes `query`, and the screens don't change. Keep `src/mocks/db.ts` enforcing the same rules the service must.
 - Request and response types come from `openapi.yaml`. Never use `any`.
 - Use `tagTypes` and `providesTags` / `invalidatesTags` so lists refresh after writes. Tag listings by id, plus a `LIST` tag.
 - Create listing and Request this food send an idempotency key (proposed header `Idempotency-Key`): generate one UUID when the user submits, reuse it on retry of the same submission.
@@ -96,9 +103,9 @@ src/
 
 - Every form uses Formik with a Yup schema. Schemas live in `src/schema/`, one per form, e.g. `src/schema/listingSchema.ts`.
 - Error messages come word for word from the spec (S2 field table).
-- Build fields with the adapters in `src/components/form/` (FormInput, FormTextarea, FormSelect, FormCheckbox, FormDateTime, FormImageUpload). They wrap the shared FormField and controls and show an error only after the field is left or the form submitted (`useFieldError`). Submit with the shared `Button` and `type="submit"`.
+- Build fields with the adapters in `src/components/form/` (FormInput, FormPasswordInput, FormTextarea, FormSelect, FormCheckbox, FormDate, FormTime, FormImageUpload). They wrap the shared FormField and controls and show an error only after the field is left or the form submitted (`useFieldError`). Submit with the shared `Button` and `type="submit"`.
 - Every field: visible label tied to the input, error linked with `aria-describedby`, `aria-invalid` when invalid, error shown as text (not only a red border). The shared FormField does this; the shared Checkbox can't show an error itself, so FormCheckbox puts it in the checkbox's description.
-- On submit with errors, move focus to the first invalid field.
+- On submit with errors, move focus to the first invalid field: put `<FocusFirstError order={[...]} />` inside the form, and use `focusField(name)` after mapping a 400.
 - Submit buttons show a loading state and ignore extra presses while submitting.
 - Client validation is for speed. The service validates again, and its 400 errors map back onto the fields.
 
@@ -113,7 +120,7 @@ src/
 
 ## Statuses (use these words everywhere)
 
-- Request: Pending, Approved, Declined, Expired
+- Request: Pending, Approved, Declined, Expired, Cancelled
 - Listing: Available, Reserved, Collected, Expired
 
 Badges always show the word, never colour alone. Map API values to these labels in one place, `src/constants/status.ts`.

@@ -73,3 +73,23 @@ export function initials(name: string): string {
     .map((word) => (word.match(/\p{L}/u)?.[0] ?? '').toUpperCase())
     .join('')
 }
+
+// The card's pickup line: "Pickup by 7:00 PM" today, otherwise "Pickup by tomorrow,
+// 10:00 AM", "Pickup by yesterday, 5:00 PM" or "Pickup by Mon 26 Oct, 7:00 PM".
+export function formatPickup(value: Date | string, now: Date = new Date()): string {
+  const date = typeof value === 'string' ? new Date(value) : value
+  if (daysFrom(now, date) === 0) return `Pickup by ${formatTime(date)}`
+  const when = formatDateTime(date, now)
+  return `Pickup by ${when.startsWith('Tomorrow') || when.startsWith('Yesterday') ? when[0].toLowerCase() + when.slice(1) : when}`
+}
+
+const MINUTE = 60 * 1000
+
+// How fresh a list is (spec section 4): "Updated just now", "Updated 1 minute ago",
+// "Updated 12 minutes ago", then "Updated at 7:00 PM".
+export function formatUpdated(timestamp: number, now: number = Date.now()): string {
+  const minutes = Math.floor((now - timestamp) / MINUTE)
+  if (minutes < 1) return 'Updated just now'
+  if (minutes < 60) return `Updated ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`
+  return `Updated at ${formatTime(new Date(timestamp))}`
+}

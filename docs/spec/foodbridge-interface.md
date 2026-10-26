@@ -48,6 +48,7 @@ One set of words, used on every screen and in every message.
 | Approved | `APPROVED` (**TBC**) | Success | The donor chose this request |
 | Declined | `DECLINED` (**TBC**) | Neutral | The donor declined it, or another request was approved |
 | Expired | `EXPIRED` (**TBC**) | Neutral | The listing passed its deadline before approval |
+| Cancelled | `CANCELLED` (**TBC**) | Neutral | The recipient cancelled it while it was still pending (rule **TBC** with the service engineers, see `/docs/decisions.md`) |
 
 ### Listing status
 

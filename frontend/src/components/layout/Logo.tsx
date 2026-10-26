@@ -7,17 +7,20 @@ import iconLight from '@/assets/logo-icon-light.svg'
 import { cn } from '@/lib/cn'
 
 type LogoProps = {
-  // "sidebar" follows the flood; "cream" is always the light version (phone top bar).
-  variant: 'sidebar' | 'cream'
+  // "sidebar" follows the flood; "cream" is always the light version (phone top bar);
+  // "dark" is always the dark version (the sign-in panel).
+  variant: 'sidebar' | 'cream' | 'dark'
+  // Sign-in sizes: "lg" (icon 48px, wordmark 28px) and "md" (32px, 21px).
+  size?: 'lg' | 'md'
   className?: string
 }
 
-export function Logo({ variant, className }: LogoProps) {
+export function Logo({ variant, size, className }: LogoProps) {
   return (
-    <span className={cn('fb-logo', `fb-logo--${variant}`, className)}>
+    <span className={cn('fb-logo', `fb-logo--${variant}`, size && `fb-logo--${size}`, className)}>
       <span className="fb-logo__icon" aria-hidden="true">
-        <img src={iconLight} alt="" className="fb-logo__img" />
-        {variant === 'sidebar' && <img src={iconDark} alt="" className="fb-logo__img fb-logo__img--dark" />}
+        {variant !== 'dark' && <img src={iconLight} alt="" className="fb-logo__img" />}
+        {variant !== 'cream' && <img src={iconDark} alt="" className="fb-logo__img fb-logo__img--dark" />}
       </span>
       <span className="fb-logo__word">
         <span className="fb-logo__food">Food</span>

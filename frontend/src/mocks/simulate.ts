@@ -1,0 +1,57 @@
+// TEMPORARY: simulated until the API exists.
+// Runs one simulated endpoint the way the network would: after a short delay, as the
+// signed-in account, returning { data } or an RTK Query { error }.
+// Dev builds also read a ?simulate= switch from the page address:
+//   ?simulate=error  every call fails (500), to see error states
+//   ?simulate=empty  lists come back empty, to see empty states
+//   ?simulate=slow   every call takes 2 seconds, to see loading states
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import { getSession } from '@/app/session'
+import { MockApiError } from '@/mocks/db'
+import type { Session } from '@/types/api'
+
+export type SimulateMode = 'error' | 'empty' | 'slow'
+
+// Short enough not to annoy, long enough to see the loading state. None in tests.
+const DELAY_MS = import.meta.env.MODE === 'test' ? 0 : 400
+const SLOW_DELAY_MS = 2000
+
+export function simulateMode(): SimulateMode | null {
+  if (!import.meta.env.DEV) return null
+  const value = new URLSearchParams(window.location.search).get('simulate')
+  return value === 'error' || value === 'empty' || value === 'slow' ? value : null
+}
+
+function wait(ms: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms))
+}
+
+type Result<T> = { data: T } | { error: FetchBaseQueryError }
+
+export async function simulate<T>(
+  run: (actor: Session | null) => T,
+  // What a list returns under ?simulate=empty. Leave out for calls that aren't lists.
+  empty?: () => T,
+): Promise<Result<T>> {
+  const mode = simulateMode()
+  await wait(mode === 'slow' ? SLOW_DELAY_MS : DELAY_MS)
+
+  if (mode === 'error') {
+    return { error: { status: 500, data: { code: 'SIMULATED_ERROR', message: 'Simulated server error.' } } }
+  }
+  if (mode === 'empty' && empty) return { data: empty() }
+
+  try {
+    return { data: run(getSession()) }
+  } catch (error) {
+    if (error instanceof MockApiError) {
+      return {
+        error: {
+          status: error.status,
+          data: { code: error.code, message: error.message, fields: error.fields },
+        },
+      }
+    }
+    throw error
+  }
+}

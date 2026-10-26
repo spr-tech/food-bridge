@@ -1,8 +1,8 @@
-// "/": sends each role to its home page (donor, recipient or admin).
+// "/": sends each role to its home page (donor, recipient or admin), or to sign in.
 import { Navigate } from 'react-router'
-import { ROLE_CONFIG } from '@/constants/roles'
+import { homePathFor } from '@/constants/roles'
 import { useRole } from '@/hooks/useRole'
 
 export function HomeRedirect() {
-  return <Navigate to={ROLE_CONFIG[useRole()].homePath} replace />
+  return <Navigate to={homePathFor(useRole())} replace />
 }

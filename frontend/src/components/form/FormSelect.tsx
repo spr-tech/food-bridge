@@ -21,6 +21,7 @@ export function FormSelect({ name, label, hint, required, options, placeholder, 
       {(control) => (
         <Select
           {...control}
+          data-field={name}
           name={name}
           options={options}
           placeholder={placeholder}

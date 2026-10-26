@@ -1,8 +1,7 @@
-// The signed-in user's role. Reads the temporary DEV_ROLE until auth exists;
-// components call this hook so only this file changes when it does.
-import { DEV_ROLE } from '@/app/devRole'
+// The signed-in account's role, from the session, or null when signed out.
+import { useSession } from '@/app/session'
 import type { Role } from '@/types/role'
 
-export function useRole(): Role {
-  return DEV_ROLE
+export function useRole(): Role | null {
+  return useSession()?.role ?? null
 }
