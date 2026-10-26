@@ -4,10 +4,11 @@
 // that have no login (donors, and recipients so a listing can have several requests),
 // and listings and requests in every status. Deadlines are set relative to when the store is
 // first created, so the data always looks current.
+import { DEMO_PASSWORD } from '@/constants/demoAccounts'
 import type { Role } from '@/types/role'
 
-// Every demo account uses this password; it is listed in the root README.
-export const DEMO_PASSWORD = 'FoodBridge-demo-2026'
+// Every demo account uses the sign-in page's demo password (also in the root README).
+export { DEMO_PASSWORD }
 
 export type MockAccount = {
   id: string
