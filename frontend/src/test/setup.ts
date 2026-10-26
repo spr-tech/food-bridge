@@ -4,6 +4,7 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach } from 'vitest'
 import { resetMockDb } from '@/mocks/db'
+import { resetSimulateSwitches } from '@/mocks/simulate'
 
 // Radix (the shared Checkbox and Select) measures elements and captures the pointer.
 // jsdom has neither, so these stand-ins do nothing, as a browser would in a test.
@@ -37,5 +38,6 @@ afterEach(() => {
   cleanup()
   sessionStorage.clear()
   resetMockDb()
+  resetSimulateSwitches()
   window.history.replaceState(null, '', '/')
 })

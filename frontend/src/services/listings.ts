@@ -4,7 +4,7 @@ import { simulate, simulateWrite } from '@/mocks/simulate'
 import { api, LIST_QUERY_OPTIONS } from '@/services/api'
 import type { CreateListingInput, Listing, ListingFilters, ListingPage } from '@/types/api'
 
-const listingsApi = api.injectEndpoints({
+export const listingsApi = api.injectEndpoints({
   endpoints: (build) => ({
     // TEMPORARY: simulated until the API exists. Replace the inside with an
     // injectEndpoints endpoint; the screen must not change.

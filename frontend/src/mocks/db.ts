@@ -392,6 +392,27 @@ export function decideRequest(
   return toRequest(db, request, now)
 }
 
+// DEMO ONLY (?simulate=conflict, see simulate.ts): approves another pending request on the
+// same listing, as a second donor session would have, so the next approval of requestId
+// meets 409 LISTING_ALREADY_RESERVED. Does nothing when there is no other pending request.
+export function approveRival(requestId: string) {
+  const db = load()
+  const now = new Date()
+  const request = db.requests.find((r) => r.id === requestId)
+  if (!request) return
+  const rival = db.requests.find(
+    (r) => r.listingId === request.listingId && r.id !== requestId && requestStatus(db, r, now) === 'PENDING',
+  )
+  if (!rival) return
+  rival.status = 'APPROVED'
+  for (const other of db.requests) {
+    if (other.listingId === rival.listingId && other.id !== rival.id && other.status === 'PENDING') {
+      other.status = 'DECLINED'
+    }
+  }
+  save(db)
+}
+
 // Only the recipient who made a request can cancel it, and only while it is pending.
 // Cancelling an approved request is out of scope for now.
 export function cancelRequest(actor: Session | null, input: { requestId: string }): ListingRequest {

@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { clearSession } from '@/app/session'
 import * as db from '@/mocks/db'
 import { ACCOUNTS, DEMO_PASSWORD } from '@/mocks/seed'
-import { simulate, simulateWrite } from '@/mocks/simulate'
+import { simulate, simulateRivalApproval, simulateWrite } from '@/mocks/simulate'
 import { signInAs } from '@/test/render'
 import type { CreateListingInput } from '@/types/api'
 
@@ -314,6 +314,29 @@ describe('simulate switches', () => {
     expect(save).toMatchObject({ error: { status: 'FETCH_ERROR' } })
     expect(saved).toBe(false)
     expect(read).toEqual({ data: 'listings' })
+  })
+
+  it('?simulate=conflict approves another pending request first, once per page load', () => {
+    window.history.replaceState(null, '', '/?simulate=conflict')
+    const donor = signInAs('donor')
+
+    simulateRivalApproval('req-02')
+    expectError(() => db.decideRequest(donor, { requestId: 'req-02', decision: 'APPROVED' }), 409, 'LISTING_ALREADY_RESERVED')
+    expect(requestStatus('req-01', 'lst-01')).toBe('APPROVED')
+    expect(requestStatus('req-02', 'lst-01')).toBe('DECLINED')
+
+  })
+
+  it('?simulate=conflict fires only once per page load', () => {
+    window.history.replaceState(null, '', '/?simulate=conflict')
+    signInAs('donor')
+
+    // The first approval spends it, even on a listing with no other pending request.
+    simulateRivalApproval('req-09')
+    simulateRivalApproval('req-02')
+
+    expect(requestStatus('req-01', 'lst-01')).toBe('PENDING')
+    expect(requestStatus('req-02', 'lst-01')).toBe('PENDING')
   })
 
   it("passes the store's errors on as RTK Query errors", async () => {

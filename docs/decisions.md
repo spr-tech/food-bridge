@@ -71,3 +71,7 @@ Agreed by: Muizz Jamiu. Emails TBC: TODO (service engineer)
 2026-10-26  Demo switch ?simulate=offline: while the data is simulated, every save (publish, request, approve, decline, cancel) fails as if the connection dropped, in every build including the deployed demo; reads still work. Dev and demo only: it lives in frontend/src/mocks/simulate.ts and goes when the simulated layer does. The dev-only switches (error, empty, slow) stay dev-only.
 Why: the simulated data lives in one browser tab, so a dropped connection and its rollback can't otherwise be shown live.
 Agreed by: Muizz Jamiu
+
+2026-10-26  Demo switch ?simulate=conflict: while the data is simulated, in every build including the deployed demo, the next approval is refused with 409 LISTING_ALREADY_RESERVED, as if another approval had landed first: the simulated store approves another pending request on the same listing just before (it needs one; lst-01 has three). Once per page load. Dev and demo only: it lives in frontend/src/mocks/ and goes when the simulated layer does.
+Why: the optimistic approve's rollback and its conflict message can't otherwise be shown live, because the simulated data lives in one browser tab.
+Agreed by: Muizz Jamiu

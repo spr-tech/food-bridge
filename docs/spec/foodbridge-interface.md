@@ -200,7 +200,7 @@ A cancelled request doesn't count: the recipient can request the listing again.
 
 ### S5. Listing details (donor view), `/listings/:id`
 
-**Shows:** the same listing details as S4, plus a requests panel listing each request with the organisation, area, request time, note, status badge, and Approve and Decline buttons on Pending requests.
+**Shows:** the same listing details as S4 (with "Back to Your listings"), plus a requests panel under the `h2` "Requests", with "Updated [time]". Each request shows the organisation, area, request time ("Requested Today, 2:10 PM"), note, status badge, and Approve and Decline buttons on Pending requests.
 
 **Rules shown on screen:**
 - One approved request per listing. Once one is approved, the panel shows it at the top and every other request shows Declined, with no Approve buttons.
@@ -209,13 +209,15 @@ A cancelled request doesn't count: the recipient can request the listing again.
 
 **Approve flow (this is the optimistic update, see section 6):**
 1. Donor presses Approve.
-2. Confirmation dialog: "Approve this request?" and "[Organisation] will be the only recipient for [quantity] [food]. The other [n] pending requests will be declined." Cancel and Approve request buttons.
+2. Confirmation dialog: "Approve this request?" and "[Organisation] will be the only recipient for [food] ([quantity])." followed by "The other [n] pending requests will be declined." ("The other pending request will be declined." for one; left out for none). For example: "Hope Community Kitchen will be the only recipient for Wholewheat bread loaves (40 loaves). The other 2 pending requests will be declined." Cancel and Approve request buttons.
 3. On Approve request, the panel updates immediately: this request Approved, the others Declined.
 4. If the service confirms: toast "Request approved".
 5. If the service refuses because another request was already approved (409): the panel puts itself back to the service's true state, and the toast says "This listing already has an approved request. Your approval was not saved." Focus moves to the request that is actually approved.
 6. If the connection fails: the panel puts itself back, and the toast says "Your approval wasn't saved because the connection dropped. Try again." with a Try again action.
+7. Other refusals also put the panel back, then show the true state: a server error (500), "Your approval wasn't saved. Try again." with Try again; the listing expired (409), "This listing expired before your approval was saved."; the request is no longer Pending (409), "This request can no longer be approved."
+8. If the panel's refresh after a failure also fails, it keeps showing the state it put itself back to.
 
-**Decline flow:** a confirmation dialog, "Decline this request?" ("[Organisation] will be told their request was declined."), then the badge changes to Declined with the toast "Request declined". Decline is not optimistic.
+**Decline flow:** a confirmation dialog, "Decline this request?" ("[Organisation] will be told their request was declined."), with Cancel and "Decline request", then the badge changes to Declined with the toast "Request declined". Decline is not optimistic. If the request is no longer Pending (409): "This request can no longer be declined." and the panel shows the true state. Server error or no connection: "Your decline wasn't saved. Try again." with Try again, and nothing changes.
 
 **States:**
 - Loading: skeletons for details and the requests panel.

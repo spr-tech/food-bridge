@@ -7,13 +7,16 @@
 //   ?simulate=slow     every call takes 2 seconds, to see loading states
 // DEMO SWITCH, every build while the data is simulated (dev and the deployed demo), so
 // the rollback can be shown live. It goes when this folder does:
-//   ?simulate=offline  every save fails as if the connection dropped (reads still work)
+//   ?simulate=offline   every save fails as if the connection dropped (reads still work)
+//   ?simulate=conflict  the next approval is refused with 409 LISTING_ALREADY_RESERVED, as if
+//                       another approval had landed first (once per page load; the listing
+//                       needs another pending request)
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import { getSession } from '@/app/session'
-import { MockApiError } from '@/mocks/db'
+import { approveRival, MockApiError } from '@/mocks/db'
 import type { Session } from '@/types/api'
 
-export type SimulateMode = 'error' | 'empty' | 'slow' | 'offline'
+export type SimulateMode = 'error' | 'empty' | 'slow' | 'offline' | 'conflict'
 
 // Short enough not to annoy, long enough to see the loading state. None in tests.
 const DELAY_MS = import.meta.env.MODE === 'test' ? 0 : 400
@@ -21,7 +24,7 @@ const SLOW_DELAY_MS = 2000
 
 export function simulateMode(): SimulateMode | null {
   const value = new URLSearchParams(window.location.search).get('simulate')
-  if (value === 'offline') return value
+  if (value === 'offline' || value === 'conflict') return value
   if (!import.meta.env.DEV) return null
   return value === 'error' || value === 'empty' || value === 'slow' ? value : null
 }
@@ -68,4 +71,19 @@ export async function simulateWrite<T>(run: (actor: Session | null) => T): Promi
     return { error: { status: 'FETCH_ERROR', error: 'TypeError: Failed to fetch' } }
   }
   return simulate(run)
+}
+
+// DEMO SWITCH ?simulate=conflict: before the next approval, another pending request on the
+// listing is approved, so this one meets the service's real 409 and rolls back.
+let conflictUsed = false
+
+export function simulateRivalApproval(requestId: string) {
+  if (simulateMode() !== 'conflict' || conflictUsed) return
+  conflictUsed = true
+  approveRival(requestId)
+}
+
+// Lets ?simulate=conflict fire again (tests start each one fresh).
+export function resetSimulateSwitches() {
+  conflictUsed = false
 }

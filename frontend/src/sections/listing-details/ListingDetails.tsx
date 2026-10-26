@@ -20,6 +20,7 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useSessionEnded } from '@/hooks/useSessionEnded'
 import { ListingSummary } from '@/sections/listing-details/ListingSummary'
 import { RecipientAction } from '@/sections/listing-details/RecipientAction'
+import { RequestsPanel } from '@/sections/listing-details/RequestsPanel'
 import { errorStatus } from '@/services/errors'
 import { useListing } from '@/services/listings'
 
@@ -96,11 +97,16 @@ export function ListingDetails({ listingId }: { listingId: string }) {
       </>
     )
   } else {
+    // The service decides who sees the requests; this only picks the view.
+    const isOwner = role === 'donor' && listing.data.donorId === session?.accountId
     body = (
-      <article className={CARD}>
-        <ListingSummary listing={listing.data} />
-        {role === 'recipient' && <RecipientAction listing={listing.data} />}
-      </article>
+      <>
+        <article className={CARD}>
+          <ListingSummary listing={listing.data} />
+          {role === 'recipient' && <RecipientAction listing={listing.data} />}
+        </article>
+        {isOwner && <RequestsPanel listing={listing.data} />}
+      </>
     )
   }
 

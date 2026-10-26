@@ -42,7 +42,8 @@ export function RecipientAction({ listing }: { listing: Listing }) {
     if (!target) return
     const timer = window.setTimeout(() => {
       target.focus()
-      setFocusNext(null)
+      // Only if no newer target was set meanwhile.
+      setFocusNext((current) => (current === focusNext ? null : current))
     }, 0)
     return () => window.clearTimeout(timer)
   }, [focusNext, myRequest?.id, myRequest?.status, listing.status])
