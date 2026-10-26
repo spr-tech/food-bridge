@@ -164,7 +164,7 @@ export function FindFood() {
   }
 
   return (
-    <div className="max-w-270">
+    <div>
       <FilterBar
         query={query}
         onQueryChange={setQuery}

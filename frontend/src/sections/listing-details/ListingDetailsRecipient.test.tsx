@@ -100,6 +100,12 @@ describe('Listing details (recipient): states', () => {
     expect(await heading('Moi moi and fried plantain')).toBeInTheDocument()
   })
 
+  it('opens the listing when its address ends in pasted spaces', async () => {
+    renderRoutes(ROUTES_UNDER_TEST, { initialEntries: ['/listings/lst-09%20%20'] })
+
+    expect(await heading('Moi moi and fried plantain')).toBeInTheDocument()
+  })
+
   it('says a listing that is gone no longer exists, with a link to Find food', async () => {
     renderDetails('lst-nope')
 

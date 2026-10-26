@@ -1,5 +1,6 @@
 // Shown for any address that matches no route.
 import { Link } from 'react-router'
+import { PageContainer } from '@/components/common/PageContainer'
 import { PageHeader } from '@/components/common/PageHeader'
 import { homePathFor } from '@/constants/roles'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
@@ -12,11 +13,11 @@ export function NotFoundPage() {
   const homePath = homePathFor(useRole())
 
   return (
-    <>
+    <PageContainer>
       <PageHeader title={TITLE} description="Check the address, or go back to your home page." />
       <Link to={homePath} className="font-medium text-primary underline underline-offset-4">
         Go to your home page
       </Link>
-    </>
+    </PageContainer>
   )
 }

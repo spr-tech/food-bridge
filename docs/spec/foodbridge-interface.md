@@ -372,6 +372,7 @@ No grey or black states anywhere in the sidebar: every state is dark green, crea
 ### Desktop layout (768px and up)
 
 - A 248px sidebar beside the content. Content padding 38px 52px.
+- **Page container:** every signed-in page (its heading and content) sits in one shared container. Where the content area is wider than the page's max width, the page is centred in it, not left-aligned. Max widths: Listing details 800px, Share food 860px, Find food (All listings for administrators) 1080px, and 1080px for every other page (Your listings, Your requests, Requests and those to come). On a phone the page fills the width, as before.
 - **Sidebar**, top to bottom:
   - the logo
   - the role's links
