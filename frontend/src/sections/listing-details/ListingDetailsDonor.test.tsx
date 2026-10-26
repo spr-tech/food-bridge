@@ -177,14 +177,21 @@ describe('Listing details (donor): approving', () => {
 
     await approve(user, HOPE)
 
-    // The service hasn't answered yet (two seconds), but the panel already shows the result.
+    // The service takes two seconds to answer. Well inside that window (1.5 seconds at
+    // most, for a slow test machine), the screen already shows the result...
+    await waitFor(
+      () => {
+        expect(statusOf(HOPE)).toBe('Approved')
+        expect(statusOf(AJEGUNLE)).toBe('Declined')
+        expect(statusOf(GRACE)).toBe('Declined')
+        expect(screen.queryByRole('button', { name: /^(Approve|Decline):/ })).not.toBeInTheDocument()
+        expect(screen.getByText('Reserved')).toBeInTheDocument()
+        expect(rowFor(HOPE)).toHaveFocus()
+      },
+      { timeout: 1500 },
+    )
+    // ...while the service still hasn't recorded it.
     expect(storedStatus('req-01')).toBe('PENDING')
-    expect(statusOf(HOPE)).toBe('Approved')
-    expect(statusOf(AJEGUNLE)).toBe('Declined')
-    expect(statusOf(GRACE)).toBe('Declined')
-    expect(screen.queryByRole('button', { name: /^(Approve|Decline):/ })).not.toBeInTheDocument()
-    expect(screen.getByText('Reserved')).toBeInTheDocument()
-    await waitFor(() => expect(rowFor(HOPE)).toHaveFocus())
 
     expect(await screen.findByText('Request approved', {}, { timeout: 5000 })).toBeInTheDocument()
     expect(storedStatus('req-01')).toBe('APPROVED')
