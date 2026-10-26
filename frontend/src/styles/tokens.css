@@ -76,6 +76,9 @@
   --color-wordmark-bridge-dark: #f0a24b;
   --color-wordmark-bridge-light: #b85f1f;
   --color-text-secondary: #4b5550; /* Sign out, card details */
+  /* Descriptions, notes and listing details (design value). Contrast: 10.76:1 on white,
+     9.95:1 on the page, 9.46:1 on cream, 9.19:1 on surface-hover. */
+  --color-text-body: #36403a;
   --color-on-dark-heading: #f3efe3; /* sign-in panel headline */
   --color-on-dark-label: #e6ede8; /* sign-in panel icon labels */
   --color-dropzone-border: #c9d6cc; /* Share food photo drop zone */

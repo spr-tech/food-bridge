@@ -14,6 +14,7 @@ import { FormField } from '@/components/ui/form-field'
 import { Select } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CATEGORIES, PICKUP_AREAS } from '@/constants/listingOptions'
+import { useNow } from '@/hooks/useNow'
 import { useSessionEnded } from '@/hooks/useSessionEnded'
 import { formatUpdated } from '@/lib/format'
 import { ListingCard } from '@/sections/find-food/ListingCard'
@@ -36,16 +37,6 @@ const STATUS_OPTIONS = [
 function countMessage(total: number, availableOnly: boolean): string {
   const noun = total === 1 ? 'listing' : 'listings'
   return availableOnly ? `${total} ${noun} available` : `${total} ${noun}`
-}
-
-// Re-renders every 30 seconds, so "Updated 2 minutes ago" stays true.
-function useNow(intervalMs = 30_000): number {
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), intervalMs)
-    return () => window.clearInterval(timer)
-  }, [intervalMs])
-  return now
 }
 
 export function FindFood() {

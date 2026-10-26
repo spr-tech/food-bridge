@@ -2,7 +2,7 @@
 // Screens use these hooks only. Every write refreshes the listing it touches, the lists
 // and the navigation counts.
 import * as db from '@/mocks/db'
-import { simulate } from '@/mocks/simulate'
+import { simulate, simulateWrite } from '@/mocks/simulate'
 import { api, LIST_QUERY_OPTIONS } from '@/services/api'
 import type { ListingRequest } from '@/types/api'
 
@@ -39,7 +39,7 @@ const requestsApi = api.injectEndpoints({
       { listingId: string; note?: string | null; idempotencyKey: string }
     >({
       queryFn: ({ listingId, note, idempotencyKey }) =>
-        simulate((actor) => db.createRequest(actor, { listingId, note }, idempotencyKey)),
+        simulateWrite((actor) => db.createRequest(actor, { listingId, note }, idempotencyKey)),
       invalidatesTags: (_result, _error, { listingId }) => [...touched(listingId)],
     }),
 
@@ -50,14 +50,14 @@ const requestsApi = api.injectEndpoints({
       { requestId: string; listingId: string; decision: 'APPROVED' | 'DECLINED' }
     >({
       queryFn: ({ requestId, decision }) =>
-        simulate((actor) => db.decideRequest(actor, { requestId, decision })),
+        simulateWrite((actor) => db.decideRequest(actor, { requestId, decision })),
       invalidatesTags: (_result, _error, { listingId }) => [...touched(listingId)],
     }),
 
     // TEMPORARY: simulated until the API exists. Replace the inside with an
     // injectEndpoints endpoint; the screen must not change.
     cancelRequest: build.mutation<ListingRequest, { requestId: string; listingId: string }>({
-      queryFn: ({ requestId }) => simulate((actor) => db.cancelRequest(actor, { requestId })),
+      queryFn: ({ requestId }) => simulateWrite((actor) => db.cancelRequest(actor, { requestId })),
       invalidatesTags: (_result, _error, { listingId }) => [...touched(listingId)],
     }),
 

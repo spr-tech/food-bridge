@@ -9,6 +9,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ROUTES } from '@/constants/routes'
 import * as db from '@/mocks/db'
 import { BrowsePage } from '@/pages/BrowsePage'
+import { moveDeadline } from '@/test/mockDb'
 import { findToastAction, renderRoutes, signInAs } from '@/test/render'
 
 // Rendering a dozen cards in jsdom takes a while; allow for a busy test run.
@@ -37,14 +38,6 @@ function cardFor(foodName: string): HTMLElement {
   const card = heading.closest('li')
   if (!card) throw new Error(`No card for ${foodName}`)
   return card
-}
-
-// Changes a listing's deadline in the simulated store, as if time had passed.
-function moveDeadline(listingId: string, iso: string) {
-  const stored = JSON.parse(sessionStorage.getItem(db.MOCK_DB_STORAGE_KEY) ?? '{}')
-  const listing = stored.listings.find((item: { id: string }) => item.id === listingId)
-  listing.deadline = iso
-  sessionStorage.setItem(db.MOCK_DB_STORAGE_KEY, JSON.stringify(stored))
 }
 
 beforeEach(() => {

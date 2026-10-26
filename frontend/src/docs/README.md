@@ -6,7 +6,8 @@
 - `components/`: `ui/` holds the shared component set, copied unchanged from
   github.com/spr-tech/interface-eng-shared-components (never edited here). `form/` holds the
   Formik adapters around the shared controls, `common/` our own patterns (StatusBadge,
-  PageHeader, LoadingState), and `layout/` the page frame: the desktop sidebar and top bar,
+  PageHeader, LoadingState, ListingPhoto, MetaIcons, and CancelRequestButton, the cancel flow
+  shared by Listing details and Your requests), and `layout/` the page frame: the desktop sidebar and top bar,
   the phone top bar, account menu and tab bar, and the logo. Empty and error states use the
   shared EmptyState and ErrorState directly.
 - `services/`: RTK Query. `api.ts` is the one `createApi`; each resource adds endpoints in its
@@ -24,4 +25,5 @@
 - `styles/tokens.css`: every colour, font and radius. No hard-coded colours elsewhere.
 - `styles/layout.css`: the app frame, including the sidebar flood with its exact timings
   (from `docs/design/foodbridge-final/foodbridge-sidebar-animation.html`).
-- `test/setup.ts`: Vitest setup. Test files sit next to what they test, e.g. `lib/format.test.ts`.
+- `test/`: `setup.ts` (Vitest setup), `render.tsx` (render routes, sign in as a demo account,
+  find a toast's action) and `mockDb.ts` (change the simulated data behind a screen). Test files sit next to what they test, e.g. `lib/format.test.ts`.

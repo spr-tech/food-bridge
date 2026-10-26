@@ -1,6 +1,6 @@
 // Listings: browse, details, create, and the donor's own. Screens use these hooks only.
 import * as db from '@/mocks/db'
-import { simulate } from '@/mocks/simulate'
+import { simulate, simulateWrite } from '@/mocks/simulate'
 import { api, LIST_QUERY_OPTIONS } from '@/services/api'
 import type { CreateListingInput, Listing, ListingFilters, ListingPage } from '@/types/api'
 
@@ -31,7 +31,7 @@ const listingsApi = api.injectEndpoints({
     // injectEndpoints endpoint; the screen must not change.
     createListing: build.mutation<Listing, { input: CreateListingInput; idempotencyKey: string }>({
       queryFn: ({ input, idempotencyKey }) =>
-        simulate((actor) => db.createListing(actor, input, idempotencyKey)),
+        simulateWrite((actor) => db.createListing(actor, input, idempotencyKey)),
       invalidatesTags: [
         { type: 'Listing', id: 'LIST' },
         { type: 'Listing', id: 'MINE' },

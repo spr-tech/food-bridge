@@ -169,23 +169,33 @@ No preview card: removed on purpose (section 12).
 
 ### S4. Listing details (recipient view), `/listings/:id`
 
-**Shows:** image or placeholder, status badge, food name, donor and category, quantity, pickup area, collect by time, when it was listed, description, and one action.
+**Shows:** image or placeholder, status badge, food name, donor and category, quantity, pickup area, collect by time, when it was listed ("Listed Today, 9:30 AM"), description, and one action. A listing with no description leaves the Description heading out.
 
 **Action, by situation:**
 
 | Situation | What the recipient sees |
 |---|---|
 | Available, not yet requested | "Request this food" button, with "The donor approves one request. You'll see the result in Your requests." |
-| Already requested by this recipient | The request's status badge in place of the button |
+| Already requested by this recipient | "Your request" with the request's status badge in place of the button; while it is Pending, a "Cancel request" button too |
 | Reserved for someone else | "Already reserved", no button |
 | Expired | Expired badge, no button, and "The collection deadline has passed, so this listing can't be requested." |
+| Collected | No action line; the Collected badge says it |
+
+A cancelled request doesn't count: the recipient can request the listing again.
+
+**Cancel request** (only the recipient's own request, only while Pending; the service enforces both):
+1. Confirmation dialog, danger tone: "Cancel this request?" and "The donor will no longer see it.", with "Keep request" and "Cancel request".
+2. On success: the toast "Request cancelled", and "Request this food" is available again (focus moves to it).
+3. 409 `REQUEST_NOT_PENDING` (the donor decided first, or it expired): the toast "This request can no longer be cancelled.", and the page refreshes to the request's true status.
+4. 500 or no connection: the toast "Your request wasn't cancelled. Try again." with a Try again action.
 
 **States:**
 - Loading: skeleton for image and details. Request this food shows its loading state, cannot be pressed twice, and reuses its idempotency key on retry.
 - Error, listing can't be loaded: "We couldn't load this listing." with "Try again".
+- Error, not found (404): "This listing no longer exists." with a link to "Find food" (recipients) or "Your listings" (donors).
 - Error, expired while viewing (409): "This listing expired before your request was saved." The page refreshes to the Expired view.
 - Success: badge changes to Pending, with the toast "Request sent".
-- Confirmation: no dialog needed. A request can be withdrawn later (after Monday).
+- Confirmation: no dialog before requesting. Cancel request asks first (above).
 - Empty: not applicable.
 
 ### S5. Listing details (donor view), `/listings/:id`

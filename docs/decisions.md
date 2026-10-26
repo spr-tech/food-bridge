@@ -67,3 +67,7 @@ Agreed by: Muizz Jamiu
 2026-10-26  One demo account per role, matching the service: donor@foodbridge.test (Mama's Oven), recipient@foodbridge.test (Hope Community Kitchen) and admin@foodbridge.test, all with the README's password. The emails are TBC until the service engineers confirm theirs. In the simulated store, Ajegunle Food Bank and Grace Shelter become organisations without a login, so a listing can still have several requests and some can be declined. Replaces the five accounts in the 2026-10-25 simulated data entry.
 Why: the sign-in page should offer the accounts the service will have, no more.
 Agreed by: Muizz Jamiu. Emails TBC: TODO (service engineer)
+
+2026-10-26  Demo switch ?simulate=offline: while the data is simulated, every save (publish, request, approve, decline, cancel) fails as if the connection dropped, in every build including the deployed demo; reads still work. Dev and demo only: it lives in frontend/src/mocks/simulate.ts and goes when the simulated layer does. The dev-only switches (error, empty, slow) stay dev-only.
+Why: the simulated data lives in one browser tab, so a dropped connection and its rollback can't otherwise be shown live.
+Agreed by: Muizz Jamiu
