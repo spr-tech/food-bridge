@@ -56,8 +56,6 @@ export async function findToastAction(title: string, action: string): Promise<HT
 const ACCOUNT_IDS = {
   donor: 'acc-donor',
   recipient: 'acc-recipient',
-  recipient2: 'acc-recipient-2',
-  recipient3: 'acc-recipient-3',
   admin: 'acc-admin',
 } as const
 

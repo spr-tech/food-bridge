@@ -253,8 +253,7 @@ describe('Find food: cards', () => {
   })
 
   it('offers Request food again after the recipient cancelled their request', async () => {
-    // Seed: Grace Shelter cancelled her request on the fried rice (req-11).
-    signInAs('recipient3')
+    // Seed: Hope Community Kitchen cancelled its request on the fried rice (req-11).
     renderFindFood()
     await screen.findByRole('heading', { level: 2, name: 'Fried rice and turkey' })
 

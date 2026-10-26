@@ -1,7 +1,8 @@
 // TEMPORARY: simulated until the API exists.
-// The sample data the simulated store starts from: the demo accounts (one donor, three
-// recipients, one administrator), other fictional donors in real Lagos areas, and
-// listings and requests in every status. Deadlines are set relative to when the store is
+// The sample data the simulated store starts from: the demo accounts (one per role:
+// donor, recipient, administrator), other fictional organisations in real Lagos areas
+// that have no login (donors, and recipients so a listing can have several requests),
+// and listings and requests in every status. Deadlines are set relative to when the store is
 // first created, so the data always looks current.
 import type { Role } from '@/types/role'
 
@@ -17,8 +18,8 @@ export type MockAccount = {
   area: string
 }
 
-// Donors who list food but have no demo login.
-export type MockDonor = {
+// Donors and recipients with no demo login: they list food or have requested it.
+export type MockOrganisation = {
   id: string
   organisationName: string
   area: string
@@ -55,24 +56,26 @@ export type StoredRequest = {
 export type MockDb = {
   version: number
   accounts: MockAccount[]
-  donors: MockDonor[]
+  organisations: MockOrganisation[]
   listings: StoredListing[]
   requests: StoredRequest[]
   // "kind:key" to the id first created with that idempotency key.
   idempotency: Record<string, string>
 }
 
-export const DB_VERSION = 1
+export const DB_VERSION = 2
 
 export const ACCOUNTS: MockAccount[] = [
   { id: 'acc-donor', email: 'donor@foodbridge.test', password: DEMO_PASSWORD, role: 'donor', organisationName: "Mama's Oven", area: 'yaba' },
   { id: 'acc-recipient', email: 'recipient@foodbridge.test', password: DEMO_PASSWORD, role: 'recipient', organisationName: 'Hope Community Kitchen', area: 'yaba' },
-  { id: 'acc-recipient-2', email: 'recipient2@foodbridge.test', password: DEMO_PASSWORD, role: 'recipient', organisationName: 'Ajegunle Food Bank', area: 'ajegunle' },
-  { id: 'acc-recipient-3', email: 'recipient3@foodbridge.test', password: DEMO_PASSWORD, role: 'recipient', organisationName: 'Grace Shelter', area: 'ikeja' },
   { id: 'acc-admin', email: 'admin@foodbridge.test', password: DEMO_PASSWORD, role: 'admin', organisationName: 'FoodBridge demo admin', area: 'yaba' },
 ]
 
-const DONORS: MockDonor[] = [
+const ORGANISATIONS: MockOrganisation[] = [
+  // Recipients.
+  { id: 'org-ajegunle', organisationName: 'Ajegunle Food Bank', area: 'ajegunle' },
+  { id: 'org-grace', organisationName: 'Grace Shelter', area: 'ikeja' },
+  // Donors.
   { id: 'don-eko', organisationName: 'Eko Caterers', area: 'surulere' },
   { id: 'don-basira', organisationName: 'Iya Basira Kitchen', area: 'ikeja' },
   { id: 'don-crumbs', organisationName: 'Sweet Crumbs Bakery', area: 'lekki' },
@@ -133,20 +136,22 @@ const LISTINGS: ListingSeed[] = [
 const REQUESTS: RequestSeed[] = [
   // Three recipients asking for the same loaves: the "three requests" demo.
   { id: 'req-01', listingId: 'lst-01', recipientId: 'acc-recipient', note: 'We need this for our weekend feeding programme. Thank you!', status: 'PENDING', madeHoursAgo: 1.5 },
-  { id: 'req-02', listingId: 'lst-01', recipientId: 'acc-recipient-2', note: 'Our van is in Yaba this afternoon.', status: 'PENDING', madeHoursAgo: 1 },
-  { id: 'req-03', listingId: 'lst-01', recipientId: 'acc-recipient-3', note: 'For our evening meal service.', status: 'PENDING', madeHoursAgo: 0.5 },
+  { id: 'req-02', listingId: 'lst-01', recipientId: 'org-ajegunle', note: 'Our van is in Yaba this afternoon.', status: 'PENDING', madeHoursAgo: 1 },
+  { id: 'req-03', listingId: 'lst-01', recipientId: 'org-grace', note: 'For our evening meal service.', status: 'PENDING', madeHoursAgo: 0.5 },
   // Reserved: one approved, the other declined.
   { id: 'req-04', listingId: 'lst-02', recipientId: 'acc-recipient', note: null, status: 'APPROVED', madeHoursAgo: 3.5 },
-  { id: 'req-05', listingId: 'lst-02', recipientId: 'acc-recipient-2', note: 'We can collect within the hour.', status: 'DECLINED', madeHoursAgo: 3 },
+  { id: 'req-05', listingId: 'lst-02', recipientId: 'org-ajegunle', note: 'We can collect within the hour.', status: 'DECLINED', madeHoursAgo: 3 },
   // Collected.
-  { id: 'req-06', listingId: 'lst-03', recipientId: 'acc-recipient-3', note: null, status: 'APPROVED', madeHoursAgo: 27 },
+  { id: 'req-06', listingId: 'lst-03', recipientId: 'org-grace', note: null, status: 'APPROVED', madeHoursAgo: 27 },
   // Pending when the listing expired: reads as EXPIRED.
   { id: 'req-07', listingId: 'lst-04', recipientId: 'acc-recipient', note: 'Could we collect after 6?', status: 'PENDING', madeHoursAgo: 6 },
-  { id: 'req-08', listingId: 'lst-10', recipientId: 'acc-recipient-3', note: null, status: 'PENDING', madeHoursAgo: 25 },
+  { id: 'req-08', listingId: 'lst-10', recipientId: 'org-grace', note: null, status: 'PENDING', madeHoursAgo: 25 },
   // Another donor's listings.
   { id: 'req-09', listingId: 'lst-06', recipientId: 'acc-recipient', note: 'For the children’s lunch club.', status: 'PENDING', madeHoursAgo: 2 },
-  { id: 'req-10', listingId: 'lst-07', recipientId: 'acc-recipient-2', note: null, status: 'APPROVED', madeHoursAgo: 4 },
-  { id: 'req-11', listingId: 'lst-12', recipientId: 'acc-recipient-3', note: null, status: 'CANCELLED', madeHoursAgo: 3 },
+  { id: 'req-10', listingId: 'lst-07', recipientId: 'org-ajegunle', note: null, status: 'APPROVED', madeHoursAgo: 4 },
+  // Hope Community Kitchen cancelled one and had one declined.
+  { id: 'req-11', listingId: 'lst-12', recipientId: 'acc-recipient', note: null, status: 'CANCELLED', madeHoursAgo: 3 },
+  { id: 'req-12', listingId: 'lst-10', recipientId: 'acc-recipient', note: 'Tomatoes for our soup kitchen.', status: 'DECLINED', madeHoursAgo: 29 },
 ]
 
 // Times are rounded to the half hour, like real collection times.
@@ -159,7 +164,7 @@ export function createSeed(now: Date): MockDb {
   return {
     version: DB_VERSION,
     accounts: ACCOUNTS.map((account) => ({ ...account })),
-    donors: DONORS.map((donor) => ({ ...donor })),
+    organisations: ORGANISATIONS.map((organisation) => ({ ...organisation })),
     listings: LISTINGS.map(({ deadlineInHours, listedHoursAgo, ...listing }) => ({
       ...listing,
       deadline: at(time, deadlineInHours),

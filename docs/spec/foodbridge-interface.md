@@ -96,7 +96,7 @@ Badges always show the word, never colour alone.
 
 **Shows:** email, password, Sign in button, and a demo accounts box listing each role and email (passwords are in the README).
 
-**Demo accounts:** donor (Mama's Oven, Yaba), recipient (Hope Community Kitchen), recipient 2 (Ajegunle Food Bank), recipient 3 (Grace Shelter), administrator. All emails use `@foodbridge.test`. On a phone they are tap-to-fill chips (Donor, Recipient, Recipient 2, Recipient 3, Administrator) under "Try a demo account" and "Tap one to fill in the email. Password in the README."; tapping one fills the email field only.
+**Demo accounts:** one per role, matching the service: donor (Mama's Oven, Yaba) `donor@foodbridge.test`, recipient (Hope Community Kitchen) `recipient@foodbridge.test`, administrator `admin@foodbridge.test`. The emails are **TBC** until the service engineers confirm their own. Other organisations in the sample data (for example Ajegunle Food Bank and Grace Shelter) have no login. On a phone the accounts are tap-to-fill chips (Donor, Recipient, Administrator) under "Try a demo account" and "Tap one to fill in the email. Password in the README."; tapping one fills the email field only.
 
 **States:**
 - Loading: the Sign in button shows its loading state.
@@ -476,7 +476,7 @@ Google sign-in, Create account, the notifications bell, Dashboard, Transactions,
 | Focus ring on cream | `#f0a24b` (1.85:1) | `#c2410c` (4.55:1) | Focus must stay visible, 3:1 |
 | Sign-in headline | A second `h1` | Styled text, not a heading | One `h1` per screen |
 | Desktop sign-in wordmark | "FoodBridge" in Fraunces | DM Sans 700, "Food" white, "Bridge" `#f0a24b` | One wordmark everywhere |
-| Demo accounts | Four, "Admin" on the phone | S1's five, "Administrator" | Matches the seeded accounts |
+| Demo accounts | Four, "Admin" on the phone | S1's three, one per role, "Administrator" | Matches the service's accounts |
 | Share food: Description | Marked required | Optional, with the 500-character counter | S2 rules |
 | Share food: Time | Not marked required | Required | The deadline needs a time |
 | Share food: required fields | Asterisk not explained | "Fields marked * are required." | Instructions for every user |

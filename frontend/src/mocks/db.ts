@@ -112,7 +112,7 @@ function requestStatus(db: MockDb, request: StoredRequest, now: Date): RequestSt
 }
 
 function organisation(db: MockDb, id: string): { organisationName: string; area: string } {
-  const owner = db.accounts.find((a) => a.id === id) ?? db.donors.find((d) => d.id === id)
+  const owner = db.accounts.find((a) => a.id === id) ?? db.organisations.find((o) => o.id === id)
   return owner ?? { organisationName: 'Unknown organisation', area: '' }
 }
 
