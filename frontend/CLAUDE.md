@@ -19,6 +19,7 @@ If the spec and `openapi.yaml` disagree, `openapi.yaml` wins. Flag the mismatch 
 
 - Build every screen from `../docs/design/foodbridge-final/`. Read `source-html/` and `foodbridge-sidebar-animation.html` for exact values; don't approximate from the PNGs. Before pushing a screen, list any difference from its design.
 - Spec section 12 ("Visual design") lists the deliberate differences from the design files (contrast fixes, one `h1`, phone Sign out). Where they disagree, section 12 wins.
+- Use canonical Tailwind classes; only use an arbitrary value when no standard class gives exactly that value. ESLint enforces this (`better-tailwindcss/enforce-canonical-classes`) in className and `cn()`, but not in plain string constants, so check those by hand.
 
 ## Stack
 

@@ -104,7 +104,7 @@ export function FindFood() {
   if (listings.isLoading) {
     body = (
       <LoadingState label="Loading listings">
-        <ul className="grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-4.5 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }, (_, index) => (
             <li key={index}>
               <Skeleton shape="card" />
@@ -140,7 +140,7 @@ export function FindFood() {
   } else {
     body = (
       <>
-        <ul className="grid gap-[14px] sm:grid-cols-2 md:gap-[18px] lg:grid-cols-3">
+        <ul className="grid gap-3.5 sm:grid-cols-2 md:gap-4.5 lg:grid-cols-3">
           {items.map((listing, index) => (
             <li key={listing.id}>
               <ListingCard
@@ -173,7 +173,7 @@ export function FindFood() {
   }
 
   return (
-    <div className="max-w-[1080px]">
+    <div className="max-w-270">
       <FilterBar
         query={query}
         onQueryChange={setQuery}

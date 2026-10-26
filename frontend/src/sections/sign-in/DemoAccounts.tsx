@@ -13,7 +13,7 @@ function PersonIcon() {
 
 export function DemoAccountsBox() {
   return (
-    <section aria-labelledby="demo-accounts" className="mt-6 rounded-2xl border border-border bg-surface px-5 py-[18px]">
+    <section aria-labelledby="demo-accounts" className="mt-6 rounded-2xl border border-border bg-surface px-5 py-4.5">
       <h2 id="demo-accounts" className="font-sans text-[15px] font-bold">
         Demo accounts
       </h2>

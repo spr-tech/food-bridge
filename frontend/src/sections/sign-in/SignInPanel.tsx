@@ -61,9 +61,9 @@ const RING_COLOUR =
 
 export function SignInPanelDesktop() {
   return (
-    <div className="relative flex flex-col overflow-hidden bg-sidebar-dark px-[clamp(40px,6.25vw,90px)] pt-[84px] pb-16 text-on-dark-heading">
+    <div className="relative flex flex-col overflow-hidden bg-sidebar-dark px-[clamp(40px,6.25vw,90px)] pt-21 pb-16 text-on-dark-heading">
       <Logo variant="dark" size="lg" />
-      <p className="relative mt-14 mb-6 max-w-[560px] font-display text-[clamp(44px,4.6vw,66px)] leading-[1.04] font-semibold">
+      <p className="relative mt-14 mb-6 max-w-140 font-display text-[clamp(44px,4.6vw,66px)] leading-[1.04] font-semibold">
         {HEADLINE}
       </p>
       <p className="relative m-0 max-w-107.5 text-[17px] leading-[1.65] text-footer-on-dark">
@@ -77,7 +77,7 @@ export function SignInPanelDesktop() {
             className={
               index === 0
                 ? "flex flex-col gap-3 pr-8.5"
-                : "flex flex-col gap-3 border-l border-[color-mix(in_srgb,var(--color-surface)_18%,transparent)] px-[34px]"
+                : "flex flex-col gap-3 border-l border-[color-mix(in_srgb,var(--color-surface)_18%,transparent)] px-8.5"
             }
           >
             <PanelIcon>{point.icon}</PanelIcon>
@@ -91,11 +91,11 @@ export function SignInPanelDesktop() {
       </ul>
       <div
         aria-hidden="true"
-        className={`${RING} ${RING_COLOUR} -right-[230px] -bottom-[250px] size-[700px] border-[70px]`}
+        className={`${RING} ${RING_COLOUR} -right-57.5 -bottom-62.5 size-175 border-70`}
       />
       <div
         aria-hidden="true"
-        className={`${RING} -right-[90px] -bottom-27.5 size-105 border-[44px] border-[color-mix(in_srgb,var(--color-surface)_4%,transparent)]`}
+        className={`${RING} -right-22.5 -bottom-27.5 size-105 border-44 border-[color-mix(in_srgb,var(--color-surface)_4%,transparent)]`}
       />
     </div>
   );
@@ -103,7 +103,7 @@ export function SignInPanelDesktop() {
 
 export function SignInPanelPhone() {
   return (
-    <div className="relative overflow-hidden bg-sidebar-dark px-5 pt-[22px] pb-[26px] text-on-dark-heading">
+    <div className="relative overflow-hidden bg-sidebar-dark px-5 pt-5.5 pb-6.5 text-on-dark-heading">
       <Logo variant="dark" size="md" />
       <p className="relative mt-4.5 mb-0 font-display text-[30px] leading-[1.1] font-semibold">
         {HEADLINE}

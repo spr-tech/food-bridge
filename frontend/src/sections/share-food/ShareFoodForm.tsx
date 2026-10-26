@@ -127,11 +127,11 @@ export function ShareFoodForm() {
   return (
     <Formik<ListingFormValues> initialValues={initialValues} validationSchema={listingSchema} onSubmit={handleSubmit}>
       {({ isSubmitting, dirty }) => (
-        <Form noValidate className="max-w-[860px]">
+        <Form noValidate className="max-w-215">
           <LeaveGuard active={dirty && !leavingOnPurpose} />
           <FocusFirstError order={FIELD_ORDER} />
           <Card className="shadow-[0_1px_2px_rgb(0_0_0/0.03),0_8px_22px_rgb(30_42_36/0.05)]">
-            <div className="flex flex-col gap-4 md:gap-5 md:p-[14px]">
+            <div className="flex flex-col gap-4 md:gap-5 md:p-3.5">
               <p className="text-sm text-text-muted">Fields marked * are required.</p>
 
               <div role="alert">
@@ -171,7 +171,7 @@ export function ShareFoodForm() {
               <FormImageUpload name="photo" label="Add photo (optional)" />
 
               <div className="flex md:justify-end">
-                <Button type="submit" size="lg" loading={isSubmitting} className="w-full md:w-auto md:min-w-[200px]">
+                <Button type="submit" size="lg" loading={isSubmitting} className="w-full md:w-auto md:min-w-50">
                   Publish listing
                 </Button>
               </div>

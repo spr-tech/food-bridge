@@ -1,4 +1,5 @@
 import js from '@eslint/js'
+import betterTailwindcss from 'eslint-plugin-better-tailwindcss'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
@@ -17,6 +18,21 @@ export default defineConfig([
     ],
     languageOptions: {
       globals: globals.browser,
+    },
+  },
+  {
+    // Canonical Tailwind classes only: an arbitrary value only when no standard class
+    // gives exactly that value (md:p-6.5, not md:p-[26px]). The copied shared components
+    // are left out; their suggestions go to the shared repo.
+    files: ['**/*.{ts,tsx}'],
+    ignores: ['src/components/ui/**'],
+    plugins: { 'better-tailwindcss': betterTailwindcss },
+    settings: { 'better-tailwindcss': { entryPoint: 'src/index.css' } },
+    rules: {
+      // rootFontSize lets it see that 26px is 6.5 spacing steps. collapse is off: merging
+      // "text-3xl leading-tight" into "text-3xl/tight" changes the line height wherever a
+      // responsive size (sm:text-4xl) follows, so it isn't always the same value.
+      'better-tailwindcss/enforce-canonical-classes': ['error', { rootFontSize: 16, collapse: false }],
     },
   },
   {

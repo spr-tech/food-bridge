@@ -45,7 +45,7 @@ function Meta({ icon, children }: { icon: ReactNode; children: ReactNode }) {
 }
 
 function Thumbnail({ photoUrl }: { photoUrl: string | null }) {
-  const box = 'h-[62px] w-[84px] shrink-0 rounded-[10px]'
+  const box = 'h-15.5 w-21 shrink-0 rounded-md'
   if (photoUrl) return <img src={photoUrl} alt="" className={cn(box, 'object-cover')} />
   return (
     // The placeholder the spec asks for when there's no photo.
@@ -60,7 +60,7 @@ function Thumbnail({ photoUrl }: { photoUrl: string | null }) {
 }
 
 // The card's two buttons share one size: 38px tall, 13px text.
-const CARD_BUTTON = 'h-[38px] px-2.5 text-[13px] font-bold'
+const CARD_BUTTON = 'h-9.5 px-2.5 text-[13px] font-bold'
 const DISABLED = 'bg-disabled-bg text-disabled-text border-transparent hover:bg-disabled-bg disabled:opacity-100'
 
 type ListingCardProps = {
@@ -142,11 +142,11 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(funct
         <Thumbnail photoUrl={listing.photoUrl} />
         <StatusBadge kind="listing" status={listing.status} />
       </div>
-      <h2 className="mt-3 mb-[3px] line-clamp-2 text-lg leading-snug break-words">{listing.foodName}</h2>
+      <h2 className="mt-3 mb-0.75 line-clamp-2 text-lg leading-snug wrap-break-word">{listing.foodName}</h2>
       <p className="mb-2.5 text-[13px] text-text-muted">
         {labelOf(CATEGORIES, listing.category)} · {listing.donorName}
       </p>
-      <ul className="mb-3.5 grid gap-[5px] text-[13px] text-text-secondary">
+      <ul className="mb-3.5 grid gap-1.25 text-[13px] text-text-secondary">
         <Meta icon={<><path d="M21 8 12 3 3 8v8l9 5 9-5z" /><path d="M3 8l9 5 9-5M12 13v8" /></>}>
           {quantityOf(listing)}
         </Meta>

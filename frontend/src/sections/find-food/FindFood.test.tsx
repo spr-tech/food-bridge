@@ -9,7 +9,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ROUTES } from '@/constants/routes'
 import * as db from '@/mocks/db'
 import { BrowsePage } from '@/pages/BrowsePage'
-import { renderRoutes, signInAs } from '@/test/render'
+import { findToastAction, renderRoutes, signInAs } from '@/test/render'
 
 // Rendering a dozen cards in jsdom takes a while; allow for a busy test run.
 vi.setConfig({ testTimeout: 15_000 })
@@ -243,11 +243,10 @@ describe('Find food: cards', () => {
     window.history.replaceState(null, '', '/?simulate=error')
 
     await user.click(screen.getByRole('button', { name: 'Request food: Coconut bread' }))
-    const toast = (await screen.findByText("Your request wasn't sent. Try again.")).closest('li')
-    if (!toast) throw new Error('No toast')
+    const tryAgain = await findToastAction("Your request wasn't sent. Try again.", 'Try again')
 
     window.history.replaceState(null, '', '/')
-    await user.click(within(toast).getByRole('button', { name: 'Try again' }))
+    await user.click(tryAgain)
 
     expect(await screen.findByText('Request sent')).toBeInTheDocument()
     expect(db.listMyRequests(signInAs('recipient')).filter((r) => r.listingId === 'lst-13')).toHaveLength(1)
