@@ -1,7 +1,7 @@
 // Sign in (spec S1): validation, wrong details, an unreachable service, the session it
 // saves, where each role lands, ?next= (followed only to a page the role may open), the
 // demo accounts filling in the form, and show password.
-import { screen, waitFor } from '@testing-library/react'
+import { act, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { getSession, SESSION_STORAGE_KEY } from '@/app/session'
@@ -163,6 +163,22 @@ describe('Sign in', () => {
     expect(emailField()).toHaveValue('recipient@foodbridge.test')
     expect(passwordField()).toHaveValue(DEMO_PASSWORD)
     expect(screen.getByRole('button', { name: 'Sign in' })).toHaveFocus()
+  })
+
+    it('leaves no field errors after filling in from a demo account', async () => {
+    const user = userEvent.setup()
+    renderSignIn()
+
+    // The email field starts focused, so choosing an account also counts as leaving it:
+    // any error it had would now be allowed to show.
+    await user.click(screen.getByRole('button', { name: 'Donor' }))
+    // Let Formik's validation finish before checking that no error appeared.
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)))
+
+    expect(emailField()).toHaveValue('donor@foodbridge.test')
+    expect(screen.queryByText('Enter your email address')).not.toBeInTheDocument()
+    expect(screen.queryByText('Enter your password')).not.toBeInTheDocument()
+    expect(emailField()).not.toHaveAttribute('aria-invalid', 'true')
   })
 
   it('works with the keyboard: Enter on an account fills the form, Enter on Sign in signs in', async () => {

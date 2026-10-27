@@ -1,6 +1,6 @@
 # FoodBridge: interface spec
 
-Status: draft, 25 Oct 2026. Owner: Muizz Jamiu (interface).
+Status: draft, 27 Oct 2026. Owner: Muizz Jamiu (interface).
 Reads with: `/docs/intent/foodbridge.md` (what and why), `/openapi.yaml` (every endpoint, field and error shape) and `/docs/design/foodbridge-final/` (how every screen looks, see section 12).
 This file covers only how the screens behave. If it ever disagrees with `openapi.yaml`, the OpenAPI document wins and this file gets corrected.
 
@@ -21,6 +21,7 @@ Items marked **TBC** need agreement with the service engineers (Adedayo, Esther)
 
 | Route | Screen | Role | Monday |
 |---|---|---|---|
+| `/` | Landing page (S0) | Signed out only; a signed-in user goes to their home page | After Monday |
 | `/sign-in` | Sign in | Anyone | Yes |
 | `/listings` | Find food (browse listings) | Recipient | Yes |
 | `/listings/:id` | Listing details | Recipient or donor (view differs) | Yes |
@@ -34,7 +35,7 @@ Items marked **TBC** need agreement with the service engineers (Adedayo, Esther)
 - After sign in: donors land on `/your-listings`, recipients on `/listings`, administrators on `/admin`.
 - The role comes from the signed-in account, never from a choice on screen.
 - Hiding a route from a role is convenience only. The service enforces who can do what (brief, page 6).
-- A signed-out user opening any route other than `/sign-in` is sent to `/sign-in`, then back to where they were going after signing in.
+- A signed-out user opening `/` sees the landing page (S0). Opening any other route except `/sign-in` sends them to `/sign-in`, then back to where they were going after signing in (only to a page their role may open).
 
 ## 3. Status vocabulary
 
@@ -92,11 +93,37 @@ Badges always show the word, never colour alone.
 
 ## 5. Screens
 
+### S0. Landing page, `/` (signed out)
+
+A public page that explains FoodBridge before asking anyone to sign in. A signed-in user who opens `/` goes straight to their home page (section 2). Every call to action goes to `/sign-in` (no sign-up, see "Removed on purpose" in section 12).
+
+**Shows, top to bottom:**
+- **Header:** logo; links "The story", "How it works" and "Join" (jump to their sections; hidden on a phone); "Sign in".
+- **Hero:** `h1` "Good food deserves another table." (the last two words in the accent colour). "At closing time, bakeries, caterers and restaurants share the food they can't sell. Community kitchens nearby collect it and serve it the same evening." Buttons "Share surplus food" and "Find food for your group". Link "Scroll to follow one evening".
+- **The story:** label "One evening in Yaba", `h2` "From the bin's edge to someone's plate, in one evening.", then five timed steps:
+  - 6:00 PM, "The ovens cool. Forty loaves are left." "Good bread, baked this morning. Tomorrow it can't be sold."
+  - 6:05 PM, "One minute on a phone." "The baker lists them: forty loaves, Yaba, collect by 8 PM."
+  - 6:20 PM, "Three kitchens see it. Three hands go up." "A community kitchen, a food bank and a shelter each ask for it."
+  - 6:30 PM, "One yes. Two kind no's." "The baker approves one. The others are told at once, so nobody makes a wasted trip."
+  - 7:30 PM, "Dinner is served." "The bread that was going to the bin is on the table, still soft."
+
+  Then "An illustration of how FoodBridge works. The places are real; the evening is imagined."
+- **Food band:** "Nothing good should go to waste." and "Not food. Not kindness.", between two rows of Lagos food names that drift slowly in opposite directions (decorative, hidden from screen readers).
+- **How it works:** label "How it works", `h2` "Simple enough for the end of a long day.", three numbered cards: "List it" ("What it is, how much, where, and by when. A photo if you have one."), "They ask for it" ("Community groups nearby find it by food, area and deadline, and request it."), "You choose one" ("Approve one request; everyone else knows straight away. They collect before the deadline.").
+- **The promise:** `h2` "A promise you can plan around." "Each listing goes to exactly one group, even when several ask in the same second. Food past its deadline can't be requested. Everyone always sees where they stand."
+- **Join:** `h2` "Which side of the table are you on?" Two cards: "I have food", "Bakeries, caterers, restaurants", "Turn what's left at closing time into tonight's dinner for someone nearby. You decide who gets it.", button "Share surplus food"; and "I feed people", "Community kitchens, food banks, shelters", "See good food close to you, ask for what you can collect, and know straight away where you stand.", button "Find food now".
+- **Closing:** `h2` "Tonight, let nothing good go to waste." and "Sign in to FoodBridge".
+- **Footer:** "FoodBridge · TeSA Cohort 6 · Team 1" and the demonstration label.
+
+**States:** the page shows no service data, so loading, empty, error and confirmation don't apply. Success is the page itself.
+
+**Accessibility:** one `h1` (the hero), each section an `h2`. The animated closing heading is read once, in full ("Tonight, let nothing good go to waste."), not letter by letter. All motion stops with reduced motion (section 9).
+
 ### S1. Sign in, `/sign-in`
 
 **Shows:** email, password, Sign in button, and a demo accounts box with a button per account, showing its role and email (the password is also in the README).
 
-**Demo accounts:** one per role, matching the service: donor (Mama's Oven, Yaba) `donor@foodbridge.test`, recipient (Hope Community Kitchen) `recipient@foodbridge.test`, administrator `admin@foodbridge.test`. The emails are **TBC** until the service engineers confirm their own. Other organisations in the sample data (for example Ajegunle Food Bank and Grace Shelter) have no login. On desktop each account in the box is a button (icon, role and email) with a visible hover and focus state, under "Use these accounts to explore the app. Choose one to fill in the email and password. Password in the README." On a phone the accounts are chips (Donor, Recipient, Administrator) under "Try a demo account" and "Tap one to fill in the email and password. Password in the README." On both, choosing an account (click, tap, or Enter or Space from the keyboard) fills in its email and the demo password, then moves focus to Sign in; it doesn't sign in by itself. The demo password must match the service's.
+**Demo accounts:** one per role, matching the service: donor (Mama's Oven, Yaba) `donor@foodbridge.test`, recipient (Hope Community Kitchen) `recipient@foodbridge.test`, administrator `admin@foodbridge.test`. The emails are **TBC** until the service engineers confirm their own. Other organisations in the sample data (for example Ajegunle Food Bank and Grace Shelter) have no login. On desktop each account in the box is a button (icon, role and email) with a visible hover and focus state, under "Use these accounts to explore the app. Choose one to fill in the email and password. Password in the README." On a phone the accounts are chips (Donor, Recipient, Administrator) under "Try a demo account" and "Tap one to fill in the email and password. Password in the README." On both, choosing an account (click, tap, or Enter or Space from the keyboard) fills in its email and the demo password, then moves focus to Sign in; it doesn't sign in by itself, and it leaves no field errors showing. The demo password must match the service's.
 
 **States:**
 - Loading: the Sign in button shows its loading state.
@@ -306,6 +333,8 @@ Tested with the browser's network throttling (Slow 4G) on every Monday screen.
 - Toasts and result counts are announced through live regions.
 - Dialogs trap focus, close with Escape, and return focus to the button that opened them.
 - Everything works with a keyboard alone, and focus is always visible.
+- Animation never carries meaning. With `prefers-reduced-motion: reduce`, nothing moves: the landing page's reveals, food band and button pulse stop, and the sidebar flood switches instantly.
+- A field with an error shows its focus in the danger colour, so focus and error never show two different colours on one field.
 - Colours come from tokens that pass contrast (text 4.5:1, borders and focus 3:1).
 - Layout works from a 360 pixel wide phone up to desktop.
 - Screen reader testing with NVDA (NonVisual Desktop Access) or VoiceOver happens after Monday, with findings in the README.
@@ -325,12 +354,13 @@ Tested with the browser's network throttling (Slow 4G) on every Monday screen.
 - How photos are uploaded and stored (S2).
 - What final state an expired listing with an approved request reaches (brief, page 6), and how S5 and S7 show it.
 - The endpoint behind Requests (S8): every request on the donor's listings, filtered by status, with counts.
+- The handover photo on the landing and sign-in pages is a TEMPORARY, unlicensed iStock preview. Replace it with a licensed or free-to-use photo, credited in the README, before final submission (see `/docs/decisions.md`, 2026-10-27).
 
 ---
 
 ## 12. Visual design
 
-**Source of truth:** `/docs/design/foodbridge-final/`. Exact colours, sizes and spacing come from `source-html/`; motion and timings come from `foodbridge-sidebar-animation.html`. The PNGs are pictures of those files. Where this section differs from the design files, this section wins; every difference is listed under "Deliberate differences" at the end.
+**Source of truth:** `/docs/design/foodbridge-final/`. Exact colours, sizes and spacing come from `source-html/`; motion and timings come from `foodbridge-sidebar-animation.html`. The PNGs are pictures of those files. The landing page (S0) and the sign-in page's photo and card come from the FoodBridge landing canvas (https://claude.ai/artifact/MgPj42vTu3L4esQ6EosDHy) instead. Where this section differs from the design files, this section wins; every difference is listed under "Deliberate differences" at the end.
 
 Every colour below becomes a token in `frontend/src/styles/tokens.css`. Components never hard-code colours.
 
@@ -341,7 +371,10 @@ Every colour below becomes a token in `frontend/src/styles/tokens.css`. Componen
 | Page background | `#f7f6f2` |
 | Cards, inputs, top bar before the flood | `#ffffff`, lines `#e4e2dc` |
 | Cream: sidebar and top bar after the flood, phone top bar and tab bar | `#f4f0e6`, border `#e6e0d1` |
-| Dark green: sidebar before the flood, sign-in panel | `#1d4637` |
+| Dark green: sidebar before the flood, under the photo overlay | `#1d4637` |
+| Orange on dark green: landing buttons, accent words, the closing heading | `#f0a24b` (dark green text on it: 5.03:1) |
+| Outline button on dark green | `#9fd3ae` (6.25:1) |
+| Photo backdrop (landing dark sections, sign-in page) | The handover photo under dark green at 72% opacity |
 | Primary: buttons, current link on cream, "Food" on cream | `#1f5c45` |
 | Active pill on dark (current link and hover) | `#2f6a52`, white text |
 | Link text on cream | `#2d5a46` |
@@ -353,7 +386,7 @@ Every colour below becomes a token in `frontend/src/styles/tokens.css`. Componen
 | Muted text, demonstration label, input placeholders | `#5f6963` (5.27:1 on the page, 5.70:1 on white) |
 | Input border | `#8a877c`, the existing token (3.60:1) |
 | Count badge (sidebar and tabs) | `#e0a46b`, text `#1d4637` |
-| Focus ring | 2px solid, 2px offset: `#f0a24b` on dark green (5.03:1), `#c2410c` on cream, white and the page (4.55:1 or better) |
+| Focus ring | 2px solid, 2px offset: `#f0a24b` on dark green (5.03:1); `#1f5c45` on cream, white and the page (7.85:1 on white, 7.26:1 on the page). On a field with an error: `#a8321f` with no offset, merging with the error border (6.18:1) |
 | Required asterisk | `#a8321f` |
 | Disabled button (Requested, Reserved, Expired) | `#eceae4`, text `#7a817c` |
 | Category chip | `#efeee9`, text `#4a514c` |
@@ -387,7 +420,7 @@ No grey or black states anywhere in the sidebar: every state is dark green, crea
   - organisation name (600, 14px), with the role (12px, muted) under it
   - a thin divider
   - "Sign out" with its icon, as a button
-  
+
   There is no chevron. The bar is white with a `#e4e2dc` border before the flood, and cream with a `#e6e0d1` border after.
 
 **Navigation per role:**
@@ -435,11 +468,16 @@ No grey or black states anywhere in the sidebar: every state is dark green, crea
 
 ### Per screen
 
+**Landing page (S0).**
+- Built from the FoodBridge landing canvas, not `foodbridge-final/`.
+- The hero, the promise and the closing sit on the photo backdrop. On desktop the photo stays still while the page scrolls over it; on touch screens it scrolls normally.
+- Motion: sections rise in as they scroll into view; the story's line grows; the How it works cards come in from the left, from below and from the right, and lift on hover; the food band drifts; the closing opens like a lens, its words arrive from four sides, "go to waste." drops in letter by letter, and its button pulses. Scroll-linked motion runs where the browser supports it (Chrome, Edge); elsewhere everything simply shows.
+
 **Sign in (S1).**
-- **Desktop:** two halves.
-  - Left: the dark green panel with the wordmark and the headline "Good food deserves another table." (Fraunces 66px, styled text, not a heading). Then the description "A practical way for food businesses, community groups and charities to share surplus food and reduce waste in Lagos." and three icons: "Reduce food waste", "Support communities", "Build a stronger Lagos".
-  - Right: the `h1` "Welcome back", "Sign in to your FoodBridge account.", Email address, Password, the Sign in button, then the Demo accounts box ("Use these accounts to explore the app. Choose one to fill in the email and password. Password in the README."), one button per account.
-- **Phone:** a short dark green header with the logo and the headline only, then the form and the demo account chips (S1), so the page fits one screen.
+- The handover photo (photo backdrop) covers the whole page. The form sits on a white card with a soft shadow: the `h1` "Welcome back", "Sign in to your FoodBridge account.", Email address, Password, the Sign in button, the Demo accounts box or chips (S1), and the demonstration label.
+- **Desktop (1024px and up):** the left half holds the wordmark, the headline "Tonight's surplus is waiting." (Fraunces 66px, styled text, not a heading), the description "Share what's left at closing time, or find good food nearby to collect this evening." and three icons: "Reduce food waste", "Support communities", "Build a stronger Lagos". The card is centred in the right half.
+- **Tablet (768px to 1023px):** the wordmark, headline and description above a 500px card, all on one left edge.
+- **Phone:** the wordmark only, then the card, so the form fits one screen.
 
 **Find food (S3).**
 - `h1` "Find food" and the line "Discover surplus food from local businesses and organisations in your area." (phone: "Surplus food from local businesses near you.").
@@ -486,8 +524,9 @@ Google sign-in, Create account, the notifications bell, Dashboard, Transactions,
 | Input placeholders | `#8a918c` (3.23:1) | `#5f6963` (5.70:1) | Text contrast 4.5:1 |
 | Input borders | `#d9d7d0` (1.44:1) | `#8a877c` (3.60:1) | Input boundaries need 3:1 |
 | Muted text on cream | `#5f7a6b` (4.12:1) | `#4f6b5d` (5.14:1) | Text contrast 4.5:1 |
-| Focus ring on cream | `#f0a24b` (1.85:1) | `#c2410c` (4.55:1) | Focus must stay visible, 3:1 |
-| Sign-in headline | A second `h1` | Styled text, not a heading | One `h1` per screen |
+| Focus ring on cream | `#f0a24b` (1.85:1) | `#1f5c45` (7.85:1 on white) | Focus must stay visible, 3:1; green so it never looks like an error |
+| Sign-in headline | A second `h1`, "Good food deserves another table." | Styled text, "Tonight's surplus is waiting." | One `h1` per screen; the landing page now owns the old line |
+| Sign-in layout | Two halves on flat dark green, decorative rings | Photo across the page, form on a white card | Carries the landing page's look through to sign in |
 | Desktop sign-in wordmark | "FoodBridge" in Fraunces | DM Sans 700, "Food" white, "Bridge" `#f0a24b` | One wordmark everywhere |
 | Demo accounts | Four, "Admin" on the phone | S1's three, one per role, "Administrator" | Matches the service's accounts |
 | Share food: Description | Marked required | Optional, with the 500-character counter | S2 rules |

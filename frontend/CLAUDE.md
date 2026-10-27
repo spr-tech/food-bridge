@@ -2,7 +2,7 @@
 
 FoodBridge coordinates surplus food: donors list food, recipients request it, the donor approves one request. This repository is the interface tier. The Java service lives in a separate repository owned by the service engineers (link TODO); never edit it from here.
 
-Built for the TeSA Cohort 6 capstone. Monday 26 Oct 2026 is the MVP checkpoint: donor lists food, recipient requests it, donor approves, all against the deployed service.
+Built for the TeSA Cohort 6 capstone. The MVP checkpoint (Monday 26 Oct 2026) ran on simulated data; the priority now is running the journeys against the deployed service.
 
 ## Read these first
 
@@ -18,6 +18,7 @@ If the spec and `openapi.yaml` disagree, `openapi.yaml` wins. Flag the mismatch 
 ## Design
 
 - Build every screen from `../docs/design/foodbridge-final/`. Read `source-html/` and `foodbridge-sidebar-animation.html` for exact values; don't approximate from the PNGs. Before pushing a screen, list any difference from its design.
+- The landing page (`/`) and the sign-in page's full-page photo and form card come from the FoodBridge landing canvas (https://claude.ai/artifact/MgPj42vTu3L4esQ6EosDHy), not `foodbridge-final/`. See `../docs/decisions.md` (2026-10-27).
 - Spec section 12 ("Visual design") lists the deliberate differences from the design files (contrast fixes, one `h1`, phone Sign out). Where they disagree, section 12 wins.
 - Use canonical Tailwind classes; only use an arbitrary value when no standard class gives exactly that value. ESLint enforces this (`better-tailwindcss/enforce-canonical-classes`) in className and `cn()`, but not in plain string constants, so check those by hand.
 
@@ -58,7 +59,8 @@ src/
 │                  # store.ts (makeStore), providers.tsx (Redux Provider + RouterProvider),
 │                  # session.ts (the signed-in session in sessionStorage; the role comes from it;
 │                  # signOutSession() for a deliberate sign-out, clearSession() for an expired one)
-├── assets/        # images, logo-icon-dark.svg and logo-icon-light.svg (icon only; the wordmark is text)
+├── assets/        # images, logo-icon-dark.svg and logo-icon-light.svg (icon only; the wordmark is text),
+│                  # landing/handover.jpg (TEMPORARY, see decisions 2026-10-27)
 ├── components/
 │   ├── ui/        # shared components, copied unchanged from the shared repo (never edited here)
 │   ├── form/      # Formik adapters around the shared FormField and controls; export from index.ts
@@ -81,12 +83,16 @@ src/
 ├── mocks/         # TEMPORARY simulated service: db.ts (the rules), seed.ts (demo data),
 │                  # simulate.ts (delay, the dev-only ?simulate=error|empty|slow switches, and
 │                  # the demo switches ?simulate=offline|conflict, in every build while simulated)
-├── pages/         # one thin file per route; a page only composes sections
+├── pages/         # one thin file per route; a page only composes sections. HomeRedirect is "/":
+│                  # a signed-in role goes to its home page, otherwise the LandingPage child route
 ├── schema/        # Yup schemas, one per form
-├── sections/      # page-level blocks, one folder per screen, e.g. sections/sign-in/
+├── sections/      # page-level blocks, one folder per screen, e.g. sections/sign-in/,
+│                  # sections/landing/ (LandingHero, LandingMiddle, LandingClosing)
 ├── services/      # api.ts (the one base createApi); auth.ts, listings.ts, requests.ts (the hooks
 │                  # screens use); errors.ts (reading status, code and field errors)
-├── styles/        # tokens.css; layout.css (the app frame and the sidebar flood's exact timings)
+├── styles/        # tokens.css; layout.css (the app frame, the sidebar flood's exact timings,
+│                  # .photo-backdrop, and the red focus on invalid fields); landing.css (the
+│                  # landing page's animations, loaded only with that page)
 ├── test/          # setup.ts for Vitest, render.tsx (renderRoutes, signInAs, findToastAction),
 │                  # mockDb.ts (moveDeadline); tests sit next to their code
 └── types/         # shared types: Role, RequestStatus, ListingStatus; api.ts (Listing, ListingRequest, Session)

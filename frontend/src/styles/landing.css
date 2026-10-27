@@ -1,0 +1,123 @@
+/* Landing page (/): photo backgrounds, scroll-linked reveals and the food marquee.
+   Layout and spacing are Tailwind classes; colours come from tokens.css.
+   Scroll-linked animations run where animation-timeline is supported (Chrome, Edge);
+   elsewhere everything simply shows. All motion stops for prefers-reduced-motion. */
+
+/* Photo behind the dark sections, fixed so the page scrolls over it */
+.landing-photo {
+  --overlay: color-mix(in srgb, var(--color-sidebar-dark) 80%, transparent);
+  background-color: var(--color-sidebar-dark);
+  background-image: linear-gradient(var(--overlay), var(--overlay)), url('../assets/landing/handover2.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Phones ignore or stutter on fixed backgrounds */
+@media (hover: none) {
+  .landing-photo {
+    background-attachment: scroll;
+  }
+}
+
+/* How it works cards: lift on hover. Uses translate, not transform, so it
+   doesn't fight the slide-in animation. */
+.landing-card {
+  transition: translate 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.landing-card:hover {
+  translate: 0 -8px;
+  box-shadow: 0 18px 36px color-mix(in srgb, var(--color-sidebar-dark) 14%, transparent);
+  border-color: var(--color-border-hover);
+}
+
+/* Food names drifting across the cream band */
+.landing-marquee {
+  animation: landing-marquee 40s linear infinite;
+}
+
+.landing-marquee-reverse {
+  animation-direction: reverse;
+}
+
+/* Closing button: soft pulse so the page ends on something alive */
+.landing-pulse {
+  animation: landing-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes landing-rise { from { opacity: 0; transform: translateY(48px) } to { opacity: 1; transform: none } }
+@keyframes landing-grow { from { transform: scaleY(0) } to { transform: scaleY(1) } }
+@keyframes landing-glow { from { opacity: 0.15 } to { opacity: 1 } }
+@keyframes landing-from-left { from { opacity: 0; transform: translateX(-80px) } to { opacity: 1; transform: none } }
+@keyframes landing-from-right { from { opacity: 0; transform: translateX(80px) } to { opacity: 1; transform: none } }
+@keyframes landing-pop { from { opacity: 0; transform: translateY(60px) scale(0.85) } to { opacity: 1; transform: none } }
+@keyframes landing-marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+@keyframes landing-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-highlight-on-dark) 55%, transparent) }
+  50% { box-shadow: 0 0 0 14px transparent }
+}
+@keyframes landing-iris { from { clip-path: circle(8% at 50% 55%) } to { clip-path: circle(75% at 50% 50%) } }
+@keyframes landing-zoom { from { opacity: 0; transform: scale(3) } to { opacity: 1; transform: none } }
+@keyframes landing-in-left { from { opacity: 0; transform: translateX(-160px) rotate(-8deg) } to { opacity: 1; transform: none } }
+@keyframes landing-in-top { from { opacity: 0; transform: translateY(-120px) } to { opacity: 1; transform: none } }
+@keyframes landing-in-bottom { from { opacity: 0; transform: translateY(120px) } to { opacity: 1; transform: none } }
+@keyframes landing-in-right { from { opacity: 0; transform: translateX(160px) rotate(8deg) } to { opacity: 1; transform: none } }
+@keyframes landing-drop {
+  0% { opacity: 0; transform: translateY(-90px) rotate(-20deg) }
+  60% { opacity: 1; transform: translateY(10px) rotate(4deg) }
+  100% { opacity: 1; transform: none }
+}
+
+@supports (animation-timeline: view()) {
+  .landing-reveal, .landing-line, .landing-glow,
+  .landing-from-left, .landing-from-right, .landing-pop,
+  .landing-iris, .landing-zoom, .landing-word, .landing-letter {
+    animation-fill-mode: both;
+    animation-timing-function: ease-out;
+    animation-timeline: view();
+  }
+
+  /* Story, Join and other sections */
+  .landing-reveal { animation-name: landing-rise; animation-range: entry 5% cover 35% }
+  .landing-line { animation-name: landing-grow; transform-origin: top; animation-range: entry 0% exit 40% }
+  .landing-glow { animation-name: landing-glow; animation-range: entry 20% cover 50% }
+
+  /* How it works cards */
+  .landing-from-left, .landing-pop, .landing-from-right { animation-range: entry 10% cover 40% }
+  .landing-from-left { animation-name: landing-from-left }
+  .landing-pop { animation-name: landing-pop }
+  .landing-from-right { animation-name: landing-from-right }
+
+  /* Closing band. It's the last section, so every range ends by "entry 100%":
+     the page can't scroll it further up than that. */
+  .landing-iris { animation-name: landing-iris; animation-range: entry 0% entry 70% }
+  .landing-zoom { animation-name: landing-zoom; animation-range: entry 20% entry 60% }
+  .landing-word { animation-range: entry 30% entry 75% }
+  .landing-word-1 { animation-name: landing-in-left }
+  .landing-word-2 { animation-name: landing-in-top }
+  .landing-word-3 { animation-name: landing-in-bottom }
+  .landing-word-4 { animation-name: landing-in-right }
+  /* Each letter starts a little later: --i is set per letter in LandingClosing.tsx */
+  .landing-letter {
+    animation-name: landing-drop;
+    animation-range: entry calc(45% + var(--i) * 3%) entry 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-reveal, .landing-line, .landing-glow,
+  .landing-from-left, .landing-from-right, .landing-pop,
+  .landing-iris, .landing-zoom, .landing-word, .landing-letter,
+  .landing-marquee, .landing-pulse {
+    animation: none;
+  }
+
+  .landing-card {
+    transition: none;
+  }
+
+  .landing-card:hover {
+    translate: none;
+  }
+}
