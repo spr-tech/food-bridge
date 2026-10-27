@@ -13,6 +13,10 @@ const listeners = new Set<() => void>()
 let cachedRaw: string | null = null
 let cachedSession: Session | null = null
 
+// Set when the user signs out on purpose, until the next sign-in. The page being left
+// can still render once without a session; this tells RequireSession not to add ?next=.
+let signedOut = false
+
 function readRaw(): string | null {
   try {
     return sessionStorage.getItem(SESSION_STORAGE_KEY)
@@ -39,6 +43,7 @@ function notify() {
 }
 
 export function saveSession(session: Session) {
+  signedOut = false
   try {
     sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session))
   } catch {
@@ -47,13 +52,28 @@ export function saveSession(session: Session) {
   notify()
 }
 
-export function clearSession() {
+function endSession(onPurpose: boolean) {
+  signedOut = onPurpose
   try {
     sessionStorage.removeItem(SESSION_STORAGE_KEY)
   } catch {
     // Nothing stored, nothing to clear.
   }
   notify()
+}
+
+// The session ended without the user choosing to (a 401): ?next= still brings them back.
+export function clearSession() {
+  endSession(false)
+}
+
+// The user signed out.
+export function signOutSession() {
+  endSession(true)
+}
+
+export function wasSignedOut(): boolean {
+  return signedOut
 }
 
 function subscribe(listener: () => void) {

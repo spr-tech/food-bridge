@@ -3,6 +3,7 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach } from 'vitest'
+import { clearSession } from '@/app/session'
 import { resetMockDb } from '@/mocks/db'
 import { resetSimulateSwitches } from '@/mocks/simulate'
 
@@ -36,6 +37,7 @@ window.matchMedia ??= (query: string) =>
 // Each test starts signed out, with the simulated data back at its seed.
 afterEach(() => {
   cleanup()
+  clearSession()
   sessionStorage.clear()
   resetMockDb()
   resetSimulateSwitches()

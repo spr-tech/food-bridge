@@ -1,6 +1,6 @@
 // Sign in (spec S1): validation, wrong details, an unreachable service, the session it
-// saves, where each role lands, ?next=, the demo accounts filling in the form, and show
-// password.
+// saves, where each role lands, ?next= (followed only to a page the role may open), the
+// demo accounts filling in the form, and show password.
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
@@ -104,11 +104,21 @@ describe('Sign in', () => {
   })
 
   it('returns to the page asked for in ?next=', async () => {
-    renderSignIn(`${ROUTES.signIn}?next=${encodeURIComponent(ROUTES.requests)}`)
+    const { router } = renderSignIn(`${ROUTES.signIn}?next=${encodeURIComponent(ROUTES.requests)}`)
 
     await signInWith('donor@foodbridge.test', DEMO_PASSWORD)
 
     expect(await screen.findByRole('heading', { name: 'Requests page' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe(ROUTES.requests)
+  })
+
+  it("goes home instead of to a ?next= page the role can't open", async () => {
+    const { router } = renderSignIn(`${ROUTES.signIn}?next=${encodeURIComponent(ROUTES.listings)}`)
+
+    await signInWith('donor@foodbridge.test', DEMO_PASSWORD)
+
+    expect(await screen.findByRole('heading', { name: 'Donor home' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe(ROUTES.yourListings)
   })
 
   it.each(['https://example.com/', '//example.com/'])('ignores a ?next= outside the app (%s)', async (next) => {

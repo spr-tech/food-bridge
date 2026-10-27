@@ -53,8 +53,11 @@ Before saying a task is done, run `npm run lint`, `npm run typecheck`, `npm test
 
 ```
 src/
-├── app/           # router.tsx, store.ts (makeStore), providers.tsx (Redux Provider + RouterProvider),
-│                  # session.ts (the signed-in session in sessionStorage; the role comes from it)
+├── app/           # routes.tsx (the route table, each route's allowed roles, and canOpen(role, path);
+│                  # the one place role rules live), router.tsx (only creates the browser router),
+│                  # store.ts (makeStore), providers.tsx (Redux Provider + RouterProvider),
+│                  # session.ts (the signed-in session in sessionStorage; the role comes from it;
+│                  # signOutSession() for a deliberate sign-out, clearSession() for an expired one)
 ├── assets/        # images, logo-icon-dark.svg and logo-icon-light.svg (icon only; the wordmark is text)
 ├── components/
 │   ├── ui/        # shared components, copied unchanged from the shared repo (never edited here)

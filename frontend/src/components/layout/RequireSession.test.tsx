@@ -24,6 +24,10 @@ function renderApp(entry: string) {
             element: <RequireRole roles={['recipient', 'admin']} />,
             children: [{ path: ROUTES.listings, element: <h1>Find food page</h1> }],
           },
+          {
+            element: <RequireRole roles={['donor']} />,
+            children: [{ path: ROUTES.yourListings, element: <h1>Your listings page</h1> }],
+          },
         ],
       },
     ],
@@ -31,22 +35,45 @@ function renderApp(entry: string) {
   )
 }
 
+async function signInWith(email: string) {
+  const user = userEvent.setup()
+  await user.click(screen.getByRole('textbox', { name: /Email address/ }))
+  await user.paste(email)
+  await user.click(screen.getByLabelText(/^Password/))
+  await user.paste(DEMO_PASSWORD)
+  await user.click(screen.getByRole('button', { name: 'Sign in' }))
+}
+
 describe('RequireSession', () => {
   it('sends a signed-out user to sign in, then back to the page they wanted', async () => {
-    const user = userEvent.setup()
     const { router } = renderApp(`${ROUTES.requests}?tab=pending`)
 
     expect(await screen.findByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
     expect(router.state.location.search).toBe(`?next=${encodeURIComponent('/requests?tab=pending')}`)
 
-    await user.click(screen.getByRole('textbox', { name: /Email address/ }))
-    await user.paste('donor@foodbridge.test')
-    await user.click(screen.getByLabelText(/^Password/))
-    await user.paste(DEMO_PASSWORD)
-    await user.click(screen.getByRole('button', { name: 'Sign in' }))
+    await signInWith('donor@foodbridge.test')
 
     expect(await screen.findByRole('heading', { name: 'Requests page' })).toBeInTheDocument()
     expect(router.state.location.search).toBe('?tab=pending')
+  })
+
+  it('signs out to sign in with no ?next=, so the next person starts on their own home page', async () => {
+    const user = userEvent.setup()
+    signInAs('recipient')
+    const { router } = renderApp(ROUTES.listings)
+    expect(await screen.findByRole('heading', { name: 'Find food page' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Account, Hope Community Kitchen' }))
+    await user.click(screen.getByRole('button', { name: 'Sign out' }))
+
+    expect(await screen.findByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe(ROUTES.signIn)
+    expect(router.state.location.search).toBe('')
+
+    await signInWith('donor@foodbridge.test')
+
+    expect(await screen.findByRole('heading', { name: 'Your listings page' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe(ROUTES.yourListings)
   })
 
   it('shows the page inside the app frame when signed in with the right role', async () => {

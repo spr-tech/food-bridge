@@ -105,11 +105,12 @@ describe('AppLayout sidebar', () => {
   it('signs out: clears the session and starts dark green at the next sign-in', async () => {
     const user = userEvent.setup()
     sessionStorage.setItem(SIDEBAR_STORAGE_KEY, 'cream')
-    const { unmount } = renderLayout()
+    const { unmount, router } = renderLayout()
 
     await user.click(screen.getByRole('button', { name: 'Sign out' }))
 
     expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument()
+    expect(router.state.location.search).toBe('')
     expect(sessionStorage.getItem(SIDEBAR_STORAGE_KEY)).toBeNull()
     expect(sessionStorage.getItem(SESSION_STORAGE_KEY)).toBeNull()
 
