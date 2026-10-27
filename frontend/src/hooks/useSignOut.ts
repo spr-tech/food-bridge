@@ -3,7 +3,7 @@
 // next account never sees the last one's. The simulated data itself is kept.
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router'
-import { clearSession } from '@/app/session'
+import { signOutSession } from '@/app/session'
 import { ROUTES } from '@/constants/routes'
 import { useAppDispatch } from '@/hooks/useAppStore'
 import { resetSidebarTheme } from '@/hooks/useSidebarTheme'
@@ -15,10 +15,11 @@ export function useSignOut() {
 
   return useCallback(async () => {
     // TODO(auth): end the session with the service before leaving.
-    // Leave first, so the page being left doesn't redirect with ?next= when the
-    // session disappears.
+    // Sign in with no ?next=, so the next person starts on their own home page. The
+    // page being left may render once more without a session before the sign-in page
+    // shows; signOutSession tells RequireSession not to add ?next= then either.
     await navigate(ROUTES.signIn, { replace: true })
-    clearSession()
+    signOutSession()
     resetSidebarTheme()
     dispatch(api.util.resetApiState())
   }, [navigate, dispatch])

@@ -1,10 +1,11 @@
 // Route guards (spec section 2).
 // RequireSession: a signed-out user is sent to /sign-in, with the page they wanted in
-// ?next=, so signing in brings them back. Signed in, it renders the app frame.
+// ?next=, so signing in brings them back (sign-in follows it only if the role may open
+// that page). After Sign out there is no ?next=. Signed in, it renders the app frame.
 // RequireRole: a page for another role shows the spec's 403 message (section 4) inside
 // the frame. Hiding pages is convenience only; the service decides who can do what.
 import { Link, Navigate, Outlet, useLocation } from 'react-router'
-import { useSession } from '@/app/session'
+import { useSession, wasSignedOut } from '@/app/session'
 import { PageHeader } from '@/components/common/PageHeader'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { homePathFor } from '@/constants/roles'
@@ -17,6 +18,8 @@ export function RequireSession() {
   const location = useLocation()
 
   if (!session) {
+    // Signed out on purpose: no ?next=, so the next person starts on their own home page.
+    if (wasSignedOut()) return <Navigate to={ROUTES.signIn} replace />
     const next = encodeURIComponent(`${location.pathname}${location.search}`)
     return <Navigate to={`${ROUTES.signIn}?next=${next}`} replace />
   }
