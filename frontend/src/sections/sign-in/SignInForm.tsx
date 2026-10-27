@@ -82,13 +82,11 @@ export function SignInForm({ sessionEnded }: { sessionEnded: boolean }) {
         validationSchema={signInSchema}
         onSubmit={handleSubmit}
       >
-        {({ isSubmitting, setFieldValue }) => {
+               {({ isSubmitting, setValues }) => {
           function pick(account: DemoAccount) {
-            void setFieldValue('email', account.email)
-            void setFieldValue('password', DEMO_PASSWORD)
+            void setValues({ email: account.email, password: DEMO_PASSWORD })
             signInButton.current?.focus()
           }
-
           return (
             <Form noValidate className="flex flex-col gap-4 lg:gap-5">
               <FocusFirstError order={FIELD_ORDER} />

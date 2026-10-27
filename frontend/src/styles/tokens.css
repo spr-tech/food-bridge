@@ -29,8 +29,7 @@
   --color-info: #1e4d86;
   --color-on-info: #ffffff;
 
-  --color-focus: #c2410c;
-  --focus-ring-width: 2px;
+  --color-focus: #1f5c45;  --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
 
   --radius-sm: 6px;
@@ -45,6 +44,9 @@
   --color-brand-dark: #1f4a3a;
   --color-accent: #b4532a;
   --color-logo: #e0a46b;
+  --color-highlight-on-dark: #f0a24b; /* landing: buttons and italic words on dark green */
+  --color-outline-on-dark: #9fd3ae; /* landing: outline button on dark green */
+  --color-border-hover: #cfd9d2; /* landing: card edge on hover */
 
   /* Status badges (spec section 12). StatusBadge sets these on the shared badge.
      Approved uses the available pair; Declined and Collected use the expired pair. */

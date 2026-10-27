@@ -561,3 +561,18 @@
     display: none;
   }
 }
+
+
+   /* sign-in panel. The photo only downloads when an element uses this class. */ 
+.photo-backdrop {
+  --overlay: color-mix(in srgb, var(--color-sidebar-dark) 72%, transparent);
+  background-color: var(--color-sidebar-dark);
+  background-image: linear-gradient(var(--overlay), var(--overlay)), url('../assets/landing/handover.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+[aria-invalid='true'] {
+  --color-focus: var(--color-danger);
+  --focus-ring-offset: 0px;
+}

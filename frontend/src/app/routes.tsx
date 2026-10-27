@@ -5,7 +5,6 @@
 // The roles each guard allows are also kept on its route, so canOpen (used by sign-in
 // for ?next=) follows exactly the same rules as RequireRole.
 import { matchRoutes, type RouteObject } from 'react-router'
-import { DemoBanner } from '@/components/layout/DemoBanner'
 import { RequireRole, RequireSession } from '@/components/layout/RequireSession'
 import { RootLayout } from '@/components/layout/RootLayout'
 import { ROUTES } from '@/constants/routes'
@@ -36,11 +35,17 @@ export const routes: RouteObject[] = [
   {
     Component: RootLayout,
     // Shown while the first page's code downloads.
-    HydrateFallback: DemoBanner,
-    errorElement: <ErrorPage />,
+ hydrateFallbackElement: <div className='min-h-screen bg-bg' />,        errorElement: <ErrorPage />,
     children: [
-      { index: true, Component: HomeRedirect },
-      {
+{
+  Component: HomeRedirect,
+  children: [
+    {
+      index: true,
+      lazy: () => import('@/pages/LandingPage').then((m) => ({ Component: m.LandingPage })),
+    },
+  ],
+},      {
         path: ROUTES.signIn,
         lazy: () => import('@/pages/SignInPage').then((m) => ({ Component: m.SignInPage })),
       },

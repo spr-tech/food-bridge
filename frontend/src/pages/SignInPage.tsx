@@ -2,7 +2,8 @@
 // provides its own main landmark and demonstration line. A signed-in user is sent on:
 // back to the page they wanted (?next=, only paths inside the app that their role may
 // open) or their home page.
-// Two halves from 1024px up; below that, the short header and the form.
+// The handover photo covers the whole page and the form sits on a white card. From
+// 1024px up, the welcome panel fills the left half; below that, only the logo shows.
 import { Navigate, useSearchParams } from 'react-router'
 import { canOpen } from '@/app/routes'
 import { useSession } from '@/app/session'
@@ -31,15 +32,15 @@ export function SignInPage() {
   }
 
   return (
-    <main className="grid min-h-screen bg-bg lg:grid-cols-2">
-      <div className="hidden lg:flex lg:flex-col *:flex-1">
+    <main className='photo-backdrop grid min-h-screen content-start lg:grid-cols-2 lg:content-stretch'>
+      <div className='hidden lg:flex lg:flex-col *:flex-1'>
         <SignInPanelDesktop />
       </div>
-      <div className="lg:hidden">
+      <div className='lg:hidden'>
         <SignInPanelPhone />
       </div>
-      <div className="flex flex-col items-center px-5 py-5.5 lg:justify-center lg:px-8 lg:py-12">
-        <div className="w-full max-w-110">
+      <div className='flex flex-col items-center px-4 py-4 lg:justify-center lg:px-8 lg:py-12'>
+        <div className='w-full max-w-110 rounded-2xl bg-surface px-5 pt-6 pb-5 shadow-[0_30px_70px_color-mix(in_srgb,var(--color-sidebar-dark)_45%,transparent)] lg:max-w-125 lg:rounded-3xl lg:px-11 lg:pt-11 lg:pb-8'>
           <SignInForm sessionEnded={params.get('reason') === 'session-ended'} />
           <DemoBanner />
         </div>

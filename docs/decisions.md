@@ -75,3 +75,28 @@ Agreed by: Muizz Jamiu
 2026-10-26  Demo switch ?simulate=conflict: while the data is simulated, in every build including the deployed demo, the next approval is refused with 409 LISTING_ALREADY_RESERVED, as if another approval had landed first: the simulated store approves another pending request on the same listing just before (it needs one; lst-01 has three). Once per page load. Dev and demo only: it lives in frontend/src/mocks/ and goes when the simulated layer does.
 Why: the optimistic approve's rollback and its conflict message can't otherwise be shown live, because the simulated data lives in one browser tab.
 Agreed by: Muizz Jamiu
+
+2026-10-27  Landing page at /. Signed-out visitors to / see a public landing page (header, hero, the evening story, a food band, How it works, the promise, Join, a closing call to sign in, and the footer with the demonstration line); signed-in users are still sent to their role's home page. HomeRedirect now does both: it redirects a signed-in role and otherwise renders its child route, the landing page, which loads lazily like every other page. Its code is in frontend/src/sections/landing/ (LandingHero, LandingMiddle, LandingClosing) and its animations in frontend/src/styles/landing.css, so signed-in users never download them. Every call to action goes to sign in (there is no sign-up). Scroll-linked animations use animation-timeline, so they run in Chrome and Edge and the content simply shows elsewhere; all motion stops for prefers-reduced-motion.
+Why: a visitor arriving at the live address should learn what FoodBridge is before being asked to sign in; lazy loading keeps the landing page's cost off every other page.
+Agreed by: Muizz Jamiu
+
+2026-10-27  Sign-in page redesigned: the handover photo covers the whole page under a dark green overlay, and the form sits on a white card. Desktop (1024px up): the welcome panel fills the left half. Tablet (768px up): logo, headline and description above a wider card. Phone: the logo only, then the card. New panel copy: "Tonight's surplus is waiting." and "Share what's left at closing time, or find good food nearby to collect this evening." The page's h1 stays "Welcome back". The panel's two decorative rings are removed. The demonstration line moves inside the card.
+Why: the old headline repeated the landing page's; the photo carries the landing page's look through to sign-in; a solid white card keeps the form's text, error and focus contrast fixed whatever the photo shows behind it.
+Agreed by: Muizz Jamiu
+
+2026-10-27  Shared photo class .photo-backdrop in frontend/src/styles/layout.css (photo plus a dark green overlay at 72%), used by the landing page's dark sections and the sign-in page. The landing page adds .landing-photo to fix the photo while the page scrolls (not on touch screens). New tokens: --color-highlight-on-dark #f0a24b (buttons and italic words on dark green), --color-outline-on-dark #9fd3ae (outline button), --color-border-hover #cfd9d2 (card edge on hover). Contrast on the flat dark green (#1d4637): dark green text on the orange button 5.03:1, outline border 6.25:1, heading text 9.21:1, body text on dark 8.90:1. Over the photo the background varies; the overlay strength is set so text stays readable over the photo's brightest area, to be confirmed with the NVDA and contrast checks in task 8.
+Why: one place for the photo and overlay, so both pages match; the orange already existed as focus-on-dark and wordmark-bridge-dark, but those names mean something else.
+Agreed by: Muizz Jamiu
+
+2026-10-27  The router's HydrateFallback is a blank screen in the page colour instead of DemoBanner.
+Why: on a full reload, the demonstration line flashed alone for a moment while the first page's code downloaded, which looked like a fault. The fallback shows for too short a time to read any text.
+Agreed by: Muizz Jamiu
+
+2026-10-27  TEMPORARY: the handover photo (frontend/src/assets/landing/handover.jpg) is an unlicensed iStock preview, used while the design is settled. It must be replaced before final submission with a licensed or free-to-use photo (for example from Unsplash or Pexels), credited in the README.
+Why recorded: the deployed site and the portfolio are public, and iStock previews are not licensed for public use.
+Agreed by: Muizz Jamiu
+
+2026-10-27  A field with an error shows one red line when focused. In frontend/src/styles/layout.css, [aria-invalid='true'] sets --color-focus to --color-danger and --focus-ring-offset to 0, so the focus outline turns red and merges with the 2px error border instead of drawing a second ring. Done through the variables the shared Input and Textarea read, so the copies in src/components/ui/ are unchanged. Danger on white: 6.18:1. Focus stays visible: the line goes from 2px to about 4px.
+Why: with the green focus ring, a focused field with an error showed a red border inside a green ring, two colours with opposite meanings.
+To do: move this into the shared Input and Textarea (branch fix/input-focus-ring in the shared repo), then delete this rule here.
+Agreed by: Muizz Jamiu
