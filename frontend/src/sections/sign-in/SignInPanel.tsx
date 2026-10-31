@@ -61,8 +61,7 @@ export function SignInPanelDesktop() {
       <p className='mt-14 mb-6 max-w-140 font-display text-[clamp(44px,4.6vw,66px)] leading-[1.04] font-semibold'>
         {HEADLINE}
       </p>
-      <p className='m-0 max-w-107.5 text-[17px] leading-[1.65] text-on-dark-label'>{DESCRIPTION}        Share what's left at closing time, or find good food nearby to collect this evening.
-      </p>
+      <p className='m-0 max-w-107.5 text-[17px] leading-[1.65] text-on-dark-label'>{DESCRIPTION}</p>
       <ul className='mt-auto flex pt-10'>
         {POINTS.map((point, index) => (
           <li
@@ -92,7 +91,7 @@ export function SignInPanelPhone() {
     <div className='px-5 pt-6 pb-2 text-on-dark-heading md:mx-auto md:w-full md:max-w-125 md:px-0 md:pt-16 md:pb-8'>
       <Logo variant='dark' size='md' />
       <p className='mt-8 mb-3 hidden font-display text-5xl leading-[1.05] font-semibold md:block'>{HEADLINE}</p>
-      <p className='m-0 hidden text-[17px] leading-[1.65] text-on-dark-label md:block'>{DESCRIPTION}</p>
+      <p className='m-0 hidden text-[17px] leading-[1.65] text-on-dark-label md:block '>{DESCRIPTION}</p>
     </div>
   )
 }

@@ -37,6 +37,7 @@
 .fb-side {
   position: sticky;
   top: 0;
+  align-self: start;
   display: flex;
   height: 100vh;
   flex-direction: column;
@@ -255,8 +256,11 @@
 }
 
 .fb-top {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 30;
   display: flex;
+  flex-shrink: 0;
   height: 68px;
   align-items: center;
   justify-content: flex-end;
@@ -467,7 +471,9 @@
 }
 
 .fb-ptop {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 45;
   display: flex;
   height: 60px;
   align-items: center;

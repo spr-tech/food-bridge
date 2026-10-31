@@ -171,7 +171,7 @@ export function ShareFoodForm() {
               <FormImageUpload name="photo" label="Add photo (optional)" />
 
               <div className="flex md:justify-end">
-                <Button type="submit" size="lg" loading={isSubmitting} className="w-full md:w-auto md:min-w-50">
+                <Button type="submit" size="lg" loading={isSubmitting} className="w-full md:w-auto md:min-w-50 hover:cursor-pointer">
                   Publish listing
                 </Button>
               </div>

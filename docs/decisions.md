@@ -100,3 +100,13 @@ Agreed by: Muizz Jamiu
 Why: with the green focus ring, a focused field with an error showed a red border inside a green ring, two colours with opposite meanings.
 To do: move this into the shared Input and Textarea (branch fix/input-focus-ring in the shared repo), then delete this rule here.
 Agreed by: Muizz Jamiu
+
+### 2026-10-31 · API request tracing header
+
+Decision: The frontend will not assume that `X-Request-Id` is required or supported by the backend until the service engineers confirm it. It is separate from `Idempotency-Key`, which the documented request-creation endpoint requires.
+
+Why: The current Swagger documentation does not confirm a request-tracing header. We should not treat a proposed header as part of the agreed API contract.
+
+Agreed by: Muizz Jamiu (interface).
+
+To confirm: Esther and Adedayo (backend).

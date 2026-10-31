@@ -84,7 +84,7 @@ export function SignInForm({ sessionEnded }: { sessionEnded: boolean }) {
       >
                {({ isSubmitting, setValues }) => {
           function pick(account: DemoAccount) {
-            void setValues({ email: account.email, password: DEMO_PASSWORD })
+            void setValues({ email: account.email, password: account.password ?? DEMO_PASSWORD })
             signInButton.current?.focus()
           }
           return (
@@ -105,7 +105,7 @@ export function SignInForm({ sessionEnded }: { sessionEnded: boolean }) {
                 autoComplete="current-password"
                 icon={<LockIcon />}
               />
-              <Button ref={signInButton} type="submit" size="lg" loading={isSubmitting} className="mt-1 w-full">
+              <Button ref={signInButton} type="submit" size="lg" loading={isSubmitting} className="mt-1 w-full hover:cursor-pointer">
                 Sign in
               </Button>
 
@@ -122,3 +122,9 @@ export function SignInForm({ sessionEnded }: { sessionEnded: boolean }) {
     </>
   )
 }
+
+// ---------------------------------------------------------------------------
+// Explanation
+// - One change from the original: picking a demo account fills in that account's own
+//   password (account.password), falling back to the shared mock password.
+// - The login contract now uses email, so the field keeps its email label and type.

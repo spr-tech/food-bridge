@@ -43,14 +43,19 @@ type ListingCardProps = {
 export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(function ListingCard(
   { listing, myRequest, canRequest },
   viewLinkRef,
-) {
-  const { request, isLoading } = useRequestFood(listing.id)
+) {const { request, isLoading, isRequested } =
+  useRequestFood(listing.id)
   const prefetch = usePrefetchListing()
 
-  const pending = myRequest?.status === 'PENDING'
+
+  const hasRequest = Boolean(myRequest) || isRequested
+
+const pending =
+  myRequest?.status === 'PENDING' || isRequested
+
   let second: ReactNode = null
   if (canRequest) {
-    const disabledLabel = myRequest
+    const disabledLabel = hasRequest
       ? 'Requested'
       : listing.status === 'RESERVED'
         ? 'Reserved'
@@ -82,8 +87,8 @@ export const ListingCard = forwardRef<HTMLAnchorElement, ListingCardProps>(funct
 
   return (
     <Card className="h-full rounded-2xl border-border shadow-[0_1px_2px_rgb(0_0_0/0.03),0_8px_22px_rgb(30_42_36/0.05)]">
-      <div className="flex items-start justify-between gap-3">
-        <ListingPhoto photoUrl={listing.photoUrl} className="h-15.5 w-21 shrink-0 rounded-md" />
+      <div className="flex flex-col items-start justify-between gap-3">
+        <ListingPhoto photoUrl={listing.photoUrl} className="h-50 w-full shrink-0 rounded-md" />
         <StatusBadge kind="listing" status={listing.status} />
       </div>
       <h2 className="mt-3 mb-0.75 line-clamp-2 text-lg leading-snug wrap-break-word">{listing.foodName}</h2>

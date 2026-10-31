@@ -14,7 +14,7 @@ Items marked **TBC** need agreement with the service engineers (Adedayo, Esther)
 - API endpoints are hand-written with RTK Query's `injectEndpoints` for now, with types taken from `/openapi.yaml`. Once that document exists we decide whether to generate them with `@rtk-query/codegen-openapi`. No direct fetch calls, and no calls to paths that are not in the document.
 - API address comes from `VITE_API_URL`: the mock server while building, the Render service from Friday onward. Monday runs against Render only.
 - UI built from the interface engineers' shared component set (github.com/spr-tech/interface-eng-shared-components, Radix-based), copied unchanged into `frontend/src/components/ui/`, with FoodBridge's values in `frontend/src/styles/tokens.css`. No hard-coded colours, no `any`.
-- Every request sends a request ID header so one user's journey can be followed in the service logs. Header name **TBC** (proposed `X-Request-Id`, a new UUID per request).
+- Request tracing: A request ID header such as X-Request-Id may be used to trace API calls in backend logs. Support and format must be confirmed with the backend engineers before implementation.
 - Create listing and Request this food send an idempotency key, so a repeat submission records once. Header name **TBC** (proposed `Idempotency-Key`, one UUID per form submission, reused on retry).
 
 ## 2. Roles and routes
@@ -540,3 +540,221 @@ Google sign-in, Create account, the notifications bell, Dashboard, Transactions,
 | Sizes that differ between files | Wordmark 22px, link padding 11px, top bar padding 28px in the animation file | 24px, 12px 14px, 32px from `source-html/` | Motion from the animation file, static sizes from the screens |
 
 The categories, units and donors in the designs ("packs", "containers", "Restaurant", "Market") are sample text, not the S2 lists, which are still **TBC**.
+
+---
+
+## 13. Backend integration update — 31 October 2026
+
+This section records the current integration with the deployed FoodBridge backend. It updates earlier TBC items where the live Swagger documentation now provides an answer. It does not replace the original user journeys or business rules in this specification.
+
+**Backend:** `https://foodbridge-backend-rg9f.onrender.com`
+
+**API documentation:** `https://foodbridge-backend-rg9f.onrender.com/swagger-ui/index.html`
+
+**OpenAPI document:** `https://foodbridge-backend-rg9f.onrender.com/v3/api-docs`
+
+The backend is maintained in a separate repository: `https://github.com/dayosvoid/foodbridge-backend`.
+
+### 13.1 API endpoints
+
+The following endpoints are documented by the backend:
+
+| Purpose | Method and endpoint |
+|---|---|
+| Sign in | `POST /api/auth/login` |
+| Get signed-in user | `GET /api/auth/me` |
+| List and filter food | `GET /api/listings` |
+| Get listing details | `GET /api/listings/{listingId}` |
+| Create listing | `POST /api/listings` |
+| Edit listing | `PUT /api/listings/{listingId}` |
+| Delete listing | `DELETE /api/listings/{listingId}` |
+| Upload listing photo | `POST /api/listings/images` |
+| Request food | `POST /api/listings/{listingId}/requests` |
+| Get requests for one listing | `GET /api/listings/{listingId}/requests` |
+| Get signed-in user's requests | `GET /api/requests` |
+| Get request details | `GET /api/requests/{requestId}` |
+| Approve request | `PATCH /api/requests/{requestId}/approve` |
+| Decline request | `PATCH /api/requests/{requestId}/decline` |
+| Cancel request | `POST /api/requests/{requestId}/cancel` |
+| Mark handover collected | `PATCH /api/requests/{requestId}/collected` |
+| Get administrator dashboard statistics | `GET /api/admin/dashboard` |
+
+An endpoint appearing in Swagger confirms that it is documented. It does not, by itself, confirm every permission or every possible response. Those still need testing against the live service.
+
+### 13.2 Listing data and filters
+
+The backend listing response uses these field names:
+
+- `id`
+- `foodName`
+- `description`
+- `category`
+- `quantity`
+- `unit`
+- `imageReference`
+- `pickupArea`
+- `collectionDeadline`
+- `status`
+- `donorId`
+- `donorName`
+- `createdAt`
+- `pendingRequestCount`
+
+The frontend maps backend names to its existing interface model where necessary. In particular:
+
+| Backend field | Frontend meaning |
+|---|---|
+| `foodName` | Food name |
+| `collectionDeadline` | Collection deadline |
+| `imageReference` | Listing photo reference |
+| `pickupArea` | Pickup area |
+| `pendingRequestCount` | Number of pending requests |
+
+`GET /api/listings` supports these query parameters:
+
+`category`, `pickupArea`, `availability`, `keyword`, `mine`, `offset`, `limit`.
+
+The frontend must map its search and filter values to these parameter names. Pagination uses `offset` and `limit`.
+
+### 13.3 Categories and units
+
+The documented category values are:
+
+- `PREPARED_MEALS`
+- `PRODUCE`
+- `BAKERY`
+- `DAIRY`
+- `PANTRY`
+- `OTHER`
+
+The documented unit values are:
+
+- `PORTIONS`
+- `KG`
+- `LITRES`
+- `ITEMS`
+- `BOXES`
+
+The frontend may show readable labels, but it must map them to the backend values before submission and map them back for display. Pastries should not be treated as a separate backend category unless the backend contract changes.
+
+The exact backend status enum values still need to be confirmed against the generated schema and live responses. Do not guess them from the display labels.
+
+### 13.4 Authentication
+
+The frontend uses:
+
+- `POST /api/auth/login` with email and password.
+- The returned authentication token for authenticated requests.
+- `GET /api/auth/me` to retrieve the current user's account information.
+
+The login response documents the token, user ID, name, role, organisation name and email. The current-user response provides the account information without the login token.
+
+Mock demo accounts and live backend seed accounts are different. Do not present mock credentials as live API credentials.
+
+### 13.5 Listing photos
+
+The documented upload endpoint is:
+
+`POST /api/listings/images`
+
+It accepts `multipart/form-data` with a required `file` field.
+
+The backend uses Cloudinary for image storage and saves an image reference with the listing. The frontend uploads the image and includes the resulting image reference when creating or editing a listing.
+
+**Still to verify:** the Swagger response currently does not clearly establish the exact property containing the returned image reference. Confirm the actual response with the backend engineer or a live request before relying on a guessed property name.
+
+### 13.6 Request creation and decisions
+
+The documented request-creation endpoint is:
+
+`POST /api/listings/{listingId}/requests`
+
+It requires an `Idempotency-Key` header and does not document a request body.
+
+The frontend generates a unique key for a new request and reuses it when retrying that same submission. Do not send a recipient note in the request body unless the backend contract is extended to support one. The current documented request response contains:
+
+- `id`
+- `listingId`
+- `recipientId`
+- `recipientName`
+- `status`
+- `createdAt`
+
+The request response does not currently document a recipient note.
+
+Request decisions use:
+
+- `PATCH /api/requests/{requestId}/approve`
+- `PATCH /api/requests/{requestId}/decline`
+- `POST /api/requests/{requestId}/cancel`
+
+The donor remains responsible for approving or declining requests. One approved request per listing remains the core allocation rule.
+
+`GET /api/listings/{listingId}/requests` retrieves requests for one listing. `GET /api/requests` retrieves the signed-in user's requests. The documented endpoints do not yet establish a single aggregate endpoint for every request across all of a donor's listings. Therefore, S8's cross-listing request screen still needs confirmation of the required aggregation and counts.
+
+### 13.7 Editing, deleting and handover
+
+The backend documents:
+
+- `PUT /api/listings/{listingId}` for editing a listing.
+- `DELETE /api/listings/{listingId}` for deleting a listing.
+- `PATCH /api/requests/{requestId}/collected` for recording a completed collection.
+
+The original capstone business rule remains in force: the listing's donor or an administrator may edit a listing and update its handover state. A donor may delete their own listing. Do not assume that administrators can delete listings.
+
+The frontend should only expose these actions to the appropriate roles. Confirm the live service's permission checks before marking the behaviour fully verified.
+
+A reverse-handover endpoint is not currently documented. The frontend must not claim that a completed handover can be reversed through the live API until an endpoint and its rules are agreed.
+
+### 13.8 Administrator dashboard
+
+The documented endpoint is:
+
+`GET /api/admin/dashboard`
+
+It returns summary statistics:
+
+- `totalUsers`
+- `totalDonors`
+- `totalRecipients`
+- `totalListings`
+- `availableListings`
+- `reservedListings`
+- `collectedListings`
+- `totalRequests`
+- `pendingRequests`
+- `completedHandovers`
+
+The documented response does not include a recent activity feed or estimated portions saved. These must not be presented as live backend figures unless a separate data source or endpoint is added.
+
+The administrator monitors activity and has the listing-editing and handover responsibilities described in the original capstone brief. The administrator does not replace the donor as the person who decides which recipient request is approved.
+
+### 13.9 Business rules remain unchanged
+
+The original capstone brief remains the source of truth for the product workflow:
+
+1. A donor publishes surplus food.
+2. Recipients browse and request available listings.
+3. The donor approves or declines requests.
+4. Only one request can be approved for a listing.
+5. The donor or administrator can update the handover state, subject to the service's permission checks.
+6. The administrator monitors platform activity.
+
+A later proposed admin-led allocation workflow is not adopted by this specification. Any change to who approves requests requires an explicit team decision and an update to `docs/decisions.md`.
+
+### 13.10 Remaining integration checks
+
+The following are not yet established by the documented API alone:
+
+- Exact listing and request status enum values.
+- Exact image-upload response property.
+- Whether the API supports an idempotency key for listing creation.
+- Whether recipient notes can be stored with requests.
+- The aggregate donor request view and its status counts.
+- Live permission behaviour for listing edits and handover updates.
+- The exact behaviour after a completed handover and whether reversal will be supported.
+- Recent activity and estimated portions saved for the administrator dashboard.
+
+These items must be verified with the backend engineer or through live API tests. Do not invent endpoints, fields or permissions to make an interface appear complete.
+
+---

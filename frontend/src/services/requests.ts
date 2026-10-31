@@ -1,78 +1,116 @@
-// Requests: make, approve or decline, cancel, and the lists for donors and recipients.
-// Screens use these hooks only. Every write refreshes the listing it touches, the lists
-// and the navigation counts.
+// Request workflows. These hooks keep the screens independent of whether data is mocked
+// or returned by Esther's live FoodBridge API.
 import * as db from '@/mocks/db'
 import { simulate, simulateRivalApproval, simulateWrite } from '@/mocks/simulate'
 import { api, LIST_QUERY_OPTIONS } from '@/services/api'
+import { env } from '@/config/env'
+import { mapBackendListing, mapBackendRequest } from '@/services/backend-mappers'
 import { listingsApi } from '@/services/listings'
-import type { ListingRequest } from '@/types/api'
+import type { BackendFoodRequest, BackendListingResponse, ListingRequest } from '@/types/api'
 
-// What changes when a request on this listing changes.
-const touched = (listingId: string) =>
-  [
-    { type: 'Request', id: `LISTING-${listingId}` },
-    { type: 'Request', id: 'MINE' },
-    { type: 'Listing', id: listingId },
-    { type: 'Listing', id: 'LIST' },
-    { type: 'Listing', id: 'MINE' },
-  ] as const
+const touched = (listingId: string) => [
+  { type: 'Request', id: `LISTING-${listingId}` },
+  { type: 'Request', id: 'MINE' },
+  { type: 'Listing', id: listingId },
+  { type: 'Listing', id: 'LIST' },
+  { type: 'Listing', id: 'MINE' },
+] as const
 
 const requestsApi = api.injectEndpoints({
   endpoints: (build) => ({
-    // TEMPORARY: simulated until the API exists. Replace the inside with an
-    // injectEndpoints endpoint; the screen must not change.
     getListingRequests: build.query<ListingRequest[], string>({
-      queryFn: (listingId) =>
-        simulate(
-          (actor) => db.listListingRequests(actor, listingId),
-          () => [],
-        ),
+      queryFn: async (listingId, _api, _extraOptions, baseQuery) => {
+        if (env.useMocks) {
+          return simulate((actor) => db.listListingRequests(actor, listingId), () => [])
+        }
+        const result = await baseQuery({ url: `/api/listings/${encodeURIComponent(listingId)}/requests` })
+        if (result.error) return { error: result.error }
+        const rows = Array.isArray(result.data) ? result.data as BackendFoodRequest[] : []
+        return { data: rows.map((request) => mapBackendRequest(request)) }
+      },
       providesTags: (result, _error, listingId) => [
         { type: 'Request', id: `LISTING-${listingId}` },
         ...(result ?? []).map((request) => ({ type: 'Request' as const, id: request.id })),
       ],
     }),
 
-    // TEMPORARY: simulated until the API exists. Replace the inside with an
-    // injectEndpoints endpoint; the screen must not change.
     createRequest: build.mutation<
       ListingRequest,
       { listingId: string; note?: string | null; idempotencyKey: string }
     >({
-      queryFn: ({ listingId, note, idempotencyKey }) =>
-        simulateWrite((actor) => db.createRequest(actor, { listingId, note }, idempotencyKey)),
+      queryFn: async (arg, _api, _extraOptions, baseQuery) => {
+        const { listingId, idempotencyKey } = arg
+        if (env.useMocks) {
+          return simulateWrite((actor) => db.createRequest(actor, { listingId, note: arg.note }, idempotencyKey))
+        }
+        // Current Swagger documents no request body for this endpoint. The optional note
+        // is therefore not sent until Esther adds it to the contract.
+        const result = await baseQuery({
+          url: `/api/listings/${encodeURIComponent(listingId)}/requests`,
+          method: 'POST',
+          headers: { 'Idempotency-Key': idempotencyKey },
+        })
+        if (result.error) return { error: result.error }
+        return { data: mapBackendRequest(result.data as BackendFoodRequest) }
+      },
       invalidatesTags: (_result, _error, { listingId }) => [...touched(listingId)],
     }),
 
-    // TEMPORARY: simulated until the API exists. Replace the inside with an
-    // injectEndpoints endpoint; the screen must not change.
     decideRequest: build.mutation<
       ListingRequest,
       { requestId: string; listingId: string; decision: 'APPROVED' | 'DECLINED' }
     >({
-      queryFn: ({ requestId, decision }) =>
-        simulateWrite((actor) => {
-          if (decision === 'APPROVED') simulateRivalApproval(requestId)
-          return db.decideRequest(actor, { requestId, decision })
-        }),
+      queryFn: async ({ requestId, decision }, _api, _extraOptions, baseQuery) => {
+        if (env.useMocks) {
+          return simulateWrite((actor) => {
+            if (decision === 'APPROVED') simulateRivalApproval(requestId)
+            return db.decideRequest(actor, { requestId, decision })
+          })
+        }
+        const action = decision === 'APPROVED' ? 'approve' : 'decline'
+        const result = await baseQuery({
+          url: `/api/requests/${encodeURIComponent(requestId)}/${action}`,
+          method: 'PATCH',
+        })
+        if (result.error) return { error: result.error }
+        return { data: mapBackendRequest(result.data as BackendFoodRequest) }
+      },
       invalidatesTags: (_result, _error, { listingId }) => [...touched(listingId)],
     }),
 
-    // TEMPORARY: simulated until the API exists. Replace the inside with an
-    // injectEndpoints endpoint; the screen must not change.
     cancelRequest: build.mutation<ListingRequest, { requestId: string; listingId: string }>({
-      queryFn: ({ requestId }) => simulateWrite((actor) => db.cancelRequest(actor, { requestId })),
+      queryFn: async ({ requestId }, _api, _extraOptions, baseQuery) => {
+        if (env.useMocks) {
+          return simulateWrite((actor) => db.cancelRequest(actor, { requestId }))
+        }
+        const result = await baseQuery({
+          url: `/api/requests/${encodeURIComponent(requestId)}/cancel`,
+          method: 'POST',
+        })
+        if (result.error) return { error: result.error }
+        return { data: mapBackendRequest(result.data as BackendFoodRequest) }
+      },
       invalidatesTags: (_result, _error, { listingId }) => [...touched(listingId)],
     }),
 
-    // TEMPORARY: simulated until the API exists. Replace the inside with an
-    // injectEndpoints endpoint; the screen must not change.
     getMyRequests: build.query<ListingRequest[], void>({
-      queryFn: () =>
-        simulate(
-          (actor) => db.listMyRequests(actor),
-          () => [],
-        ),
+      queryFn: async (_arg, _api, _extraOptions, baseQuery) => {
+        if (env.useMocks) return simulate((actor) => db.listMyRequests(actor), () => [])
+        const result = await baseQuery({ url: '/api/requests', params: { mine: true } })
+        if (result.error) return { error: result.error }
+        const rows = Array.isArray(result.data) ? result.data as BackendFoodRequest[] : []
+        // The current API response contains only request fields. Fetch each listing to
+        // supply the summary required by the existing Your Requests screen. Esther's
+        // planned enriched response will let us remove these extra calls.
+        const enriched = await Promise.all(rows.map(async (request) => {
+          const detail = await baseQuery({ url: `/api/listings/${encodeURIComponent(request.listingId)}` })
+          const listing = detail.error || !detail.data
+            ? undefined
+            : mapBackendListing(detail.data as BackendListingResponse)
+          return mapBackendRequest(request, listing)
+        }))
+        return { data: enriched }
+      },
       providesTags: (result) => [
         { type: 'Request', id: 'MINE' },
         ...(result ?? []).map((request) => ({ type: 'Request' as const, id: request.id })),
@@ -81,11 +119,6 @@ const requestsApi = api.injectEndpoints({
   }),
 })
 
-// Approve is the one optimistic update (spec S5 and section 6). The listing's requests
-// change at once (this one Approved and first, the other pending ones Declined) and the
-// listing shows Reserved. If the service refuses or can't be reached, both go back; then
-// invalidatesTags, which runs after a failure as well as a success, fetches the true state.
-// Added here rather than in injectEndpoints so it can name the endpoints it patches.
 requestsApi.enhanceEndpoints({
   endpoints: {
     decideRequest: {
@@ -120,26 +153,21 @@ requestsApi.enhanceEndpoints({
 
 type QueryOptions = { skip?: boolean }
 
-// TEMPORARY: simulated until the API exists. Replace the inside with an injectEndpoints
-// endpoint; the screen must not change.
 export function useListingRequests(listingId: string, options: QueryOptions = {}) {
   return requestsApi.useGetListingRequestsQuery(listingId, { ...LIST_QUERY_OPTIONS, ...options })
 }
 
-// TEMPORARY: simulated until the API exists. Replace the inside with an injectEndpoints
-// endpoint; the screen must not change.
 export const useCreateRequest = requestsApi.useCreateRequestMutation
-
-// TEMPORARY: simulated until the API exists. Replace the inside with an injectEndpoints
-// endpoint; the screen must not change.
 export const useDecideRequest = requestsApi.useDecideRequestMutation
-
-// TEMPORARY: simulated until the API exists. Replace the inside with an injectEndpoints
-// endpoint; the screen must not change.
 export const useCancelRequest = requestsApi.useCancelRequestMutation
 
-// TEMPORARY: simulated until the API exists. Replace the inside with an injectEndpoints
-// endpoint; the screen must not change.
 export function useMyRequests(options: QueryOptions = {}) {
   return requestsApi.useGetMyRequestsQuery(undefined, { ...LIST_QUERY_OPTIONS, ...options })
 }
+
+// ---------------------------------------------------------------------------
+// Explanation
+// - Your requests now asks GET /api/requests?mine=true, because the contract's mine
+//   parameter defaults to false.
+// - decideRequest no longer destructures an unused listingId inside queryFn; the cache
+//   update below still uses it.

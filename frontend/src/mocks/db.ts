@@ -152,6 +152,7 @@ function toRequest(db: MockDb, request: StoredRequest, now: Date): ListingReques
       deadline: listing.deadline,
       donorName: listing.donorName,
       status: listing.status,
+      photoUrl: listing.photoUrl ?? null,
     },
     recipientId: request.recipientId,
     recipientName: recipient.organisationName,
