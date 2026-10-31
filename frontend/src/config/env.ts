@@ -1,5 +1,4 @@
-// Environment settings, read once at start-up. A missing value fails loudly here
-// instead of as confusing network errors later.
+// Environment settings, read once at start-up.
 const apiUrl = import.meta.env.VITE_API_URL
 
 if (!apiUrl) {
@@ -9,5 +8,10 @@ if (!apiUrl) {
 }
 
 export const env = {
-  apiUrl,
+  // Keep mocks enabled unless explicitly switched off. This prevents accidentally
+  // sending demo users to the real service before the API credentials are ready.
+  apiUrl: apiUrl.replace(/\/$/, ''),
+useMocks: import.meta.env.MODE === 'test' || import.meta.env.VITE_USE_MOCKS !== 'false',
+
+
 } as const

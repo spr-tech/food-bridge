@@ -62,7 +62,7 @@ export function DemoAccountChips({ onPick }: DemoAccountsProps) {
             <button
               type="button"
               onClick={() => onPick(account)}
-              className="rounded-full border border-border-input bg-surface px-3 py-2 text-[13px] font-semibold whitespace-nowrap text-primary hover:bg-status-available-bg"
+              className="rounded-full border border-border-input bg-surface px-3 py-2 text-[13px] font-semibold whitespace-nowrap text-primary hover:bg-status-available-bg hover:cursor-pointer"
             >
               {account.label}
             </button>

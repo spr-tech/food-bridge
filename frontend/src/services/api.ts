@@ -17,6 +17,7 @@ export const api = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
     baseUrl: env.apiUrl,
+      timeout: 45000,
     prepareHeaders: (headers) => {
       // A fresh ID per request lets one user's journey be followed in the service logs.
       // Header name is TBC with the service engineers (spec section 1).
