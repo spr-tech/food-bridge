@@ -1,5 +1,4 @@
-// Share food and Edit listing use the same form.
-// Create mode publishes a new listing; edit mode updates an existing listing.
+
 import { useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { Form, Formik, type FormikHelpers } from 'formik'
@@ -22,7 +21,6 @@ import { listingDetailPath } from '@/constants/routes'
 import { useIdempotencyKey } from '@/hooks/useIdempotencyKey'
 import { useSessionEnded } from '@/hooks/useSessionEnded'
 import { combineDeadline, lagosToday, splitDeadline } from '@/lib/deadline'
-import { shrinkPhoto } from '@/lib/photo'
 import {
   DESCRIPTION_MAX,
   listingSchema,
@@ -30,7 +28,11 @@ import {
 } from '@/schema/listingSchema'
 import { LeaveGuard } from '@/sections/share-food/LeaveGuard'
 import { errorStatus, fieldErrors } from '@/services/errors'
-import { useCreateListing, useUpdateListing } from '@/services/listings'
+import {
+  useCreateListing,
+  useUpdateListing,
+  useUploadListingImage,
+} from '@/services/listings'
 import type { Listing } from '@/types/api'
 
 type ShareFoodFormProps = {
@@ -40,6 +42,11 @@ type ShareFoodFormProps = {
 const NOT_PUBLISHED = "Your listing wasn't published. Try again."
 const NOT_UPDATED = "Your changes weren't saved. Try again."
 const NOT_ALLOWED = "You don't have access to this."
+const PHOTO_UPLOAD_FAILED =
+  "Your photo couldn't be uploaded. Please try again."
+
+const LISTING_NOT_EDITABLE =
+  "This listing can no longer be edited because its status has changed. Only available listings can be edited."
 
 const FIELD_ORDER = [
   'foodName',
@@ -53,15 +60,39 @@ const FIELD_ORDER = [
   'photo',
 ]
 
-// The service names the combined deadline differently.
 const SERVICE_FIELD: Record<string, keyof ListingFormValues> = {
   deadline: 'collectionTime',
   collectionDeadline: 'collectionTime',
 }
 
+function getBackendErrorCode(error: unknown): string | null {
+  if (
+    typeof error !== 'object' ||
+    error === null ||
+    !('data' in error)
+  ) {
+    return null
+  }
+
+  const data = error.data
+
+  if (
+    typeof data !== 'object' ||
+    data === null ||
+    !('code' in data)
+  ) {
+    return null
+  }
+
+  return typeof data.code === 'string'
+    ? data.code
+    : null
+}
+
 export function ShareFoodForm({ listing }: ShareFoodFormProps) {
   const [createListing] = useCreateListing()
   const [updateListing] = useUpdateListing()
+  const [uploadListingImage] = useUploadListingImage()
 
   const { getKey, reset } = useIdempotencyKey()
   const navigate = useNavigate()
@@ -100,11 +131,18 @@ export function ShareFoodForm({ listing }: ShareFoodFormProps) {
     inFlight.current = true
     setFormError(null)
 
+    let uploadingPhoto = false
+
     try {
-      // Keep the existing image unless the donor selects a replacement.
-      const photoUrl = values.photo
-        ? await shrinkPhoto(values.photo)
-        : listing?.photoUrl ?? null
+      // Preserve the existing image if no replacement was selected.
+      let photoUrl = listing?.photoUrl ?? null
+
+      // Upload a newly selected image to Cloudinary first.
+      if (values.photo) {
+        uploadingPhoto = true
+        photoUrl = await uploadListingImage(values.photo).unwrap()
+        uploadingPhoto = false
+      }
 
       const input = {
         foodName: values.foodName.trim(),
@@ -143,10 +181,17 @@ export function ShareFoodForm({ listing }: ShareFoodFormProps) {
       void navigate(listingDetailPath(savedListing.id))
     } catch (error) {
       const status = errorStatus(error)
+      const code = getBackendErrorCode(error)
 
       if (status === 401) {
         flushSync(() => setLeavingOnPurpose(true))
         void sessionEnded()
+      } else if (code === 'LISTING_NOT_EDITABLE') {
+        setFormError(LISTING_NOT_EDITABLE)
+      } else if (status === 403) {
+        setFormError(NOT_ALLOWED)
+      } else if (uploadingPhoto) {
+        setFormError(PHOTO_UPLOAD_FAILED)
       } else if (status === 400) {
         const fields: Partial<
           Record<keyof ListingFormValues, string>
@@ -160,26 +205,26 @@ export function ShareFoodForm({ listing }: ShareFoodFormProps) {
           fields[name] = message
         }
 
-        helpers.setErrors(fields)
+        if (Object.keys(fields).length === 0) {
+          setFormError(isEditing ? NOT_UPDATED : NOT_PUBLISHED)
+        } else {
+          helpers.setErrors(fields)
 
-        const first = FIELD_ORDER.find(
-          (name) => fields[name as keyof ListingFormValues],
-        )
+          const first = FIELD_ORDER.find(
+            (name) => fields[name as keyof ListingFormValues],
+          )
 
-        if (first) {
-          for (const name of Object.keys(fields)) {
-            void helpers.setFieldTouched(name, true, false)
+          if (first) {
+            for (const name of Object.keys(fields)) {
+              void helpers.setFieldTouched(name, true, false)
+            }
+
+            focusField(first)
           }
-
-          focusField(first)
         }
       } else {
         setFormError(
-          status === 403
-            ? NOT_ALLOWED
-            : isEditing
-              ? NOT_UPDATED
-              : NOT_PUBLISHED,
+          isEditing ? NOT_UPDATED : NOT_PUBLISHED,
         )
       }
     } finally {
@@ -224,9 +269,10 @@ export function ShareFoodForm({ listing }: ShareFoodFormProps) {
               <FormTextarea
                 name="description"
                 label="Description"
+                required
                 maxLength={DESCRIPTION_MAX}
                 showCount
-                placeholder="e.g. Freshly cooked rice, ready for collection. Add any collection instructions here."
+                placeholder="Describe the food and include any collection instructions."
               />
 
               <div className="grid gap-4 md:grid-cols-[1.3fr_1fr_1fr]">
@@ -302,7 +348,11 @@ export function ShareFoodForm({ listing }: ShareFoodFormProps) {
 
               <FormImageUpload
                 name="photo"
-                label={isEditing ? 'Replace photo (optional)' : 'Add photo (optional)'}
+                label={
+                  isEditing
+                    ? 'Replace photo (optional)'
+                    : 'Add photo (optional)'
+                }
               />
 
               <div className="flex md:justify-end">
