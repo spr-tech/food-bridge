@@ -1,4 +1,4 @@
-// /listings/:id/edit: the owning donor or administrator edits a listing.
+
 import { useEffect } from 'react'
 import { Link, useParams } from 'react-router'
 import { PageContainer } from '@/components/common/PageContainer'
@@ -14,6 +14,22 @@ import { errorStatus } from '@/services/errors'
 import { useListing } from '@/services/listings'
 
 const TITLE = 'Edit listing'
+
+function unavailableMessage(status: string): string {
+  switch (status.toUpperCase()) {
+    case 'RESERVED':
+      return 'A recipient has reserved this food. You cannot edit the listing while it is reserved.'
+
+    case 'COLLECTED':
+      return 'This food has already been collected. The listing can no longer be edited.'
+
+    case 'EXPIRED':
+      return 'The collection deadline has passed. This listing can no longer be edited.'
+
+    default:
+      return 'Only available listings can be edited.'
+  }
+}
 
 export function EditListingPage() {
   useDocumentTitle(TITLE)
@@ -79,10 +95,37 @@ export function EditListingPage() {
     return (
       <PageContainer width="form">
         <PageHeader title={TITLE} />
+
         <div role="alert" className="flex flex-col gap-3">
           <p className="text-sm text-danger">
             You don't have permission to edit this listing.
             Only its owning donor or an administrator can edit it.
+          </p>
+
+          <Link
+            to={listingDetailPath(currentListing.id)}
+            className="text-sm font-semibold text-primary underline"
+          >
+            Back to listing
+          </Link>
+        </div>
+      </PageContainer>
+    )
+  }
+
+  const status = String(currentListing.status).toUpperCase()
+
+  if (status !== 'AVAILABLE') {
+    return (
+      <PageContainer width="form">
+        <PageHeader
+          title={TITLE}
+          description="This listing is no longer available for editing."
+        />
+
+        <div role="alert" className="flex flex-col gap-3">
+          <p className="rounded-md border-2 border-danger px-4 py-3 text-sm font-medium text-danger">
+            {unavailableMessage(status)}
           </p>
 
           <Link
