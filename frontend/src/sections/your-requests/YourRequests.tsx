@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { LoadingState } from '@/components/common/LoadingState'
@@ -9,6 +8,7 @@ import { ROUTES } from '@/constants/routes'
 import { useNow } from '@/hooks/useNow'
 import { useSessionEnded } from '@/hooks/useSessionEnded'
 import { formatUpdated } from '@/lib/format'
+import { getRecipientRequestStatus } from '@/lib/request-status'
 import { RequestItem } from '@/sections/your-requests/RequestItem'
 import { errorStatus } from '@/services/errors'
 import { useMyRequests } from '@/services/requests'
@@ -21,31 +21,38 @@ const newestFirst = (
   b: ListingRequest,
 ) => Date.parse(b.createdAt) - Date.parse(a.createdAt)
 
-function isCollected(request: ListingRequest): boolean {
-  return request.listing.status === 'COLLECTED'
+function isSuccessfullyCollected(request: ListingRequest): boolean {
+  return (
+    request.status === 'APPROVED' &&
+    request.listing.status === 'COLLECTED'
+  )
 }
 
 function isOpenRequest(request: ListingRequest): boolean {
+  const status = getRecipientRequestStatus(
+    request.status,
+    request.listing.status,
+  )
+
   return (
-    !isCollected(request) &&
-    (request.status === 'PENDING' ||
-      request.status === 'APPROVED')
+    !isSuccessfullyCollected(request) &&
+    (status === 'PENDING' || status === 'APPROVED')
   )
 }
 
 function isHistoryRequest(request: ListingRequest): boolean {
+  const status = getRecipientRequestStatus(
+    request.status,
+    request.listing.status,
+  )
+
   return (
-    isCollected(request) ||
-    (request.status !== 'PENDING' &&
-      request.status !== 'APPROVED')
+    isSuccessfullyCollected(request) ||
+    (status !== 'PENDING' && status !== 'APPROVED')
   )
 }
 
-function RequestList({
-  requests,
-}: {
-  requests: ListingRequest[]
-}) {
+function RequestList({ requests }: { requests: ListingRequest[] }) {
   return (
     <ul className="grid gap-3">
       {requests.map((request) => (
@@ -122,7 +129,6 @@ export function YourRequests() {
         </p>
       )}
 
-      {/* Request view toggler */}
       <div
         role="tablist"
         aria-label="Your request views"
@@ -181,7 +187,6 @@ export function YourRequests() {
         </button>
       </div>
 
-      {/* Open requests panel */}
       {activeView === 'open' && (
         <section
           id="open-requests-panel"
@@ -203,7 +208,6 @@ export function YourRequests() {
         </section>
       )}
 
-      {/* Request history panel */}
       {activeView === 'history' && (
         <section
           id="request-history-panel"
