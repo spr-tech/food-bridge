@@ -3,6 +3,7 @@
 // using data kept in sessionStorage.
 
 import { CATEGORIES, PICKUP_AREAS, UNITS } from '@/constants/listingOptions'
+import { canDeleteListing } from '@/lib/listing-permissions'
 import {
   createSeed,
   DB_VERSION,
@@ -486,6 +487,50 @@ export function updateListing(
   save(db)
 
   return toListing(db, listing, now)
+}
+
+// The owning donor while it is Available or Expired, or an administrator. Its requests
+// go with it.
+export function deleteListing(
+  actor: Session | null,
+  id: string,
+): void {
+  const db = load()
+  const deleter = requireActor(db, actor)
+  const listing = findListing(db, id)
+  const status = listingStatus(db, listing, new Date())
+
+  if (!canDeleteListing(deleter, { donorId: listing.donorId, status })) {
+    if (deleter.role === 'admin' || listing.donorId === deleter.accountId) {
+      throw new MockApiError(
+        409,
+        'LISTING_NOT_DELETABLE',
+        'This listing can no longer be deleted.',
+      )
+    }
+
+    throw new MockApiError(
+      403,
+      'NOT_OWNER',
+      "You don't have access to this.",
+    )
+  }
+
+  const goneIds = new Set([
+    id,
+    ...db.requests
+      .filter((request) => request.listingId === id)
+      .map((request) => request.id),
+  ])
+
+  db.listings = db.listings.filter((item) => item.id !== id)
+  db.requests = db.requests.filter((request) => request.listingId !== id)
+
+  for (const [key, value] of Object.entries(db.idempotency)) {
+    if (goneIds.has(value)) delete db.idempotency[key]
+  }
+
+  save(db)
 }
 
 // ---- Donor listings ---------------------------------------------------------------------

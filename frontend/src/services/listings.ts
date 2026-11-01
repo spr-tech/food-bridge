@@ -198,6 +198,42 @@ const listingsApi = api.injectEndpoints({
     }),
 
     // -----------------------------------------------------------------------
+    // DELETE /api/listings/{listingId}
+    // Delete a listing. The service replies 204 No Content.
+    // -----------------------------------------------------------------------
+    deleteListing: build.mutation<void, string>({
+      queryFn: async (
+        listingId,
+        _api,
+        _extraOptions,
+        baseQuery,
+      ) => {
+        if (env.useMocks) {
+          return simulateWrite((actor) =>
+            db.deleteListing(actor, listingId),
+          )
+        }
+
+        const result = await baseQuery({
+          url: `/api/listings/${encodeURIComponent(listingId)}`,
+          method: 'DELETE',
+        })
+
+        if (result.error) return { error: result.error }
+
+        return { data: undefined }
+      },
+
+      // The listing's requests go with it, so a recipient's own list refreshes too.
+      invalidatesTags: (_result, _error, listingId) => [
+        { type: 'Listing', id: listingId },
+        { type: 'Listing', id: 'LIST' },
+        { type: 'Listing', id: 'MINE' },
+        { type: 'Request', id: 'MINE' },
+      ],
+    }),
+
+    // -----------------------------------------------------------------------
     // POST /api/listings/images
     // Upload a photo. The backend stores it in Cloudinary.
     // -----------------------------------------------------------------------
@@ -370,6 +406,9 @@ export const useCreateListing =
 
 export const useUpdateListing =
   listingsApi.useUpdateListingMutation
+
+export const useDeleteListing =
+  listingsApi.useDeleteListingMutation
 
 export function useMyListings(
   options: QueryOptions = {},
