@@ -4,6 +4,8 @@
 // open) or their home page.
 // The handover photo covers the whole page and the form sits on a white card. From
 // 1024px up, the welcome panel fills the left half; below that, only the logo shows.
+// On short windows (laptops with Windows display scaling) the spacing tightens, so the
+// whole page fits at 100% zoom.
 import { Navigate, useSearchParams } from 'react-router'
 import { canOpen } from '@/app/routes'
 import { useSession } from '@/app/session'
@@ -39,8 +41,8 @@ export function SignInPage() {
       <div className='lg:hidden'>
         <SignInPanelPhone />
       </div>
-      <div className='flex flex-col items-center px-4 py-4 lg:justify-center lg:px-8 lg:py-12'>
-        <div className='w-full max-w-110 rounded-2xl bg-surface px-5 pt-6 pb-5 shadow-[0_30px_70px_color-mix(in_srgb,var(--color-sidebar-dark)_45%,transparent)] lg:max-w-125 lg:rounded-3xl lg:px-11 lg:pt-11 lg:pb-8'>
+      <div className='flex flex-col items-center px-4 py-4 lg:justify-center lg:px-8 lg:py-12 short:lg:py-6'>
+        <div className='w-full max-w-110 rounded-2xl bg-surface px-5 pt-6 pb-5 shadow-[0_30px_70px_color-mix(in_srgb,var(--color-sidebar-dark)_45%,transparent)] lg:max-w-125 lg:rounded-3xl lg:px-11 lg:pt-11 lg:pb-8 short:lg:pt-7 short:lg:pb-5'>
           <SignInForm sessionEnded={params.get('reason') === 'session-ended'} />
           <DemoBanner />
         </div>
