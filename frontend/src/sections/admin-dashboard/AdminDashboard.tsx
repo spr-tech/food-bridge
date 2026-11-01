@@ -1,7 +1,6 @@
 // The administrator's dashboard (brief journey 5): open listings, requests waiting,
-// reserved, completed handovers, expired, and an estimate of food saved. Each count
-// links to All listings filtered to match. States: skeletons while loading; the error
-// with Try again; a 401 goes to sign in.
+// reserved, completed handovers, expired, and an estimate of food saved.
+// Some figures and destinations remain unavailable until the backend contract is updated.
 import { useEffect } from 'react'
 import { Link } from 'react-router'
 import { LoadingState } from '@/components/common/LoadingState'
@@ -12,25 +11,31 @@ import { useNow } from '@/hooks/useNow'
 import { useSessionEnded } from '@/hooks/useSessionEnded'
 import { formatUpdated } from '@/lib/format'
 import { errorStatus } from '@/services/errors'
-import { useListings } from '@/services/listings'
+import { useAdminDashboard } from '@/services/admin'
 
 type Stat = {
   label: string
-  value: number
+  value: number | string
   hint: string
-  // Where the card leads; none for the estimate.
   to?: string
 }
 
 function StatCard({ stat }: { stat: Stat }) {
+  const value =
+    typeof stat.value === 'number'
+      ? stat.value.toLocaleString('en-GB')
+      : stat.value
+
   const content = (
     <>
       <p className="text-sm font-semibold text-text-muted">{stat.label}</p>
-      <p className="mt-1 font-display text-4xl">{stat.value.toLocaleString('en-GB')}</p>
+      <p className="mt-1 font-display text-4xl">{value}</p>
       <p className="mt-1 text-[13px] text-text-muted">{stat.hint}</p>
     </>
   )
+
   const box = 'block rounded-2xl border border-border bg-surface p-5'
+
   return stat.to ? (
     <Link to={stat.to} className={`${box} hover:bg-surface-hover`}>
       {content}
@@ -41,16 +46,17 @@ function StatCard({ stat }: { stat: Stat }) {
 }
 
 export function AdminDashboard() {
-  // Every listing in every state; the counts are worked out from them.
-  const listings = useListings({ status: 'all', limit: 1000 })
+  const dashboard = useAdminDashboard()
   const sessionEnded = useSessionEnded()
   const now = useNow()
 
   useEffect(() => {
-    if (errorStatus(listings.error) === 401) void sessionEnded()
-  }, [listings.error, sessionEnded])
+    if (errorStatus(dashboard.error) === 401) {
+      void sessionEnded()
+    }
+  }, [dashboard.error, sessionEnded])
 
-  if (listings.isLoading) {
+  if (dashboard.isLoading) {
     return (
       <LoadingState label="Loading the dashboard">
         <Skeleton shape="card" />
@@ -59,44 +65,62 @@ export function AdminDashboard() {
     )
   }
 
-  if (listings.isError) {
+  if (dashboard.isError || !dashboard.data) {
     return (
       <ErrorState
         title="We couldn't load the dashboard."
         description="Check your connection and try again."
-        onRetry={() => void listings.refetch()}
-        retrying={listings.isFetching}
+        onRetry={() => void dashboard.refetch()}
+        retrying={dashboard.isFetching}
       />
     )
   }
 
-  const items = listings.data?.items ?? []
-  const count = (status: string) => items.filter((listing) => listing.status === status).length
-  const collected = items.filter((listing) => listing.status === 'COLLECTED')
+  const summary = dashboard.data
 
   const stats: Stat[] = [
-    { label: 'Open listings', value: count('AVAILABLE'), hint: 'Available to request now', to: `${ROUTES.listings}?status=available` },
+    {
+      label: 'Open listings',
+      value: summary.availableListings,
+      hint: 'Available to request now',
+      to: `${ROUTES.listings}?status=available`,
+    },
     {
       label: 'Requests waiting',
-      value: items.reduce((sum, listing) => sum + listing.pendingRequestCount, 0),
-      hint: 'Pending a donor’s decision',
-      to: ROUTES.listings,
+      value: summary.pendingRequests,
+      hint: 'Pending donor decisions; admin request view not connected yet',
     },
-    { label: 'Reserved', value: count('RESERVED'), hint: 'A request approved, awaiting collection', to: `${ROUTES.listings}?status=reserved` },
-    { label: 'Completed handovers', value: collected.length, hint: 'Food collected', to: `${ROUTES.listings}?status=collected` },
-    { label: 'Expired', value: count('EXPIRED'), hint: 'Deadline passed', to: `${ROUTES.listings}?status=expired` },
+    {
+      label: 'Reserved',
+      value: summary.reservedListings,
+      hint: 'A request approved, awaiting collection',
+      to: `${ROUTES.listings}?status=reserved`,
+    },
+    {
+      label: 'Completed handovers',
+      value: summary.completedHandovers,
+      hint: 'Collected; listing filter awaiting backend correction',
+    },
+    {
+      label: 'Expired',
+      value: '—',
+      hint: 'Waiting for an explicit expired-listings count from the backend',
+    },
     {
       label: 'Food saved (estimate)',
-      value: collected.reduce((sum, listing) => sum + listing.quantity, 0),
-      hint: 'Items in collected listings; an estimate, not weighed',
+      value: '—',
+      hint: 'Waiting for a complete portions-saved estimate from the backend',
     },
   ]
 
   return (
     <>
-      {listings.fulfilledTimeStamp && (
-        <p className="mb-4 text-[13px] text-text-muted">{formatUpdated(listings.fulfilledTimeStamp, now)}</p>
+      {dashboard.fulfilledTimeStamp && (
+        <p className="mb-4 text-[13px] text-text-muted">
+          {formatUpdated(dashboard.fulfilledTimeStamp, now)}
+        </p>
       )}
+
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat) => (
           <li key={stat.label}>

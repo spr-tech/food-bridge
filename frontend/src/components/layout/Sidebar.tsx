@@ -1,6 +1,6 @@
-// The desktop sidebar (768px and up, spec section 12): logo, the role's links, the
-// "Coming soon" items and the footer line. Its colours follow AppLayout's data-sidebar
-// state; any link click reports back so the first one can start the flood.
+// The desktop sidebar (768px and up, spec section 12).
+// It remains dark green permanently, with white navigation text.
+// There is no flood animation or theme transition when navigating.
 import { useId } from 'react'
 import { NavLink } from 'react-router'
 import { Logo } from '@/components/layout/Logo'
@@ -12,27 +12,26 @@ export type NavCounts = Partial<Record<string, number>>
 type SidebarProps = {
   items: NavItem[]
   counts: NavCounts
-  onLinkClick: () => void
 }
 
-export function Sidebar({ items, counts, onLinkClick }: SidebarProps) {
+export function Sidebar({ items, counts }: SidebarProps) {
   const comingSoonId = useId()
 
   return (
     <aside className="fb-side">
-      <div className="fb-pour" aria-hidden="true" />
       <Logo variant="sidebar" />
 
       <nav aria-label="Main">
         <ul className="fb-nav">
           {items.map((item) => {
             const count = counts[item.to]
+
             return (
               <li key={item.to}>
-                {/* end: only the exact page is marked current, not its sub-pages */}
-                <NavLink to={item.to} end className="fb-link" onClick={onLinkClick}>
+                <NavLink to={item.to} end className="fb-link">
                   <NavIcon name={item.icon} />
                   {item.label}
+
                   {count !== undefined && (
                     <span className="fb-count">
                       <span aria-hidden="true">{count}</span>
@@ -50,6 +49,7 @@ export function Sidebar({ items, counts, onLinkClick }: SidebarProps) {
       <p id={comingSoonId} className="fb-sect">
         Coming soon
       </p>
+
       <ul className="fb-nav" aria-labelledby={comingSoonId}>
         {COMING_SOON.map((item) => (
           <li key={item.label}>

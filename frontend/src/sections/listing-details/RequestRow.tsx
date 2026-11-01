@@ -27,10 +27,12 @@ type RequestRowProps = {
   otherPending: number
   onApprove: () => void
   onDecline: () => Promise<void>
+  // Only passed for the donor. Shown on the approved request while the listing is reserved.
+  onCollect?: () => Promise<void>
 }
 
 export const RequestRow = forwardRef<HTMLDivElement, RequestRowProps>(function RequestRow(
-  { request, listing, otherPending, onApprove, onDecline },
+  { request, listing, otherPending, onApprove, onDecline, onCollect },
   ref,
 ) {
   const name = request.recipientName
@@ -90,6 +92,24 @@ export const RequestRow = forwardRef<HTMLDivElement, RequestRowProps>(function R
           />
         </div>
       )}
+      {request.status === 'APPROVED' && listing.status === 'RESERVED' && onCollect && (
+        <div className="mt-3 md:ml-14.5 md:mt-3.5">
+          <ConfirmDialog
+            trigger={
+              <Button aria-label={`Mark as collected: ${name}`} className="h-10.5 w-full font-bold md:h-10 md:w-48">
+                Mark as collected
+              </Button>
+            }
+            title="Mark this food as collected?"
+            description={`This records that ${name} collected ${listing.foodName}. The handover is then complete.`}
+            confirmLabel="Mark as collected"
+            onConfirm={onCollect}
+          />
+        </div>
+      )}
     </Card>
   )
 })
+
+
+

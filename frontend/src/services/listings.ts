@@ -1,5 +1,4 @@
-
-// Listings: browse, details, create, upload photos, and the donor's own listings.
+// Listings: browse, details, create, update, upload photos, and the donor's own listings.
 // Screens use these hooks only; mock and live services share the same UI-facing types.
 
 import * as db from '@/mocks/db'
@@ -7,7 +6,10 @@ import { simulate, simulateWrite } from '@/mocks/simulate'
 import { shrinkPhoto } from '@/lib/photo'
 import { api, LIST_QUERY_OPTIONS } from '@/services/api'
 import { env } from '@/config/env'
-import { extractImageReference, mapBackendListing } from '@/services/backend-mappers'
+import {
+  extractImageReference,
+  mapBackendListing,
+} from '@/services/backend-mappers'
 
 import type {
   BackendCreateListingRequest,
@@ -18,7 +20,10 @@ import type {
   ListingPage,
 } from '@/types/api'
 
-function queryParams(filters: ListingFilters, mine = false) {
+function queryParams(
+  filters: ListingFilters,
+  mine = false,
+) {
   const params: Record<string, string | number | boolean> = {
     offset: 0,
     limit: filters.limit ?? 50,
@@ -37,6 +42,23 @@ function queryParams(filters: ListingFilters, mine = false) {
   return params
 }
 
+function toBackendListingRequest(
+  input: CreateListingInput,
+): BackendCreateListingRequest {
+  return {
+    foodName: input.foodName,
+    description: input.description,
+    category: input.category,
+    quantity: input.quantity,
+    unit: input.unit,
+    ...(input.photoUrl
+      ? { imageReference: input.photoUrl }
+      : {}),
+    pickupArea: input.pickupArea,
+    collectionDeadline: input.deadline,
+  }
+}
+
 const listingsApi = api.injectEndpoints({
   endpoints: (build) => ({
     // -----------------------------------------------------------------------
@@ -44,7 +66,12 @@ const listingsApi = api.injectEndpoints({
     // Browse and filter food listings.
     // -----------------------------------------------------------------------
     getListings: build.query<ListingPage, ListingFilters>({
-      queryFn: async (filters, _api, _extraOptions, baseQuery) => {
+      queryFn: async (
+        filters,
+        _api,
+        _extraOptions,
+        baseQuery,
+      ) => {
         if (env.useMocks) {
           return simulate(
             (actor) => db.listListings(actor, filters),
@@ -65,7 +92,8 @@ const listingsApi = api.injectEndpoints({
 
         const items = rows.map(mapBackendListing)
 
-        const headerTotal = result.meta?.response?.headers.get('x-total-count')
+        const headerTotal =
+          result.meta?.response?.headers.get('x-total-count')
 
         const total =
           headerTotal !== null &&
@@ -74,7 +102,12 @@ const listingsApi = api.injectEndpoints({
             ? Number(headerTotal)
             : items.length
 
-        return { data: { items, total } }
+        return {
+          data: {
+            items,
+            total,
+          },
+        }
       },
 
       providesTags: (result) => [
@@ -91,7 +124,12 @@ const listingsApi = api.injectEndpoints({
     // Get one listing.
     // -----------------------------------------------------------------------
     getListing: build.query<Listing, string>({
-      queryFn: async (id, _api, _extraOptions, baseQuery) => {
+      queryFn: async (
+        id,
+        _api,
+        _extraOptions,
+        baseQuery,
+      ) => {
         if (env.useMocks) {
           return simulate((actor) => db.getListing(actor, id))
         }
@@ -103,7 +141,9 @@ const listingsApi = api.injectEndpoints({
         if (result.error) return { error: result.error }
 
         return {
-          data: mapBackendListing(result.data as BackendListingResponse),
+          data: mapBackendListing(
+            result.data as BackendListingResponse,
+          ),
         }
       },
 
@@ -113,17 +153,69 @@ const listingsApi = api.injectEndpoints({
     }),
 
     // -----------------------------------------------------------------------
+    // PUT /api/listings/{listingId}
+    // Update an existing listing.
+    // -----------------------------------------------------------------------
+    updateListing: build.mutation<
+      Listing,
+      {
+        listingId: string
+        input: CreateListingInput
+      }
+    >({
+      queryFn: async (
+        { listingId, input },
+        _api,
+        _extraOptions,
+        baseQuery,
+      ) => {
+        if (env.useMocks) {
+          return simulateWrite((actor) =>
+            db.updateListing(actor, listingId, input),
+          )
+        }
+
+        const result = await baseQuery({
+          url: `/api/listings/${encodeURIComponent(listingId)}`,
+          method: 'PUT',
+          body: toBackendListingRequest(input),
+        })
+
+        if (result.error) return { error: result.error }
+
+        return {
+          data: mapBackendListing(
+            result.data as BackendListingResponse,
+          ),
+        }
+      },
+
+      invalidatesTags: (_result, _error, { listingId }) => [
+        { type: 'Listing', id: listingId },
+        { type: 'Listing', id: 'LIST' },
+        { type: 'Listing', id: 'MINE' },
+      ],
+    }),
+
+    // -----------------------------------------------------------------------
     // POST /api/listings/images
     // Upload a photo. The backend stores it in Cloudinary.
     // -----------------------------------------------------------------------
     uploadListingImage: build.mutation<string, File>({
-      queryFn: async (file, _api, _extraOptions, baseQuery) => {
+      queryFn: async (
+        file,
+        _api,
+        _extraOptions,
+        baseQuery,
+      ) => {
         if (env.useMocks) {
           const saved = await simulateWrite(() => true)
 
           if ('error' in saved) return { error: saved.error }
 
-          return { data: await shrinkPhoto(file) }
+          return {
+            data: await shrinkPhoto(file),
+          }
         }
 
         const form = new FormData()
@@ -178,23 +270,10 @@ const listingsApi = api.injectEndpoints({
           )
         }
 
-        const body: BackendCreateListingRequest = {
-          foodName: input.foodName,
-          description: input.description,
-          category: input.category,
-          quantity: input.quantity,
-          unit: input.unit,
-          ...(input.photoUrl
-            ? { imageReference: input.photoUrl }
-            : {}),
-          pickupArea: input.pickupArea,
-          collectionDeadline: input.deadline,
-        }
-
         const result = await baseQuery({
           url: '/api/listings',
           method: 'POST',
-          body,
+          body: toBackendListingRequest(input),
           headers: {
             'Idempotency-Key': idempotencyKey,
           },
@@ -203,7 +282,9 @@ const listingsApi = api.injectEndpoints({
         if (result.error) return { error: result.error }
 
         return {
-          data: mapBackendListing(result.data as BackendListingResponse),
+          data: mapBackendListing(
+            result.data as BackendListingResponse,
+          ),
         }
       },
 
@@ -218,7 +299,12 @@ const listingsApi = api.injectEndpoints({
     // Get the authenticated donor's own listings.
     // -----------------------------------------------------------------------
     getMyListings: build.query<Listing[], void>({
-      queryFn: async (_arg, _api, _extraOptions, baseQuery) => {
+      queryFn: async (
+        _arg,
+        _api,
+        _extraOptions,
+        baseQuery,
+      ) => {
         if (env.useMocks) {
           return simulate(
             (actor) => db.listMyListings(actor),
@@ -282,7 +368,12 @@ export const useUploadListingImage =
 export const useCreateListing =
   listingsApi.useCreateListingMutation
 
-export function useMyListings(options: QueryOptions = {}) {
+export const useUpdateListing =
+  listingsApi.useUpdateListingMutation
+
+export function useMyListings(
+  options: QueryOptions = {},
+) {
   return listingsApi.useGetMyListingsQuery(undefined, {
     ...LIST_QUERY_OPTIONS,
     ...options,

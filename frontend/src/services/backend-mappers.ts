@@ -1,4 +1,3 @@
-
 import type {
   BackendFoodRequest,
   BackendListingResponse,
@@ -102,6 +101,7 @@ export function mapBackendRequest(
 
   const rawState = asString(dto.status, 'PENDING').toUpperCase()
 
+  // A collected handover keeps its approval; the listing carries the COLLECTED state.
   const status: ListingRequest['status'] = [
     'APPROVED',
     'DECLINED',
@@ -109,7 +109,9 @@ export function mapBackendRequest(
     'EXPIRED',
   ].includes(rawState)
     ? rawState as ListingRequest['status']
-    : 'PENDING'
+    : rawState === 'COLLECTED' || rawState === 'COMPLETED'
+      ? 'APPROVED'
+      : 'PENDING'
 
   return {
     id: asString(dto.id),

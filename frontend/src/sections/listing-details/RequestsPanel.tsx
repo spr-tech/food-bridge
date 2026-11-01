@@ -20,7 +20,7 @@ import { useSessionEnded } from '@/hooks/useSessionEnded'
 import { formatDateTime, formatUpdated } from '@/lib/format'
 import { RequestRow } from '@/sections/listing-details/RequestRow'
 import { errorCode, errorStatus } from '@/services/errors'
-import { useDecideRequest, useListingRequests } from '@/services/requests'
+import { useDecideRequest, useListingRequests, useMarkCollected } from '@/services/requests'
 import type { Listing, ListingRequest } from '@/types/api'
 
 const ALREADY_RESERVED = 'This listing already has an approved request. Your approval was not saved.'
@@ -30,6 +30,8 @@ const APPROVAL_EXPIRED = 'This listing expired before your approval was saved.'
 const APPROVAL_NOT_PENDING = 'This request can no longer be approved.'
 const DECLINE_NOT_PENDING = 'This request can no longer be declined.'
 const DECLINE_FAILED = "Your decline wasn't saved. Try again."
+const COLLECT_NOT_ALLOWED = "This request can't be marked as collected."
+const COLLECT_FAILED = "That wasn't saved. Try again."
 
 // Where focus goes next: a request once it has been decided, or, after a refused
 // approval, whichever request the service says is approved.
@@ -38,6 +40,7 @@ type FocusTarget = { decided: string } | { approvedOtherThan: string }
 export function RequestsPanel({ listing }: { listing: Listing }) {
   const requests = useListingRequests(listing.id)
   const [decideRequest] = useDecideRequest()
+  const [markCollected] = useMarkCollected()
   const { toast } = useToast()
   const sessionEnded = useSessionEnded()
   const now = useNow()
@@ -109,6 +112,23 @@ export function RequestsPanel({ listing }: { listing: Listing }) {
     }
   }
 
+  // Awaited by the dialog, which shows its loading state; never throws, so it closes.
+  async function collect(request: ListingRequest): Promise<void> {
+    try {
+      await markCollected({ requestId: request.id, listingId: listing.id }).unwrap()
+      toast({ variant: 'success', title: 'Marked as collected' })
+    } catch (error) {
+      const status = errorStatus(error)
+      if (status === 401) {
+        void sessionEnded()
+      } else if (status === 409 || status === 403) {
+        toast({ variant: 'error', title: COLLECT_NOT_ALLOWED })
+      } else {
+        toast({ variant: 'error', title: COLLECT_FAILED, action: { label: 'Try again', onClick: () => void collect(request) } })
+      }
+    }
+  }
+
   let body
   if (requests.isLoading) {
     body = (
@@ -155,6 +175,7 @@ export function RequestsPanel({ listing }: { listing: Listing }) {
               otherPending={pending.filter((r) => r.id !== request.id).length}
               onApprove={() => void approve(request)}
               onDecline={() => decline(request)}
+              onCollect={() => collect(request)}
             />
           </li>
         ))}

@@ -1,4 +1,5 @@
-// The phone top bar (below 768px): cream, with the logo and the account menu.
+// The mobile top bar: permanent dark-green background,
+// FoodBridge logo and account menu.
 import { AccountMenu } from '@/components/layout/AccountMenu'
 import { Logo } from '@/components/layout/Logo'
 
@@ -11,7 +12,7 @@ type PhoneTopBarProps = {
 export function PhoneTopBar(props: PhoneTopBarProps) {
   return (
     <header className="fb-ptop">
-      <Logo variant="cream" />
+      <Logo variant="sidebar" />
       <AccountMenu {...props} />
     </header>
   )
