@@ -26,7 +26,7 @@ export const listingSchema = Yup.object({
   foodName: Yup.string().trim().required('Enter the food name').min(3, 'Enter the food name').max(80, 'Enter the food name'),
   description: Yup.string().max(DESCRIPTION_MAX),
   category: Yup.string().required('Choose a category'),
-  quantity: Yup.string()
+quantity: Yup.string()
     .required('Enter a quantity of 1 or more')
     .matches(/^\s*\d+\s*$/, 'Enter a quantity of 1 or more')
     .test('at-least-one', 'Enter a quantity of 1 or more', (value) => Number(value) >= 1),

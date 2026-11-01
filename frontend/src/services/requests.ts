@@ -93,6 +93,23 @@ const requestsApi = api.injectEndpoints({
       invalidatesTags: (_result, _error, { listingId }) => [...touched(listingId)],
     }),
 
+    // PATCH /api/requests/{requestId}/collected. The donor records the handover. The
+    // service's reply is untyped in the contract, so it is not used: the screen refetches.
+    markCollected: build.mutation<void, { requestId: string; listingId: string }>({
+      queryFn: async ({ requestId }, _api, _extraOptions, baseQuery) => {
+        if (env.useMocks) {
+          return simulateWrite((actor) => db.markCollected(actor, { requestId }))
+        }
+        const result = await baseQuery({
+          url: `/api/requests/${encodeURIComponent(requestId)}/collected`,
+          method: 'PATCH',
+        })
+        if (result.error) return { error: result.error }
+        return { data: undefined }
+      },
+      invalidatesTags: (_result, _error, { listingId }) => [...touched(listingId)],
+    }),
+
     getMyRequests: build.query<ListingRequest[], void>({
       queryFn: async (_arg, _api, _extraOptions, baseQuery) => {
         if (env.useMocks) return simulate((actor) => db.listMyRequests(actor), () => [])
@@ -160,6 +177,7 @@ export function useListingRequests(listingId: string, options: QueryOptions = {}
 export const useCreateRequest = requestsApi.useCreateRequestMutation
 export const useDecideRequest = requestsApi.useDecideRequestMutation
 export const useCancelRequest = requestsApi.useCancelRequestMutation
+export const useMarkCollected = requestsApi.useMarkCollectedMutation
 
 export function useMyRequests(options: QueryOptions = {}) {
   return requestsApi.useGetMyRequestsQuery(undefined, { ...LIST_QUERY_OPTIONS, ...options })
@@ -170,4 +188,4 @@ export function useMyRequests(options: QueryOptions = {}) {
 // - Your requests now asks GET /api/requests?mine=true, because the contract's mine
 //   parameter defaults to false.
 // - decideRequest no longer destructures an unused listingId inside queryFn; the cache
-//   update below still uses it.
+//   update below still uses it.$\n// ---------------------------------------------------------------------------$\n// Explanation$\n// markCollected calls PATCH /api/requests/{requestId}/collected (live) or the mock above.$\n// The reply is an untyped map in the contract, so it is ignored; the tags refetch the data.$\n// useMarkCollected is the hook the donor's panel uses.$\n

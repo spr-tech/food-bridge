@@ -50,9 +50,14 @@ export function RequestsPage() {
     )
   } else {
     body = (
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-6">
         {waiting.map((listing) => (
-          <section key={listing.id} aria-labelledby={`listing-${listing.id}`}>
+          <section
+            key={listing.id}
+            aria-labelledby={`listing-${listing.id}`}
+            // One container per listing, so its requests read as a group apart from the next listing.
+            className="rounded-2xl border border-border bg-surface p-4 shadow-[0_1px_2px_rgb(0_0_0/0.03),0_8px_22px_rgb(30_42_36/0.05)] md:max-w-210 md:p-6"
+          >
             <h2 id={`listing-${listing.id}`} className="mb-2 font-display text-2xl">
               <Link to={listingDetailPath(listing.id)} className="text-primary underline underline-offset-4">
                 {listing.foodName}
@@ -72,3 +77,11 @@ export function RequestsPage() {
     </PageContainer>
   )
 }
+
+// ---------------------------------------------------------------------------
+// Explanation
+// - Each listing's group is now its own bordered container (rounded, tinted, with padding),
+//   so one listing's requests are easy to tell apart from the next. The groups still stack
+//   vertically, with a smaller gap between them.
+// - The request cards inside keep their own white cards, so there is a container around
+//   each listing and a card around each request.

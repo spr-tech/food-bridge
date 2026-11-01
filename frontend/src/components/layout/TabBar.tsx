@@ -1,5 +1,5 @@
-// The phone tab bar (below 768px): the sidebar's links, fixed to the bottom, with the
-// current tab as a green pill. Coming-soon items aren't shown on phones.
+// The mobile bottom navigation: permanently dark green,
+// with white links and a lighter green active tab.
 import { NavLink } from 'react-router'
 import { NavIcon } from '@/components/layout/NavIcons'
 import type { NavCounts } from '@/components/layout/Sidebar'
@@ -16,6 +16,7 @@ export function TabBar({ items, counts }: TabBarProps) {
       <ul className="fb-tabbar">
         {items.map((item) => {
           const count = counts[item.to]
+
           return (
             <li key={item.to}>
               <NavLink to={item.to} end className="fb-tab">

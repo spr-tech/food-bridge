@@ -1,12 +1,11 @@
-// AppLayout: the sidebar's dark-to-cream flood and its session memory, the Coming soon
-// items, the current link, and the phone layout replacing the sidebar.
-import { act, screen, within } from '@testing-library/react'
+// AppLayout: permanent dark-green sidebar, navigation, Coming soon items,
+// notification counts, sign-out and phone layout.
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { SESSION_STORAGE_KEY } from '@/app/session'
 import { RequireSession } from '@/components/layout/RequireSession'
 import { ROUTES } from '@/constants/routes'
-import { SIDEBAR_STORAGE_KEY } from '@/hooks/useSidebarTheme'
 import { renderRoutes, signInAs } from '@/test/render'
 
 const originalMatchMedia = window.matchMedia
@@ -56,7 +55,6 @@ beforeEach(() => {
 afterEach(() => {
   window.matchMedia = originalMatchMedia
   sessionStorage.clear()
-  vi.useRealTimers()
 })
 
 describe('AppLayout sidebar', () => {
@@ -66,57 +64,52 @@ describe('AppLayout sidebar', () => {
     expect(sidebarState()).toBe('dark')
   })
 
-  it('floods to cream on the first link click, remembers it, and floods only once', async () => {
-    vi.useFakeTimers({ shouldAdvanceTime: true })
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+  it('stays dark green when navigating between sidebar links', async () => {
+    const user = userEvent.setup()
     renderLayout()
 
     await user.click(screen.getByRole('link', { name: 'Share food' }))
 
-    expect(sidebarState()).toBe('flooding')
-    expect(sessionStorage.getItem(SIDEBAR_STORAGE_KEY)).toBe('cream')
-
-    act(() => {
-      vi.advanceTimersByTime(2600)
-    })
-    expect(sidebarState()).toBe('cream')
+    expect(await screen.findByRole('heading', { name: 'Share food' })).toBeInTheDocument()
+    expect(sidebarState()).toBe('dark')
 
     await user.click(screen.getByRole('link', { name: /^Requests/ }))
-    expect(sidebarState()).toBe('cream')
+
+    expect(await screen.findByRole('heading', { name: 'Requests' })).toBeInTheDocument()
+    expect(sidebarState()).toBe('dark')
   })
 
-  it('counts a click on the current page link as the first click', async () => {
+  it('stays dark green when the current page link is clicked', async () => {
     const user = userEvent.setup()
     renderLayout(ROUTES.yourListings)
 
     await user.click(screen.getByRole('link', { name: 'Your listings' }))
 
-    expect(sidebarState()).toBe('flooding')
+    expect(sidebarState()).toBe('dark')
   })
 
-  it('stays cream, without replaying the flood, after a reload', () => {
-    sessionStorage.setItem(SIDEBAR_STORAGE_KEY, 'cream')
+  it('ignores the old saved cream theme preference', () => {
+    sessionStorage.setItem('foodbridge.sidebar', 'cream')
 
     renderLayout()
 
-    expect(sidebarState()).toBe('cream')
+    expect(sidebarState()).toBe('dark')
   })
 
-  it('signs out: clears the session and starts dark green at the next sign-in', async () => {
+  it('signs out and starts dark green at the next sign-in', async () => {
     const user = userEvent.setup()
-    sessionStorage.setItem(SIDEBAR_STORAGE_KEY, 'cream')
     const { unmount, router } = renderLayout()
 
     await user.click(screen.getByRole('button', { name: 'Sign out' }))
 
     expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument()
     expect(router.state.location.search).toBe('')
-    expect(sessionStorage.getItem(SIDEBAR_STORAGE_KEY)).toBeNull()
     expect(sessionStorage.getItem(SESSION_STORAGE_KEY)).toBeNull()
 
     unmount()
     signInAs('recipient')
     renderLayout(ROUTES.listings)
+
     expect(sidebarState()).toBe('dark')
   })
 
@@ -129,24 +122,39 @@ describe('AppLayout sidebar', () => {
 
     // Tab through everything (focus wraps back to the page after the last control).
     const reached: Element[] = []
+
     for (let i = 0; i < 10; i += 1) {
       await user.tab()
+
       if (document.activeElement && document.activeElement !== document.body) {
         reached.push(document.activeElement)
       }
     }
+
     expect(reached.map((element) => element.textContent)).toContain('Sign out')
-    const comingSoon = [screen.getByText('Collections'), screen.getByText('Impact')].map(
-      (label) => label.closest('.fb-later'),
-    )
-    expect(reached.some((element) => comingSoon.some((item) => item?.contains(element)))).toBe(false)
+
+    const comingSoon = [
+      screen.getByText('Collections'),
+      screen.getByText('Impact'),
+    ].map((label) => label.closest('.fb-later'))
+
+    expect(
+      reached.some((element) =>
+        comingSoon.some((item) => item?.contains(element)),
+      ),
+    ).toBe(false)
   })
 
   it('marks the current page link with aria-current="page"', () => {
     renderLayout(ROUTES.createListing)
 
-    expect(screen.getByRole('link', { name: 'Share food' })).toHaveAttribute('aria-current', 'page')
-    expect(screen.getByRole('link', { name: 'Your listings' })).not.toHaveAttribute('aria-current')
+    expect(
+      screen.getByRole('link', { name: 'Share food' }),
+    ).toHaveAttribute('aria-current', 'page')
+
+    expect(
+      screen.getByRole('link', { name: 'Your listings' }),
+    ).not.toHaveAttribute('aria-current')
   })
 })
 
@@ -158,8 +166,13 @@ describe('AppLayout on a phone', () => {
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument()
     expect(sidebarState()).toBeUndefined()
     expect(screen.getAllByRole('navigation', { name: 'Main' })).toHaveLength(1)
-    expect(screen.getByRole('link', { name: /^Requests/ })).toHaveAttribute('aria-current', 'page')
-    expect(screen.getByRole('button', { name: "Account, Mama's Oven" })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /^Requests/ })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
+    expect(
+      screen.getByRole('button', { name: "Account, Mama's Oven" }),
+    ).toBeInTheDocument()
   })
 
   it('shows the sidebar and no tab bar on a desktop screen', () => {
@@ -168,6 +181,7 @@ describe('AppLayout on a phone', () => {
     expect(screen.getByRole('complementary')).toBeInTheDocument()
     expect(screen.getAllByRole('navigation', { name: 'Main' })).toHaveLength(1)
     expect(screen.queryByRole('button', { name: /Account/ })).not.toBeInTheDocument()
+    expect(sidebarState()).toBe('dark')
   })
 })
 
@@ -177,6 +191,7 @@ describe('AppLayout navigation counts', () => {
 
     // Seed: three recipients waiting on the wholewheat loaves.
     const link = await screen.findByRole('link', { name: 'Requests, 3 pending' })
+
     expect(within(link).getByText('3')).toBeInTheDocument()
   })
 
