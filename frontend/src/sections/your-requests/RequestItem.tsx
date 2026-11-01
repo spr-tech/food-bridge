@@ -1,22 +1,26 @@
-
 import { Link } from 'react-router'
 import { CancelRequestButton } from '@/components/common/CancelRequestButton'
 import { ListingPhoto } from '@/components/common/ListingPhoto'
+import { ClockIcon, PinIcon } from '@/components/common/MetaIcons'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import { optionLabel, PICKUP_AREAS } from '@/constants/listingOptions'
 import { listingDetailPath } from '@/constants/routes'
-import { formatDateTime } from '@/lib/format'
+import { formatDateTime, formatPickup } from '@/lib/format'
+import { getRecipientRequestStatus } from '@/lib/request-status'
 import type { ListingRequest } from '@/types/api'
 
-export function RequestItem({
-  request,
-}: {
-  request: ListingRequest
-}) {
+export function RequestItem({ request }: { request: ListingRequest }) {
   const { listing } = request
   const area = `${optionLabel(PICKUP_AREAS, listing.pickupArea)}, Lagos`
 
-  const isCollected = listing.status === 'COLLECTED'
+  const isCollected =
+    request.status === 'APPROVED' &&
+    listing.status === 'COLLECTED'
+
+  const displayStatus = getRecipientRequestStatus(
+    request.status,
+    listing.status,
+  )
 
   return (
     <article className="flex items-start gap-3 rounded-2xl border border-border bg-surface p-3">
@@ -38,15 +42,9 @@ export function RequestItem({
           </h3>
 
           {isCollected ? (
-            <StatusBadge
-              kind="listing"
-              status="COLLECTED"
-            />
+            <StatusBadge kind="listing" status="COLLECTED" />
           ) : (
-            <StatusBadge
-              kind="request"
-              status={request.status}
-            />
+            <StatusBadge kind="request" status={displayStatus} />
           )}
         </div>
 
@@ -64,7 +62,27 @@ export function RequestItem({
           </p>
         )}
 
-        {request.status === 'PENDING' && !isCollected && (
+        {request.status === 'APPROVED' && !isCollected && (
+          <div className="mt-2 rounded-lg bg-status-available-bg p-2 text-xs text-status-available-text">
+            <p className="font-semibold">
+              Approved. Collect from {listing.donorName}.
+            </p>
+
+            <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+              <span className="flex items-center gap-1">
+                <ClockIcon />
+                {formatPickup(listing.deadline)}
+              </span>
+
+              <span className="flex items-center gap-1">
+                <PinIcon />
+                {area}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {displayStatus === 'PENDING' && (
           <CancelRequestButton
             requestId={request.id}
             listingId={listing.id}

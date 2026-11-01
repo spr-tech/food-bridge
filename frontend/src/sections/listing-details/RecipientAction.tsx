@@ -1,25 +1,15 @@
-
-// A recipient's one action on a listing (spec S4), by situation:
-// - Already requested (and not cancelled): "Your request" with the request's status badge.
-// - Approved: explain that the listing is reserved for this organisation.
-// - Available: "Request this food", with an explanation of the approval process.
-// - Reserved for someone else: "Already reserved", no button.
-// - Expired: explain that the deadline has passed.
-// - Collected: the listing badge says Collected.
-// When the button a recipient pressed goes away, focus moves to what replaced it.
-
 import { useEffect, useRef, useState } from 'react'
 import { CancelRequestButton } from '@/components/common/CancelRequestButton'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useRequestFood } from '@/hooks/useRequestFood'
+import { getRecipientRequestStatus } from '@/lib/request-status'
 import { useMyRequests } from '@/services/requests'
 import type { Listing, ListingRequest } from '@/types/api'
 
 const NOTE = 'mt-2.5 text-[12.5px] leading-[1.55] text-text-muted md:text-[13px]'
 
-// This recipient's latest request on the listing; a cancelled one doesn't count.
 function latestRequest(
   requests: ListingRequest[] | undefined,
   listingId: string,
@@ -36,16 +26,10 @@ function latestRequest(
     )[0]
 }
 
-export function RecipientAction({
-  listing,
-}: {
-  listing: Listing
-}) {
+export function RecipientAction({ listing }: { listing: Listing }) {
   const myRequests = useMyRequests()
 
-  const [focusNext, setFocusNext] = useState<
-    'status' | 'request' | null
-  >(null)
+  const [focusNext, setFocusNext] = useState<'status' | 'request' | null>(null)
 
   const statusRef = useRef<HTMLDivElement>(null)
   const requestRef = useRef<HTMLButtonElement>(null)
@@ -57,7 +41,6 @@ export function RecipientAction({
 
   const myRequest = latestRequest(myRequests.data, listing.id)
 
-  // Wait for refreshed requests before moving focus to the new element.
   useEffect(() => {
     const target =
       focusNext === 'status'
@@ -70,27 +53,32 @@ export function RecipientAction({
 
     const timer = window.setTimeout(() => {
       target.focus()
-
-      // Only clear the focus target if no newer target was set.
       setFocusNext((current) =>
         current === focusNext ? null : current,
       )
     }, 0)
 
     return () => window.clearTimeout(timer)
-  }, [
-    focusNext,
-    myRequest?.id,
-    myRequest?.status,
-    listing.status,
-  ])
+  }, [focusNext, myRequest?.id, myRequest?.status, listing.status])
 
-  // Wait for the recipient's requests before choosing an action.
   if (myRequests.isLoading) {
     return <Skeleton lines={2} />
   }
 
   if (myRequest) {
+    const isCollected =
+      myRequest.status === 'APPROVED' &&
+      listing.status === 'COLLECTED'
+
+    const displayStatus = getRecipientRequestStatus(
+      myRequest.status,
+      listing.status,
+    )
+
+    const wasDeclinedBecauseReserved =
+      myRequest.status === 'PENDING' &&
+      listing.status === 'RESERVED'
+
     const isApprovedAndReserved =
       myRequest.status === 'APPROVED' &&
       listing.status === 'RESERVED'
@@ -103,10 +91,12 @@ export function RecipientAction({
       >
         <p className="flex flex-wrap items-center gap-2.5 text-sm font-semibold">
           <span>Your request</span>
-          <StatusBadge
-            kind="request"
-            status={myRequest.status}
-          />
+
+          {isCollected ? (
+            <StatusBadge kind="listing" status="COLLECTED" />
+          ) : (
+            <StatusBadge kind="request" status={displayStatus} />
+          )}
         </p>
 
         {isApprovedAndReserved && (
@@ -116,7 +106,13 @@ export function RecipientAction({
           </p>
         )}
 
-        {myRequest.status === 'PENDING' && (
+        {wasDeclinedBecauseReserved && (
+          <p className={NOTE}>
+            Another organisation's request was approved, so this listing is no longer available.
+          </p>
+        )}
+
+        {displayStatus === 'PENDING' && (
           <CancelRequestButton
             requestId={myRequest.id}
             listingId={listing.id}
