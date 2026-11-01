@@ -1,7 +1,9 @@
 // Listing details (spec S4 and S5), one page with two views:
 // - the owning donor: the listing and its requests panel (S5)
 // - everyone else: the listing and, for recipients, their one action (S4). Another
-//   donor or an administrator sees the listing only.
+//   donor sees the listing only; an administrator sees it with Delete listing.
+// Delete listing shows for the owning donor (Available or Expired) and any administrator,
+// and goes back to that role's list once the listing is deleted.
 // A single column, as in 4-recipient-listing-details: the back link ("Back to Find food"
 // for recipients, "Back to Your listings" for donors, "Back to All listings" for
 // administrators, matching each role's menu), then the listing in a card up to 760px wide
@@ -10,8 +12,9 @@
 // again; 404 "This listing no longer exists." and 403 "You don't have access to this.",
 // each with a link home; a 401 goes to sign in.
 import { useEffect } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { useSession } from '@/app/session'
+import { DeleteListingButton } from '@/components/common/DeleteListingButton'
 import { LoadingState } from '@/components/common/LoadingState'
 import { ErrorState } from '@/components/ui/error-state'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -19,6 +22,7 @@ import { homePathFor } from '@/constants/roles'
 import { ROUTES } from '@/constants/routes'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useSessionEnded } from '@/hooks/useSessionEnded'
+import { canDeleteListing } from '@/lib/listing-permissions'
 import { ListingSummary } from '@/sections/listing-details/ListingSummary'
 import { RecipientAction } from '@/sections/listing-details/RecipientAction'
 import { RequestsPanel } from '@/sections/listing-details/RequestsPanel'
@@ -52,6 +56,7 @@ export function ListingDetails({ listingId }: { listingId: string }) {
   const role = session?.role ?? null
   const listing = useListing(listingId)
   const sessionEnded = useSessionEnded()
+  const navigate = useNavigate()
   const status = errorStatus(listing.error)
   useDocumentTitle(listing.data?.foodName ?? 'Listing details')
 
@@ -110,6 +115,15 @@ export function ListingDetails({ listingId }: { listingId: string }) {
         <article className={CARD}>
           <ListingSummary listing={listing.data} />
           {role === 'recipient' && <RecipientAction listing={listing.data} />}
+          {/* The owning donor's and an administrator's, so not inside isOwner. */}
+          {canDeleteListing(session, listing.data) && (
+            <div className="mt-4 flex justify-end border-t border-border pt-4">
+              <DeleteListingButton
+                listing={listing.data}
+                onDeleted={() => void navigate(listPage.to, { replace: true })}
+              />
+            </div>
+          )}
         </article>
         {isOwner && <RequestsPanel listing={listing.data} />}
       </>
