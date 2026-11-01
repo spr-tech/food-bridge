@@ -13,6 +13,7 @@
 /* No dark mode. dark: only matches a .dark class we never set, so stray dark:
    classes can't switch on from the operating system's setting. */
 @custom-variant dark (&:is(.dark *));
+@custom-variant short (@media (max-height: 820px));
 
 @layer base {
   :root {
