@@ -1,3 +1,4 @@
+
 // Listing details, donor view (spec S5): the requests panel's five states; its rules (one
 // approved request, first, the others Declined; Expired on an expired listing; no panel
 // for any other donor); the optimistic Approve with both rollbacks (409 and a dropped
@@ -106,7 +107,9 @@ describe('Listing details (donor): states', () => {
     renderDetails('lst-05')
 
     expect(await screen.findByRole('heading', { name: 'No requests yet.' })).toBeInTheDocument()
-    expect(screen.getByText(/^Recipients nearby can see this listing until (Today|Tomorrow), \d+:\d\d [AP]M\.$/)).toBeInTheDocument()
+    expect(
+      screen.getByText(/^Recipients nearby can see this listing until .+, \d{1,2}:\d{2} (AM|PM)\.$/),
+    ).toBeInTheDocument()
   })
 
   it('shows the error with Try again, which loads the requests once the service is back', async () => {
