@@ -1,5 +1,4 @@
-// Share food (spec S2): every field message, the deadline rule, publishing once, the
-// success and failure paths, the unsaved-changes prompt and the photo checks.
+
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { Link, Outlet } from 'react-router'
@@ -45,11 +44,14 @@ async function choose(user: UserEvent, label: RegExp, option: string) {
 }
 
 function setDateAndTime(date: string, time: string) {
-  fireEvent.change(screen.getByLabelText(/Collection date/), { target: { value: date } })
-  fireEvent.change(screen.getByLabelText(/^Time/), { target: { value: time } })
+  fireEvent.change(screen.getByLabelText(/Collection date/), {
+    target: { value: date },
+  })
+  fireEvent.change(screen.getByLabelText(/^Time/), {
+    target: { value: time },
+  })
 }
 
-// Text is pasted rather than typed: the same events, without one per keystroke.
 async function paste(user: UserEvent, element: HTMLElement, text: string) {
   await user.click(element)
   await user.paste(text)
@@ -57,6 +59,11 @@ async function paste(user: UserEvent, element: HTMLElement, text: string) {
 
 async function fillValidForm(user: UserEvent, foodName = 'Puff-puff') {
   await paste(user, field(/Food name/), foodName)
+  await paste(
+    user,
+    field(/Description/),
+    'Freshly prepared puff-puff, ready for collection.',
+  )
   await choose(user, /Category/, 'Pastries')
   await paste(user, field(/Quantity/), '30')
   await choose(user, /Unit/, 'pieces')
@@ -65,7 +72,9 @@ async function fillValidForm(user: UserEvent, foodName = 'Puff-puff') {
 }
 
 const myListingsNamed = (name: string) =>
-  db.listMyListings(signInAs('donor')).filter((listing) => listing.foodName === name)
+  db.listMyListings(signInAs('donor')).filter(
+    (listing) => listing.foodName === name,
+  )
 
 beforeEach(() => {
   signInAs('donor')
@@ -75,19 +84,27 @@ describe('Share food', () => {
   it('has "Share food" as its h1 and explains the asterisk', () => {
     renderShareFood()
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Share food' })).toBeInTheDocument()
-    expect(screen.getByText('Fields marked * are required.')).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Share food' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('Fields marked * are required.'),
+    ).toBeInTheDocument()
   })
 
   it("shows the spec's message for every empty required field and focuses the first", async () => {
     const user = userEvent.setup()
     renderShareFood()
-    fireEvent.change(screen.getByLabelText(/Collection date/), { target: { value: '' } })
+
+    fireEvent.change(screen.getByLabelText(/Collection date/), {
+      target: { value: '' },
+    })
 
     await user.click(publish())
 
     for (const message of [
       'Enter the food name',
+      'Enter a description',
       'Choose a category',
       'Enter a quantity of 1 or more',
       'Choose a unit',
@@ -97,6 +114,7 @@ describe('Share food', () => {
     ]) {
       expect(await screen.findByText(message)).toBeInTheDocument()
     }
+
     expect(field(/Food name/)).toHaveFocus()
   })
 
@@ -107,7 +125,9 @@ describe('Share food', () => {
     await user.type(field(/Quantity/), '0')
     await user.tab()
 
-    expect(await screen.findByText('Enter a quantity of 1 or more')).toBeInTheDocument()
+    expect(
+      await screen.findByText('Enter a quantity of 1 or more'),
+    ).toBeInTheDocument()
   })
 
   it('refuses a deadline that is not later than now, under Time', async () => {
@@ -118,8 +138,12 @@ describe('Share food', () => {
     setDateAndTime(lagosToday(new Date(Date.now() - DAY)), '12:00')
     await user.click(publish())
 
-    expect(await screen.findByText('The deadline must be later than now')).toBeInTheDocument()
-    expect(screen.getByLabelText(/^Time/)).toHaveAccessibleDescription('The deadline must be later than now')
+    expect(
+      await screen.findByText('The deadline must be later than now'),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByLabelText(/^Time/),
+    ).toHaveAccessibleDescription('The deadline must be later than now')
     expect(myListingsNamed('Puff-puff')).toHaveLength(0)
   })
 
@@ -130,10 +154,20 @@ describe('Share food', () => {
 
     await user.click(publish())
 
-    expect(await screen.findByRole('heading', { name: 'Listing page' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Listing page' }),
+    ).toBeInTheDocument()
     expect(screen.getByText('Listing published')).toBeInTheDocument()
+
     const [listing] = myListingsNamed('Puff-puff')
-    expect(listing).toMatchObject({ quantity: 30, unit: 'pieces', category: 'pastries', pickupArea: 'yaba', status: 'AVAILABLE' })
+
+    expect(listing).toMatchObject({
+      quantity: 30,
+      unit: 'pieces',
+      category: 'pastries',
+      pickupArea: 'yaba',
+      status: 'AVAILABLE',
+    })
     expect(listing.deadline).toMatch(/T12:00:00\+01:00$/)
   })
 
@@ -144,7 +178,9 @@ describe('Share food', () => {
 
     await user.dblClick(publish())
 
-    expect(await screen.findByRole('heading', { name: 'Listing page' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Listing page' }),
+    ).toBeInTheDocument()
     expect(myListingsNamed('Puff-puff')).toHaveLength(1)
   })
 
@@ -156,8 +192,13 @@ describe('Share food', () => {
 
     await user.click(publish())
 
-    expect(await screen.findByRole('alert')).toHaveTextContent("Your listing wasn't published. Try again.")
+    expect(
+      await screen.findByRole('alert'),
+    ).toHaveTextContent("Your listing wasn't published. Try again.")
     expect(field(/Food name/)).toHaveValue('Puff-puff')
+    expect(field(/Description/)).toHaveValue(
+      'Freshly prepared puff-puff, ready for collection.',
+    )
     expect(field(/Quantity/)).toHaveValue('30')
   })
 
@@ -167,7 +208,9 @@ describe('Share food', () => {
 
     await user.type(field(/Description/), 'Side door')
 
-    expect(field(/Description/)).toHaveAccessibleDescription('9 of 500 characters used')
+    expect(
+      field(/Description/),
+    ).toHaveAccessibleDescription('9 of 500 characters used')
   })
 })
 
@@ -179,13 +222,17 @@ describe('Share food: leaving with changes', () => {
 
     await user.click(screen.getByRole('link', { name: 'Your listings' }))
 
-    const dialog = await screen.findByRole('dialog', { name: 'Leave without publishing?' })
+    const dialog = await screen.findByRole('dialog', {
+      name: 'Leave without publishing?',
+    })
     expect(dialog).toHaveAccessibleDescription('Your details will be lost.')
     expect(within(dialog).getByRole('button', { name: 'Stay' })).toHaveFocus()
 
     await user.click(within(dialog).getByRole('button', { name: 'Stay' }))
 
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
+    )
     expect(field(/Food name/)).toHaveValue('Puff-puff')
   })
 
@@ -197,7 +244,9 @@ describe('Share food: leaving with changes', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Leave' }))
 
-    expect(await screen.findByRole('heading', { name: 'Your listings page' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Your listings page' }),
+    ).toBeInTheDocument()
   })
 
   it("doesn't ask when nothing has changed", async () => {
@@ -206,7 +255,9 @@ describe('Share food: leaving with changes', () => {
 
     await user.click(screen.getByRole('link', { name: 'Your listings' }))
 
-    expect(await screen.findByRole('heading', { name: 'Your listings page' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Your listings page' }),
+    ).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 })
@@ -218,33 +269,55 @@ describe('Share food: photo', () => {
     const user = userEvent.setup({ applyAccept: false })
     renderShareFood()
 
-    await user.upload(photoInput(), new File(['gif'], 'bread.gif', { type: 'image/gif' }))
+    await user.upload(
+      photoInput(),
+      new File(['gif'], 'bread.gif', { type: 'image/gif' }),
+    )
 
-    expect(await screen.findByText('Choose a JPG or PNG photo of 5 MB or less.')).toBeInTheDocument()
+    expect(
+      await screen.findByText('Choose a JPG or PNG photo of 5 MB or less.'),
+    ).toBeInTheDocument()
   })
 
   it('refuses a photo over 5 MB', async () => {
     const user = userEvent.setup()
     renderShareFood()
+
     const big = new File(['x'], 'big.png', { type: 'image/png' })
-    Object.defineProperty(big, 'size', { value: 5 * 1024 * 1024 + 1 })
+    Object.defineProperty(big, 'size', {
+      value: 5 * 1024 * 1024 + 1,
+    })
 
     await user.upload(photoInput(), big)
 
-    expect(await screen.findByText('Choose a JPG or PNG photo of 5 MB or less.')).toBeInTheDocument()
+    expect(
+      await screen.findByText('Choose a JPG or PNG photo of 5 MB or less.'),
+    ).toBeInTheDocument()
   })
 
   it('shows a chosen photo, which can be removed', async () => {
     URL.createObjectURL = vi.fn(() => 'blob:preview')
     URL.revokeObjectURL = vi.fn()
+
     const user = userEvent.setup()
     renderShareFood()
 
-    await user.upload(photoInput(), new File(['png'], 'bread.png', { type: 'image/png' }))
+    await user.upload(
+      photoInput(),
+      new File(['png'], 'bread.png', { type: 'image/png' }),
+    )
 
-    expect(screen.getByRole('img', { name: 'Preview of the chosen photo' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('img', { name: 'Preview of the chosen photo' }),
+    ).toBeInTheDocument()
+
     await user.click(screen.getByRole('button', { name: 'Remove photo' }))
-    expect(screen.queryByRole('img', { name: 'Preview of the chosen photo' })).not.toBeInTheDocument()
-    expect(screen.queryByText('Choose a JPG or PNG photo of 5 MB or less.')).not.toBeInTheDocument()
+
+    expect(
+      screen.queryByRole('img', { name: 'Preview of the chosen photo' }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('Choose a JPG or PNG photo of 5 MB or less.'),
+    ).not.toBeInTheDocument()
   })
 })
