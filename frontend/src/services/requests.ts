@@ -188,4 +188,9 @@ export function useMyRequests(options: QueryOptions = {}) {
 // - Your requests now asks GET /api/requests?mine=true, because the contract's mine
 //   parameter defaults to false.
 // - decideRequest no longer destructures an unused listingId inside queryFn; the cache
-//   update below still uses it.$\n// ---------------------------------------------------------------------------$\n// Explanation$\n// markCollected calls PATCH /api/requests/{requestId}/collected (live) or the mock above.$\n// The reply is an untyped map in the contract, so it is ignored; the tags refetch the data.$\n// useMarkCollected is the hook the donor's panel uses.$\n
+//   update below still uses it.
+// ---------------------------------------------------------------------------
+// Explanation
+// markCollected calls PATCH /api/requests/{requestId}/collected (live) or the mock above.
+// The reply is an untyped map in the contract, so it is ignored; the tags refetch the data.
+// useMarkCollected is the hook the donor's panel uses.

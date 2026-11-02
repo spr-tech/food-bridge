@@ -76,9 +76,15 @@ type BackendAdminDashboardResponse = {
   availableListings: number
   reservedListings: number
   collectedListings: number
+  // EXPIRED listings, and AVAILABLE ones whose deadline has passed but the minute's
+  // expiry job hasn't reached yet.
+  expiredListings: number
   totalRequests: number
   pendingRequests: number
   completedHandovers: number
+  // Portions in completed handovers: a handover's recorded estimate, else the listing's
+  // quantity when it is measured in portions. Other units count as 0.
+  estimatedPortionsSaved: number
 }
 
 // Only the fields currently displayed by the administrator's dashboard.
@@ -88,8 +94,10 @@ export type AdminDashboardSummary = Pick<
   | 'availableListings'
   | 'reservedListings'
   | 'collectedListings'
+  | 'expiredListings'
   | 'pendingRequests'
   | 'completedHandovers'
+  | 'estimatedPortionsSaved'
 >
 
 const adminApi = api.injectEndpoints({
@@ -127,11 +135,18 @@ const adminApi = api.injectEndpoints({
                 (listing) => listing.status === 'RESERVED',
               ).length,
               collectedListings: collected.length,
+              expiredListings: listings.filter(
+                (listing) => listing.status === 'EXPIRED',
+              ).length,
               pendingRequests: listings.reduce(
                 (total, listing) => total + listing.pendingRequestCount,
                 0,
               ),
               completedHandovers: collected.length,
+              // As the service estimates it, without recorded estimates.
+              estimatedPortionsSaved: collected
+                .filter((listing) => listing.unit.toUpperCase() === 'PORTIONS')
+                .reduce((total, listing) => total + Math.round(listing.quantity), 0),
             },
           }
         }
