@@ -1,9 +1,10 @@
-// Signing in. Screens use useSignIn only.
+// Signing in, and checking a stored session is still accepted. Screens use useSignIn;
+// RequireSession uses useCurrentAccount (through useSessionCheck).
 import * as db from '@/mocks/db'
 import { simulate } from '@/mocks/simulate'
 import { api } from '@/services/api'
 import { env } from '@/config/env'
-import type { BackendLoginResponse, Session } from '@/types/api'
+import type { Account, BackendLoginResponse, BackendMeResponse, Session } from '@/types/api'
 import type { Role } from '@/types/role'
 
 function mapRole(role: string): Role | null {
@@ -50,10 +51,48 @@ const authApi = api.injectEndpoints({
         }
       },
     }),
+
+    // GET /api/auth/me with the stored Bearer token. A 401 means the token has expired or
+    // was never valid. The argument is the stored account id: it only keys the cache, so
+    // each signed-in account is checked once, not on every page.
+    getMe: build.query<Account, string>({
+      queryFn: async (_accountId, _api, _extraOptions, baseQuery) => {
+        if (env.useMocks) return simulate((actor) => db.getMe(actor))
+
+        const result = await baseQuery({ url: '/api/auth/me' })
+        if (result.error) return { error: result.error }
+
+        const response = result.data as BackendMeResponse
+        const role = mapRole(response.role ?? '')
+        if (!response.id || !role) {
+          return {
+            error: {
+              status: 'CUSTOM_ERROR',
+              error: 'The account response is missing an account ID or supported role.',
+            },
+          }
+        }
+
+        return {
+          data: {
+            accountId: response.id,
+            role,
+            organisationName: response.organisationName || response.name || response.email || '',
+            email: response.email ?? '',
+          },
+        }
+      },
+      // The answer only changes with a new sign-in, which resets the cache anyway.
+      keepUnusedDataFor: 3600,
+    }),
   }),
 })
 
 export const useSignIn = authApi.useSignInMutation
+
+export function useCurrentAccount(accountId: string | undefined) {
+  return authApi.useGetMeQuery(accountId ?? '', { skip: !accountId })
+}
 
 // ---------------------------------------------------------------------------
 // Explanation

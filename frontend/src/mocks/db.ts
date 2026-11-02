@@ -3,6 +3,7 @@
 // using data kept in sessionStorage.
 
 import { CATEGORIES, PICKUP_AREAS, UNITS } from '@/constants/listingOptions'
+import { formatDay } from '@/lib/format'
 import { canDeleteListing } from '@/lib/listing-permissions'
 import {
   createSeed,
@@ -12,11 +13,16 @@ import {
   type StoredRequest,
 } from '@/mocks/seed'
 import type {
+  Account,
+  ActivityEntry,
+  AdminRequestFilters,
   CreateListingInput,
+  DailyDistribution,
   Listing,
   ListingFilters,
   ListingPage,
   ListingRequest,
+  RequestPage,
   Session,
 } from '@/types/api'
 import type { ListingStatus, RequestStatus } from '@/types/status'
@@ -284,6 +290,21 @@ export function signIn(email: string, password: string): Session {
     role: account.role,
     organisationName: account.organisationName,
     email: account.email,
+  }
+}
+
+// GET /api/auth/me: who the stored session belongs to. 401 once the account is unknown.
+export function getMe(actor: Session | null): Account {
+  const db = load()
+  const { accountId } = requireActor(db, actor)
+  // requireActor has checked the account exists.
+  const stored = db.accounts.find((item) => item.id === accountId)!
+
+  return {
+    accountId: stored.id,
+    role: stored.role,
+    organisationName: stored.organisationName,
+    email: stored.email,
   }
 }
 
@@ -735,6 +756,7 @@ export function decideRequest(
   }
 
   request.status = input.decision
+  if (input.decision === 'APPROVED') request.decidedAt = now.toISOString()
 
   if (input.decision === 'APPROVED') {
     for (const other of db.requests) {
@@ -772,6 +794,7 @@ export function approveRival(requestId: string) {
   if (!rival) return
 
   rival.status = 'APPROVED'
+  rival.decidedAt = now.toISOString()
 
   for (const other of db.requests) {
     if (
@@ -872,4 +895,108 @@ export function listMyRequests(
     )
     .map((request) => toRequest(db, request, now))
     .sort(newestFirst)
+}
+
+// ---- Administrator ----------------------------------------------------------------------
+
+// Every recipient organisation: the recipient accounts and the organisations that have
+// requested food (the seed's organisations carry no role).
+function recipientIds(db: MockDb): Set<string> {
+  return new Set([
+    ...db.accounts.filter((account) => account.role === 'recipient').map((account) => account.id),
+    ...db.requests.map((request) => request.recipientId),
+  ])
+}
+
+// GET /api/admin/distribution/today, counted in Lagos like the service.
+export function distributionToday(actor: Session | null): DailyDistribution {
+  const db = load()
+  requireRole(requireActor(db, actor), 'admin')
+
+  const now = new Date()
+  const approvedToday = db.requests.filter(
+    (request) =>
+      request.status === 'APPROVED' &&
+      request.decidedAt !== undefined &&
+      formatDay(request.decidedAt, now) === 'Today',
+  )
+  const totalRecipients = recipientIds(db).size
+  const served = new Set(approvedToday.map((request) => request.recipientId)).size
+  const waiting = Math.max(0, totalRecipients - served)
+
+  return {
+    totalRecipients,
+    availableListings: db.listings.filter(
+      (listing) => listingStatus(db, listing, now) === 'AVAILABLE',
+    ).length,
+    approvedListingsToday: approvedToday.length,
+    recipientsServedToday: served,
+    recipientsWaitingToday: waiting,
+    firstRoundInProgress: waiting > 0,
+  }
+}
+
+// GET /api/admin/requests: every request, newest first, optionally of one status.
+export function listAllRequests(
+  actor: Session | null,
+  filters: AdminRequestFilters = {},
+): RequestPage {
+  const db = load()
+  requireRole(requireActor(db, actor), 'admin')
+
+  const offset = filters.offset ?? 0
+  const limit = filters.limit ?? 50
+  if (offset < 0 || limit < 1 || limit > 100) {
+    throw new MockApiError(400, 'INVALID_PAGE', 'Offset or limit is out of range.')
+  }
+
+  const now = new Date()
+  const matches = db.requests
+    .map((request) => toRequest(db, request, now))
+    .filter((request) => !filters.status || request.status === filters.status)
+    .sort(newestFirst)
+
+  return { items: matches.slice(offset, offset + limit), total: matches.length }
+}
+
+// GET /api/activity: what the store's own records show happened, newest first. The
+// simulated store keeps no activity log, so only events with a stored time appear.
+export function listActivity(actor: Session | null, limit = 20): ActivityEntry[] {
+  const db = load()
+  requireRole(requireActor(db, actor), 'admin')
+
+  if (limit < 1 || limit > 100) {
+    throw new MockApiError(400, 'INVALID_REQUEST', 'Limit must be between 1 and 100.')
+  }
+
+  const entry = (
+    id: string,
+    actorId: string,
+    type: string,
+    listing: StoredListing,
+    createdAt: string,
+  ): ActivityEntry => ({
+    id,
+    actorName: organisation(db, actorId).organisationName,
+    type,
+    listingId: listing.id,
+    listingTitle: listing.foodName,
+    details: '{}',
+    createdAt,
+  })
+
+  const entries = [
+    ...db.listings.map((listing) =>
+      entry(`${listing.id}-created`, listing.donorId, 'LISTING_CREATED', listing, listing.createdAt),
+    ),
+    ...db.requests.flatMap((request) => {
+      const listing = findListing(db, request.listingId)
+      const made = entry(`${request.id}-created`, request.recipientId, 'REQUEST_CREATED', listing, request.createdAt)
+      return request.decidedAt
+        ? [made, entry(`${request.id}-approved`, listing.donorId, 'REQUEST_APPROVED', listing, request.decidedAt)]
+        : [made]
+    }),
+  ]
+
+  return entries.sort(newestFirst).slice(0, limit)
 }

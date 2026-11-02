@@ -103,6 +103,27 @@ export type BackendFoodRequest = {
   recipientArea?: string
 }
 
+// GET /api/admin/distribution/today. The daily fairness rule's progress, counted in Lagos.
+export type BackendDailyDistributionSummary = {
+  totalRecipients: number
+  availableListings: number
+  approvedListingsToday: number
+  recipientsServedToday: number
+  recipientsWaitingToday: number
+  firstRoundInProgress: boolean
+}
+
+// GET /api/activity. details is a JSON string recorded by the service (often "{}").
+export type BackendActivityResponse = {
+  id: string
+  actorName: string | null
+  type: string
+  listingId: string | null
+  listingTitle: string | null
+  details: string | null
+  createdAt: string
+}
+
 export type BackendErrorResponse = {
   code: string
   message: string
@@ -119,6 +140,21 @@ export type Session = {
   role: Role
   organisationName: string
   email: string
+}
+
+// The signed-in account as GET /api/auth/me describes it: the session without its token.
+export type Account = Omit<Session, 'token'>
+
+export type DailyDistribution = BackendDailyDistributionSummary
+
+export type ActivityEntry = {
+  id: string
+  actorName: string
+  type: string
+  listingId: string | null
+  listingTitle: string | null
+  details: string | null
+  createdAt: string
 }
 
 export type Listing = {
@@ -176,6 +212,17 @@ export type ListingFilters = {
 export type ListingPage = {
   items: Listing[]
   total: number
+}
+
+export type RequestPage = {
+  items: ListingRequest[]
+  total: number
+}
+
+export type AdminRequestFilters = {
+  status?: RequestStatus
+  offset?: number
+  limit?: number
 }
 
 export type CreateListingInput = {

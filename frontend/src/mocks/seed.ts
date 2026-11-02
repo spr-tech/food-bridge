@@ -52,6 +52,9 @@ export type StoredRequest = {
   note: string | null
   status: StoredRequestStatus
   createdAt: string
+  // When it was approved, for the daily distribution figures. The seed's approvals have
+  // none, so they count as earlier days.
+  decidedAt?: string
 }
 
 export type MockDb = {

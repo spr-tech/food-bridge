@@ -14,7 +14,10 @@ export function useSessionEnded() {
 
   return useCallback(async () => {
     const next = encodeURIComponent(`${location.pathname}${location.search}`)
-    await navigate(`${ROUTES.signIn}?reason=session-ended&next=${next}`, { replace: true })
+    // flushSync: leave the page before the session is cleared. Otherwise RequireSession,
+    // still on screen during the router's transition, would see no session and send the
+    // user to sign in again without "Your session ended".
+    await navigate(`${ROUTES.signIn}?reason=session-ended&next=${next}`, { replace: true, flushSync: true })
     clearSession()
     dispatch(api.util.resetApiState())
   }, [navigate, location, dispatch])
