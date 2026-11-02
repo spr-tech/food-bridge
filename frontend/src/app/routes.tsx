@@ -102,6 +102,13 @@ export const routes: RouteObject[] = [
                 path: ROUTES.admin,
                 lazy: () => import('@/pages/DashboardPage').then((m) => ({ Component: m.DashboardPage })),
               },
+              {
+                path: ROUTES.completedHandovers,
+                lazy: () =>
+                  import('@/pages/CompletedHandoversPage').then((m) => ({
+                    Component: m.CompletedHandoversPage,
+                  })),
+              },
             ],
           ),
           // Every role: the donor's and the recipient's views differ (spec S4, S5).

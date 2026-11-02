@@ -12,6 +12,7 @@ export const ROUTES = {
   yourRequests: '/your-requests',
   requests: '/requests',
   admin: '/admin',
+  completedHandovers: '/admin/handovers',
   devForms: '/dev/forms',
 } as const
 

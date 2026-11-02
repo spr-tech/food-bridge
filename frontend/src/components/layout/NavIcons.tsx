@@ -11,6 +11,7 @@ export type NavIconName =
   | 'inbox'
   | 'calendar'
   | 'impact'
+  | 'handover'
 
 type IconProps = SVGProps<SVGSVGElement> & { size?: number }
 
@@ -71,6 +72,13 @@ const PATHS: Record<NavIconName, ReactNode> = {
       <rect x="3" y="3" width="18" height="18" rx="3" />
       <path d="M7 17c0-6 4-10 10-10 0 6-4 10-10 10z" />
       <path d="M7 17 13 11" />
+    </>
+  ),
+  // Not from the design files: a box with a tick, for Completed handovers.
+  handover: (
+    <>
+      <path d="M21 8 12 3 3 8v8l9 5 9-5z" />
+      <path d="m8.5 12 2.5 2.5 4.5-4.5" />
     </>
   ),
 }

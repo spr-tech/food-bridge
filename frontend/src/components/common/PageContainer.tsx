@@ -8,6 +8,7 @@ const MAX_WIDTH = {
   details: 'max-w-200', // 800px: Listing details
   form: 'max-w-215', // 860px: Share food
   wide: 'max-w-270', // 1080px: Find food and lists
+  dashboard: 'max-w-320', // 1280px: the administrator's dashboard and handovers
 } as const
 
 export type PageWidth = keyof typeof MAX_WIDTH

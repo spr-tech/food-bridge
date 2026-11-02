@@ -42,6 +42,19 @@ function daysFrom(now: Date, date: Date): number {
   return Math.round((Date.parse(dayKey.format(date)) - Date.parse(dayKey.format(now))) / DAY_MS)
 }
 
+const longDay = new Intl.DateTimeFormat('en-GB', {
+  timeZone: TIME_ZONE,
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+})
+
+// The date in full, in Lagos: "Monday 2 November".
+export function formatLongDay(value: Date | string): string {
+  const parts = longDay.formatToParts(typeof value === 'string' ? new Date(value) : value)
+  return `${part(parts, 'weekday')} ${part(parts, 'day')} ${part(parts, 'month')}`
+}
+
 // "Today", "Tomorrow", "Yesterday" or "Mon 26 Oct", counted in Lagos.
 export function formatDay(value: Date | string, now: Date = new Date()): string {
   const date = typeof value === 'string' ? new Date(value) : value
