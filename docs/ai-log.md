@@ -106,3 +106,36 @@ Checks still required before the integration is considered fully verified:
 - Test the important donor and recipient journeys against the deployed API.
 - Confirm the image-upload response shape and the relevant edit, delete and handover permissions with the backend engineer.
 - Confirm whether Qocent updates automatically after a push to GitHub, and check that its deployment does not bypass the GitHub Actions checks.
+
+### 2026-11-01 · Claude Code · documentation refresh
+
+Asked: bring every existing documentation file in line with the code after PR #17 to #20 and the open `fix/prevent-second-request-approval` branch, without changing application code.
+
+Accepted: updates to `README.md`, `frontend/README.md`, `frontend/CLAUDE.md`, `frontend/src/docs/README.md`, `docs/spec/foodbridge-interface.md` (new section 14) and `docs/decisions.md`, each checked against the source files they describe. Lint, typecheck, tests (248 passed) and build were re-run on the working tree.
+
+Found wrong in the existing documentation, and how we checked:
+
+- `frontend/CLAUDE.md` and the spec pointed to `../openapi.yaml` as the API contract; `git log --all -- openapi.yaml` shows it has never been committed.
+- `frontend/CLAUDE.md` listed a `useSidebarTheme` hook that was deleted in `c06e44d`, and told contributors to keep working on `feature/connect-backend`, which has been merged.
+- The spec still described the description field as optional; `src/schema/listingSchema.ts` now requires it.
+- The root README said live demonstration credentials must be obtained separately; `src/constants/demoAccounts.ts` shows them on the sign-in page in live mode.
+
+Code that contradicts the recorded rules, left for the team (not changed in a docs-only task): `X-Request-Id` is still sent on every request; `POST /api/listings` sends an `Idempotency-Key` the contract doesn't document; `DATA_IS_SIMULATED` is always true; the edit route is donor-only although the edit page and the brief allow administrators.
+
+### 2026-11-02 · Claude Code · QA audit, PR #22 to #24, documentation update
+
+Asked: audit the local and deployed app; then implement listing history, state-aware listing actions and fairness handling (PR #23), fix the Find food filters and disable Delete on Collected listings (PR #24); then bring the documentation in line with `main` after PR #24 without changing application code.
+
+Accepted: the code in PR #23 and #24, each with lint, typecheck, tests and build passing locally (354 tests across 34 files on `main` at `c857ea6`), and checked in a browser against the deployed backend using only clearly labelled QA listings. The documentation updates in this entry's commit.
+
+Checked and found wrong, and how:
+
+- The documentation said the backend's handling of competing requests was unconfirmed. A live check and the backend source (`DefaultReservationOperations.approve`) show it leaves them `PENDING`.
+- The pickup area filter returned 1 of 14 Available Surulere listings and 0 of 15 Yaba. Comparing the API's own data showed seeded areas stored as longer text ("Surulere, Lagos - …") against an exact-match filter; the search box also promised donor and area search that the backend doesn't do.
+- The first version of the delete dialog said a listing would be "removed for good"; the backend keeps it as a record (soft delete), so the wording was changed.
+- In a test fixture for the filters the expected total was 118; the run gave 119, and a recount of the fixture confirmed 119 was right.
+- The documentation said the backend documents no handover-reversal endpoint and no expired or portions-saved dashboard figures; the live OpenAPI document now lists all three, though no response yet exposes the `handoverId` reversal needs.
+
+Rejected: predicting the daily fairness rule in the browser, because a donor's data can't show it reliably (see `decisions.md`, 2026-11-02).
+
+Still unverified: whether the Qocent backup deployment is current or updates from GitHub.

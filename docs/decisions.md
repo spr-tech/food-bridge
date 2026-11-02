@@ -110,3 +110,49 @@ Why: The current Swagger documentation does not confirm a request-tracing header
 Agreed by: Muizz Jamiu (interface).
 
 To confirm: Esther and Adedayo (backend).
+
+Note (1 November 2026): `frontend/src/services/api.ts` still sends an `X-Request-Id` UUID on every request, so the code does not yet follow this decision. Either remove the header or confirm it with the backend engineers and update this entry.
+
+### 2026-11-01 · Listing edit rules and required description (PR #18)
+
+Decision, as implemented in commits `1cf88bf` and `9813623`: a listing can be edited only while it is Available (Reserved, Collected and Expired listings explain why they can't be edited), and the listing form now requires a description ("Enter a description", up to 500 characters). This replaces the optional description in spec S2.
+
+Why: recorded in the request for this documentation update as a change "for compatibility with the existing backend"; the commit messages don't state the reason.
+
+Recorded from: Git history. Agreed by: to confirm (Muizz Jamiu, interface; backend engineer for whether the backend itself requires a description).
+
+### 2026-11-01 · Recipient status derived from request and listing status
+
+Decision, as implemented in commit `2670a85` (merged in PR #21): the status a recipient sees comes from `frontend/src/lib/request-status.ts`. A pending request on a Reserved or Collected listing shows Declined; on an Expired listing, Expired. Cancel is offered only when that derived status is Pending, and such requests move to Request history.
+
+Why: if the deployed backend returns a losing request as `PENDING` after another request on the listing is approved, the recipient would see a misleading Pending status and could try to cancel it.
+
+Update, 2 November 2026: the deployed backend was observed doing exactly that. It leaves losing requests `PENDING` (they also stay in `pendingRequestCount`); its approve operation does not decline them. The same display rule now also drives the donor's panel and the navigation counts (PR #23).
+
+This is a display fallback only. It does not change stored data. The backend still needs to store competing pending requests as `DECLINED` when one is approved; this entry stays open until it does.
+
+Recorded from: Git history and a live check. Agreed by: to confirm (Muizz Jamiu). Backend change to confirm: Esther and Adedayo.
+
+### 2026-11-02 · Listing deletion and Listing history (PR #22, #23, #24)
+
+Decision: the owning donor and administrators are offered Delete listing on any listing not already deleted. On **Collected** listings it is disabled with the reason ("kept as a record of the handover"), for donors and administrators alike (PR #24). On **Reserved** listings it stays enabled and the backend's refusal (409 `LISTING_NOT_DELETABLE`) is explained in the dialog, so the button works without change if the backend's rule is relaxed. Edit appears only on Available listings. Your listings splits into current listings (Available, Reserved) and Listing history (Collected, Expired), with the tab kept in the address.
+
+Why: the backend deletes only Available and Expired listings and keeps a deleted listing as a record (a soft delete, status `DELETED`), so the interface must not say a listing is removed for good. Finished listings cluttered the donor's current work.
+
+Recorded from: Git history and the backend source (`DefaultListingOperations.delete`). Agreed by: Muizz Jamiu (interface), 2 November 2026.
+
+### 2026-11-02 · Daily fairness refusals are explained, not predicted (PR #23)
+
+Decision: the donor's panel does not try to work out in advance whether a request may be approved under the backend's daily fairness rule (409 `DAILY_DISTRIBUTION_PRIORITY`: a recipient already approved today, Lagos time, can't get a second approval while another recipient has none). It explains a refusal when it happens, refreshes the requests, and disables Approve for that organisation for the rest of the visit, with the reason; Decline stays available.
+
+Why: a donor's data doesn't show other listings' approvals or the list of recipients, and the per-day summary (`GET /api/admin/distribution/today`) is for administrators only. A client-side guess could block valid approvals or allow invalid ones.
+
+Recorded from: the backend source (`DailyDistributionService`). Agreed by: Muizz Jamiu (interface), 2 November 2026. A backend field showing eligibility would let the interface disable Approve up front.
+
+### 2026-11-02 · Find food matches area and search in the browser (PR #24)
+
+Decision: when a search or a pickup area is set, Find food asks the backend for status and category only, reads every page (100 at a time) and matches the area and the search (food name, description, donor, area and category) in the browser. Stored areas that start with a known area ("Surulere, Lagos - …") are read as that area.
+
+Why: the deployed backend's area filter matches only the exact stored text, and its keyword search covers only the food name and description, so seeded listings were missing from area results and donor or area searches found nothing.
+
+Recorded from: Git history and a live check. Agreed by: Muizz Jamiu (interface), 2 November 2026. To revisit: once the backend normalises areas (or matches them by prefix) and widens the keyword search, move filtering back to the server.
