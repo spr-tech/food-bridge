@@ -1,7 +1,7 @@
 // Who is offered Delete listing, and when a listing can be edited, for every role and
 // listing status.
 import { describe, expect, it } from 'vitest'
-import { canDeleteListing, isListingEditable } from '@/lib/listing-permissions'
+import { canDeleteListing, deleteBlockedReason, isListingEditable } from '@/lib/listing-permissions'
 import type { Listing } from '@/types/api'
 
 const OWNER = '6b1f6c1e-3c43-4a59-9d1e-0d6c8a1f2b11'
@@ -43,6 +43,18 @@ describe('canDeleteListing', () => {
 
   it('a listing with no donorId never matches a donor', () => {
     expect(canDeleteListing({ role: 'donor', accountId: '' }, { donorId: '', status: 'AVAILABLE' })).toBe(false)
+  })
+})
+
+describe('deleteBlockedReason', () => {
+  it('disables Delete on a Collected listing, with the reason', () => {
+    expect(deleteBlockedReason({ status: 'COLLECTED' })).toBe(
+      "Collected listings can't be deleted. They're kept as a record of the handover.",
+    )
+  })
+
+  it.each(['AVAILABLE', 'RESERVED', 'EXPIRED'] as const)('leaves it enabled on a %s listing', (status) => {
+    expect(deleteBlockedReason({ status })).toBeNull()
   })
 })
 

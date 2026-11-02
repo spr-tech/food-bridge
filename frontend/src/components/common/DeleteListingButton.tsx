@@ -7,15 +7,16 @@
 //   listings refresh, so the listing leaves the screen only once the service has said so
 // - 401: the session ends (sign in again, then back here)
 // - 403, 404, 409, 500 or no connection: the dialog stays open with what went wrong, and
-//   nothing is removed. A 409 on a Reserved or Collected listing says that is why.
+//   nothing is removed. A 409 on a Reserved listing says that is why.
+// On a Collected listing the button is disabled, with the reason (deleteBlockedReason).
 // The service decides who may delete; this button is not the safeguard.
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useSession } from '@/app/session'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/dialog'
 import { useToast } from '@/components/ui/toast'
 import { useSessionEnded } from '@/hooks/useSessionEnded'
-import { canDeleteListing } from '@/lib/listing-permissions'
+import { canDeleteListing, deleteBlockedReason } from '@/lib/listing-permissions'
 import { errorStatus } from '@/services/errors'
 import { useDeleteListing } from '@/services/listings'
 import type { Listing } from '@/types/api'
@@ -67,8 +68,42 @@ export function DeleteListingButton({ listing, variant = 'button', onDeleted }: 
   const { toast } = useToast()
   const sessionEnded = useSessionEnded()
   const [failure, setFailure] = useState<string | null>(null)
+  const reasonId = useId()
 
   if (!canDeleteListing(session, listing)) return null
+
+  // Offered but disabled, with the reason: for an icon in a row the reason is read out
+  // (and shown on hover); under the full button it is shown.
+  const blocked = deleteBlockedReason(listing)
+  if (blocked) {
+    return variant === 'icon' ? (
+      <>
+        <button
+          type="button"
+          disabled
+          aria-label={`Delete listing: ${listing.foodName}`}
+          aria-describedby={reasonId}
+          title={blocked}
+          className="inline-flex size-8 cursor-not-allowed items-center justify-center rounded-lg border border-border bg-surface text-text-muted opacity-50"
+        >
+          <TrashIcon />
+        </button>
+        <span id={reasonId} className="sr-only">
+          {blocked}
+        </span>
+      </>
+    ) : (
+      <div className="flex flex-col items-end gap-1.5">
+        <Button variant="danger" disabled aria-label={`Delete listing: ${listing.foodName}`} aria-describedby={reasonId}>
+          <TrashIcon />
+          Delete listing
+        </Button>
+        <p id={reasonId} className="text-right text-[12.5px] text-text-muted md:text-[13px]">
+          {blocked}
+        </p>
+      </div>
+    )
+  }
 
   async function confirmDelete(): Promise<void> {
     setFailure(null)

@@ -71,7 +71,7 @@ describe('Your listings (live service)', () => {
     expect(within(deleted).getByText('Deleted')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Edit Old cakes' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Delete listing: Old cakes' })).not.toBeInTheDocument()
-    // A Collected one keeps Delete (the service may refuse it, and the dialog says why).
-    expect(screen.getByRole('button', { name: 'Delete listing: Spare yams' })).toBeInTheDocument()
+    // A Collected one shows Delete disabled, with the reason.
+    expect(screen.getByRole('button', { name: 'Delete listing: Spare yams' })).toBeDisabled()
   })
 })
