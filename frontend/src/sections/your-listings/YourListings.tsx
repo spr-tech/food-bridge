@@ -9,14 +9,16 @@
 // with Back and Forward. Each listing is placed by the status the service sends.
 import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
+import { ListChecks, ShoppingBasket, Truck } from 'lucide-react'
 import { LoadingState } from '@/components/common/LoadingState'
+import { SummaryStrip } from '@/components/common/SummaryStrip'
+import { ViewTabs } from '@/components/common/ViewTabs'
 import { EmptyState } from '@/components/ui/empty-state'
 import { ErrorState } from '@/components/ui/error-state'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ROUTES } from '@/constants/routes'
 import { useNow } from '@/hooks/useNow'
 import { useSessionEnded } from '@/hooks/useSessionEnded'
-import { cn } from '@/lib/cn'
 import { formatUpdated } from '@/lib/format'
 import { YourListingRow } from '@/sections/your-listings/YourListingRow'
 import { errorStatus } from '@/services/errors'
@@ -43,42 +45,6 @@ function ListingList({ listings }: { listings: Listing[] }) {
         </li>
       ))}
     </ul>
-  )
-}
-
-type TabProps = {
-  id: string
-  panelId: string
-  label: string
-  count: number
-  selected: boolean
-  onSelect: () => void
-}
-
-function Tab({ id, panelId, label, count, selected, onSelect }: TabProps) {
-  return (
-    <button
-      id={id}
-      type="button"
-      role="tab"
-      aria-selected={selected}
-      aria-controls={panelId}
-      onClick={onSelect}
-      className={cn(
-        'flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
-        selected ? 'bg-primary text-on-primary shadow-sm' : 'bg-transparent text-text-secondary hover:bg-surface',
-      )}
-    >
-      {label}
-      <span
-        className={cn(
-          'rounded-full px-2 py-0.5 text-xs',
-          selected ? 'bg-on-primary/15 text-on-primary' : 'bg-surface text-text-muted',
-        )}
-      >
-        {count}
-      </span>
-    </button>
   )
 }
 
@@ -143,6 +109,11 @@ export function YourListings() {
 
   const active = items.filter(isActiveListing)
   const history = items.filter((listing) => !isActiveListing(listing))
+  const available = items.filter((listing) => listing.status === 'AVAILABLE')
+  const reserved = items.filter((listing) => listing.status === 'RESERVED')
+  // Requests still awaiting a decision: only an Available listing's count (once a listing
+  // is reserved the service still counts its other requests as pending). As in the menu.
+  const waiting = available.reduce((sum, listing) => sum + listing.pendingRequestCount, 0)
 
   return (
     <>
@@ -150,24 +121,36 @@ export function YourListings() {
         <p className="mb-4 text-[13px] text-text-muted">{formatUpdated(listings.fulfilledTimeStamp, now)}</p>
       )}
 
-      <div role="tablist" aria-label="Your listing views" className="mb-6 grid grid-cols-2 gap-2 rounded-xl bg-surface-hover p-1">
-        <Tab
-          id="active-listings-tab"
-          panelId="active-listings-panel"
-          label="Your listings"
-          count={active.length}
-          selected={view === 'active'}
-          onSelect={() => showView('active')}
-        />
-        <Tab
-          id="listing-history-tab"
-          panelId="listing-history-panel"
-          label="Listing history"
-          count={history.length}
-          selected={view === 'history'}
-          onSelect={() => showView('history')}
-        />
-      </div>
+      <SummaryStrip
+        label="Your listings at a glance"
+        figures={[
+          { label: 'Available', value: available.length, hint: 'Open to requests', icon: <ShoppingBasket size={18} /> },
+          { label: 'Reserved', value: reserved.length, hint: 'Awaiting collection', icon: <Truck size={18} /> },
+          { label: 'Requests waiting', value: waiting, hint: 'For your decision', icon: <ListChecks size={18} /> },
+        ]}
+      />
+
+      <ViewTabs
+        label="Your listing views"
+        tabs={[
+          {
+            id: 'active-listings-tab',
+            panelId: 'active-listings-panel',
+            label: 'Your listings',
+            count: active.length,
+            selected: view === 'active',
+            onSelect: () => showView('active'),
+          },
+          {
+            id: 'listing-history-tab',
+            panelId: 'listing-history-panel',
+            label: 'Listing history',
+            count: history.length,
+            selected: view === 'history',
+            onSelect: () => showView('history'),
+          },
+        ]}
+      />
 
       {view === 'active' ? (
         <section id="active-listings-panel" role="tabpanel" aria-labelledby="active-listings-tab" tabIndex={0}>
@@ -175,7 +158,7 @@ export function YourListings() {
           {active.length > 0 ? (
             <ListingList listings={active} />
           ) : (
-            <p className="rounded-xl border border-border bg-surface p-5 text-sm text-text-muted">
+            <p className="rounded-3xl border border-border bg-surface p-5 text-sm text-text-muted shadow-card">
               Nothing open right now. Available listings and reserved ones awaiting collection appear here.
             </p>
           )}
@@ -186,7 +169,7 @@ export function YourListings() {
           {history.length > 0 ? (
             <ListingList listings={history} />
           ) : (
-            <p className="rounded-xl border border-border bg-surface p-5 text-sm text-text-muted">
+            <p className="rounded-3xl border border-border bg-surface p-5 text-sm text-text-muted shadow-card">
               No listing history yet. Collected and expired listings appear here.
             </p>
           )}

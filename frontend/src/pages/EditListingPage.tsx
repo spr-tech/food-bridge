@@ -14,6 +14,7 @@ import { errorStatus } from '@/services/errors'
 import { useListing } from '@/services/listings'
 
 const TITLE = 'Edit listing'
+const EYEBROW = 'Donor · Edit listing'
 
 function unavailableMessage(status: string): string {
   switch (status.toUpperCase()) {
@@ -54,7 +55,7 @@ export function EditListingPage() {
   if (!id) {
     return (
       <PageContainer width="form">
-        <PageHeader title={TITLE} />
+        <PageHeader eyebrow={EYEBROW} title={TITLE} />
         <p role="alert" className="text-sm text-danger">
           We couldn't find the listing you're trying to edit.
         </p>
@@ -65,7 +66,7 @@ export function EditListingPage() {
   if (listing.isLoading) {
     return (
       <PageContainer width="form">
-        <PageHeader title={TITLE} />
+        <PageHeader eyebrow={EYEBROW} title={TITLE} />
         <Skeleton shape="card" />
       </PageContainer>
     )
@@ -74,7 +75,7 @@ export function EditListingPage() {
   if (listing.isError || !listing.data) {
     return (
       <PageContainer width="form">
-        <PageHeader title={TITLE} />
+        <PageHeader eyebrow={EYEBROW} title={TITLE} />
         <ErrorState
           title="We couldn't load this listing."
           description="Check your connection and try again."
@@ -97,7 +98,7 @@ export function EditListingPage() {
   if (!canEdit) {
     return (
       <PageContainer width="form">
-        <PageHeader title={TITLE} />
+        <PageHeader eyebrow={EYEBROW} title={TITLE} />
 
         <div role="alert" className="flex flex-col gap-3">
           <p className="text-sm text-danger">
@@ -122,6 +123,7 @@ export function EditListingPage() {
     return (
       <PageContainer width="form">
         <PageHeader
+          eyebrow={EYEBROW}
           title={TITLE}
           description="This listing is no longer available for editing."
         />
@@ -145,6 +147,7 @@ export function EditListingPage() {
   return (
     <PageContainer width="form">
       <PageHeader
+        eyebrow={EYEBROW}
         title={TITLE}
         description="Update the food listing details below."
       />

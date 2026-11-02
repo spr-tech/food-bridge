@@ -59,9 +59,7 @@ export function Sidebar({ items, counts }: SidebarProps) {
         <span className="fb-tag__mark">
           <ArchMark />
         </span>
-        <p className="fb-tag__title">
-          Together we <em>reduce</em> food waste.
-        </p>
+        <p className="fb-tag__title">Together we reduce food waste.</p>
       </div>
     </aside>
   )

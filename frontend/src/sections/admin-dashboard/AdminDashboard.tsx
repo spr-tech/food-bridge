@@ -4,10 +4,12 @@
 // /api/admin/dashboard), today's progress through the daily fairness rule (GET
 // /api/admin/distribution/today) and recent activity (GET /api/activity). Each part loads
 // and fails on its own, so one slow or failing call never hides the others.
-import { useEffect, useId, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ArrowUpRight, ListChecks, PackageCheck, ShoppingBasket, Truck } from 'lucide-react'
 import { LoadingState } from '@/components/common/LoadingState'
+import { PageHeader } from '@/components/common/PageHeader'
+import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { ErrorState } from '@/components/ui/error-state'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -16,17 +18,21 @@ import { listingDetailPath, ROUTES } from '@/constants/routes'
 import { useNow } from '@/hooks/useNow'
 import { useSessionEnded } from '@/hooks/useSessionEnded'
 import { cn } from '@/lib/cn'
+import { formatFoodSaved } from '@/lib/food-saved'
 import { formatDateTime, formatLongDay, formatUpdated, initials } from '@/lib/format'
 import { errorStatus } from '@/services/errors'
 import {
   useAdminDashboard,
+  useCompletedHandovers,
   useDistributionToday,
   useRecentActivity,
   type AdminDashboardSummary,
 } from '@/services/admin'
 
-// How many activity rows the dashboard shows (the service allows 1 to 100).
-const ACTIVITY_LIMIT = 10
+// Recent activity: the 50 most recent events (the service allows 1 to 100), shown five
+// at a time.
+const ACTIVITY_LIMIT = 50
+const ACTIVITY_STEP = 5
 
 const CARD = 'rounded-3xl border border-border bg-surface shadow-card'
 const EYEBROW = 'text-[11px] font-bold tracking-widest text-text-muted uppercase'
@@ -183,48 +189,41 @@ export function DashboardHeader() {
   const now = useNow()
 
   return (
-    <header className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-      <div>
-        <p className={cn(EYEBROW, 'text-accent')}>
-          <span>Today</span>
-          <span aria-hidden="true"> · </span>
-          <span>{formatLongDay(new Date(now))}</span>
-        </p>
-        <h1 className="mt-2 font-display text-5xl leading-none tracking-tight text-text sm:text-6xl">
-          Dash<em className="text-accent">board</em>
-        </h1>
-        <p className="mt-3 max-w-xl text-text-muted">How FoodBridge is doing, across every listing.</p>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        {dashboard.fulfilledTimeStamp && (
-          <p className="inline-flex items-center gap-2 rounded-full bg-cream px-3 py-1.5 text-[13px] text-muted-on-cream">
-            <span aria-hidden="true" className="size-2 rounded-full bg-success" />
-            {formatUpdated(dashboard.fulfilledTimeStamp, now)}
-          </p>
-        )}
-        <Link
-          to={ROUTES.listings}
-          className={cn(
-            'inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-text transition-colors hover:bg-surface-hover',
-            FOCUS,
+    <PageHeader
+      eyebrow={`Today · ${formatLongDay(new Date(now))}`}
+      title="Dashboard"
+      description="How FoodBridge is doing, across every listing."
+      actions={
+        <>
+          {dashboard.fulfilledTimeStamp && (
+            <p className="inline-flex items-center gap-2 rounded-full bg-cream px-3 py-1.5 text-[13px] text-muted-on-cream">
+              <span aria-hidden="true" className="size-2 rounded-full bg-success" />
+              {formatUpdated(dashboard.fulfilledTimeStamp, now)}
+            </p>
           )}
-        >
-          <ShoppingBasket size={16} aria-hidden="true" />
-          Browse all listings
-        </Link>
-        <Link
-          to={ROUTES.completedHandovers}
-          className={cn(
-            'inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-hover',
-            FOCUS,
-          )}
-        >
-          <PackageCheck size={16} aria-hidden="true" />
-          View handovers
-        </Link>
-      </div>
-    </header>
+          <Link
+            to={ROUTES.listings}
+            className={cn(
+              'inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-text transition-colors hover:bg-surface-hover',
+              FOCUS,
+            )}
+          >
+            <ShoppingBasket size={16} aria-hidden="true" />
+            Browse all listings
+          </Link>
+          <Link
+            to={ROUTES.completedHandovers}
+            className={cn(
+              'inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-hover',
+              FOCUS,
+            )}
+          >
+            <PackageCheck size={16} aria-hidden="true" />
+            View handovers
+          </Link>
+        </>
+      }
+    />
   )
 }
 
@@ -441,32 +440,43 @@ function ShareRing({ summary }: { summary: AdminDashboardSummary }) {
 // Expired listings and the estimate of food saved, both from GET /api/admin/dashboard.
 function MoreFigures() {
   const dashboard = useAdminDashboard()
-  const summary = dashboard.data
+  const handovers = useCompletedHandovers()
+  useEndSessionOn401(handovers.error)
 
-  const figures = summary && [
-    {
-      label: 'Expired',
-      value: summary.expiredListings.toLocaleString('en-GB'),
-      hint: 'Listings whose collection deadline passed before anyone collected them',
-    },
-    {
-      label: 'Food saved (estimate)',
-      value: `${summary.estimatedPortionsSaved.toLocaleString('en-GB')} portions`,
-      hint: "Portions in completed handovers. Food listed in kg, litres, items or boxes isn't counted.",
-    },
-  ]
+  let foodSaved: string
+  if (handovers.isLoading) foodSaved = '…'
+  else if (handovers.isError || !handovers.data) foodSaved = 'Unavailable'
+  else foodSaved = formatFoodSaved(handovers.data) ?? 'None yet'
 
   return (
     <Panel eyebrow="Listings" title="More figures">
-      {figures ? (
+      {dashboard.data ? (
         <ul className="flex flex-col gap-3">
-          {figures.map((figure) => (
-            <li key={figure.label} className="rounded-2xl bg-cream p-4">
-              <p className="text-sm font-semibold text-muted-on-cream">{figure.label}</p>
-              <p className="mt-1 font-display text-3xl leading-none text-text">{figure.value}</p>
-              <p className="mt-2 text-[13px] leading-snug text-muted-on-cream">{figure.hint}</p>
-            </li>
-          ))}
+          <li className="rounded-2xl bg-cream p-4">
+            <p className="text-sm font-semibold text-muted-on-cream">Expired</p>
+            <p className="mt-1 font-display text-3xl leading-none text-text">
+              {dashboard.data.expiredListings.toLocaleString('en-GB')}
+            </p>
+            <p className="mt-2 text-[13px] leading-snug text-muted-on-cream">
+              Listings whose collection deadline passed before anyone collected them
+            </p>
+          </li>
+          <li className="rounded-2xl bg-cream p-4" aria-busy={handovers.isLoading || undefined}>
+            <p className="text-sm font-semibold text-muted-on-cream">Food saved (estimate)</p>
+            <p className="mt-1 font-display text-2xl leading-tight wrap-break-word text-text">{foodSaved}</p>
+            <p className="mt-2 text-[13px] leading-snug text-muted-on-cream">
+              Based on the quantity listed on each completed handover, totalled per unit.
+            </p>
+            {handovers.isError && (
+              <button
+                type="button"
+                onClick={() => void handovers.refetch()}
+                className="mt-2 text-[13px] font-semibold text-primary underline underline-offset-4"
+              >
+                Try again
+              </button>
+            )}
+          </li>
         </ul>
       ) : (
         <SummaryPending loading={dashboard.isLoading} />
@@ -567,6 +577,8 @@ function DistributionToday() {
 function RecentActivity({ className }: { className?: string }) {
   const activity = useRecentActivity(ACTIVITY_LIMIT)
   const now = useNow()
+  const [shown, setShown] = useState(ACTIVITY_STEP)
+  const showMoreRef = useRef<HTMLButtonElement>(null)
   useEndSessionOn401(activity.error)
 
   let body
@@ -593,7 +605,7 @@ function RecentActivity({ className }: { className?: string }) {
   } else {
     body = (
       <ul className="-mx-2 flex flex-col">
-        {activity.data.map((entry) => (
+        {activity.data.slice(0, shown).map((entry) => (
           <li
             key={entry.id}
             className="flex items-start gap-3 rounded-2xl px-2 py-3 transition-colors hover:bg-bg"
@@ -634,6 +646,48 @@ function RecentActivity({ className }: { className?: string }) {
         ))}
       </ul>
     )
+
+    const total = activity.data.length
+    const visible = Math.min(shown, total)
+    if (total > ACTIVITY_STEP) {
+      body = (
+        <>
+          {body}
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+            <p className="text-[13px] text-text-muted" aria-live="polite">
+              Showing {visible} of {total}
+            </p>
+            <div className="flex gap-2">
+              {visible > ACTIVITY_STEP && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setShown(ACTIVITY_STEP)
+                    showMoreRef.current?.focus()
+                  }}
+                >
+                  Show less
+                </Button>
+              )}
+              <Button
+                ref={showMoreRef}
+                variant="secondary"
+                size="sm"
+                // aria-disabled, not disabled, so focus stays on it once everything is shown.
+                aria-disabled={visible >= total || undefined}
+                className="aria-disabled:opacity-50"
+                onClick={() => {
+                  if (visible < total) setShown((count) => count + ACTIVITY_STEP)
+                }}
+              >
+                Show more
+              </Button>
+            </div>
+          </div>
+        </>
+      )
+    }
   }
 
   return (

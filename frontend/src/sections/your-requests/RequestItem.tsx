@@ -23,7 +23,7 @@ export function RequestItem({ request }: { request: ListingRequest }) {
   )
 
   return (
-    <article className="flex items-start gap-3 rounded-2xl border border-border bg-surface p-3">
+    <article className="flex items-start gap-3 rounded-3xl border border-border bg-surface p-3 shadow-card sm:gap-4 sm:p-4">
       <ListingPhoto
         photoUrl={listing.photoUrl}
         className="h-30 w-30 shrink-0 rounded-xl"
@@ -42,9 +42,9 @@ export function RequestItem({ request }: { request: ListingRequest }) {
           </h3>
 
           {isCollected ? (
-            <StatusBadge kind="listing" status="COLLECTED" />
+            <StatusBadge kind="listing" status="COLLECTED" className="shrink-0 whitespace-nowrap" />
           ) : (
-            <StatusBadge kind="request" status={displayStatus} />
+            <StatusBadge kind="request" status={displayStatus} className="shrink-0 whitespace-nowrap" />
           )}
         </div>
 
@@ -63,7 +63,7 @@ export function RequestItem({ request }: { request: ListingRequest }) {
         )}
 
         {request.status === 'APPROVED' && !isCollected && (
-          <div className="mt-2 rounded-lg bg-status-available-bg p-2 text-xs text-status-available-text">
+          <div className="mt-2 rounded-xl bg-status-available-bg p-2.5 text-xs text-status-available-text">
             <p className="font-semibold">
               Approved. Collect from {listing.donorName}.
             </p>

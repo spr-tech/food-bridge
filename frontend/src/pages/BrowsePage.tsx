@@ -11,11 +11,13 @@ import { FindFood } from '@/sections/find-food/FindFood'
 const COPY = {
   recipient: {
     title: 'Find food',
+    eyebrow: 'Recipient · Find food',
     long: 'Discover surplus food from local businesses and organisations in your area.',
     short: 'Surplus food from local businesses near you.',
   },
   admin: {
     title: 'All listings',
+    eyebrow: 'Administrator · All listings',
     long: 'Every listing on FoodBridge. Use Status to see reserved, collected and expired ones.',
     short: 'Every listing on FoodBridge.',
   },
@@ -29,6 +31,7 @@ export function BrowsePage() {
   return (
     <PageContainer>
       <PageHeader
+        eyebrow={copy.eyebrow}
         title={copy.title}
         description={
           <>

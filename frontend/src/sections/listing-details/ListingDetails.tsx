@@ -30,7 +30,7 @@ import { errorStatus } from '@/services/errors'
 import { useListing } from '@/services/listings'
 import type { Role } from '@/types/role'
 
-const CARD = 'md:max-w-190 md:rounded-2xl md:border md:border-border md:bg-surface md:p-5 md:shadow-[0_1px_2px_rgb(0_0_0/0.03),0_8px_22px_rgb(30_42_36/0.05)]'
+const CARD = 'md:max-w-190 md:rounded-3xl md:border md:border-border md:bg-surface md:p-6 md:shadow-card'
 const LINK = 'font-semibold text-primary underline underline-offset-4'
 
 // Where each role's list of listings lives, named as it is in that role's menu.
@@ -72,7 +72,7 @@ export function ListingDetails({ listingId }: { listingId: string }) {
       <div className={CARD}>
         <h1 className="sr-only">Listing details</h1>
         <LoadingState label="Loading listing">
-          <Skeleton shape="image" className="h-50 rounded-[14px] md:h-65 md:rounded-xl" />
+          <Skeleton shape="image" className="h-50 rounded-2xl md:h-65" />
           <Skeleton lines={4} />
         </LoadingState>
       </div>

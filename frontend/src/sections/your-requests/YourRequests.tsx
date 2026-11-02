@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
+import { History, Inbox, PackageCheck } from 'lucide-react'
 import { LoadingState } from '@/components/common/LoadingState'
+import { SummaryStrip } from '@/components/common/SummaryStrip'
+import { ViewTabs } from '@/components/common/ViewTabs'
 import { EmptyState } from '@/components/ui/empty-state'
 import { ErrorState } from '@/components/ui/error-state'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -122,6 +125,11 @@ export function YourRequests() {
     .filter(isHistoryRequest)
     .sort(newestFirst)
 
+  // Approved and awaiting collection: part of the open requests, not counted again.
+  const approvedToCollect = openRequests.filter(
+    (request) => getRecipientRequestStatus(request.status, request.listing.status) === 'APPROVED',
+  ).length
+
   return (
     <>
       {requests.fulfilledTimeStamp && (
@@ -130,63 +138,36 @@ export function YourRequests() {
         </p>
       )}
 
-      <div
-        role="tablist"
-        aria-label="Your request views"
-        className="mb-6 grid grid-cols-2 gap-2 rounded-xl bg-surface-hover p-1"
-      >
-        <button
-          id="open-requests-tab"
-          type="button"
-          role="tab"
-          aria-selected={activeView === 'open'}
-          aria-controls="open-requests-panel"
-          onClick={() => setActiveView('open')}
-          className={`flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
-            activeView === 'open'
-              ? 'bg-[#174B3B] text-white shadow-sm'
-              : 'bg-transparent text-text-secondary hover:bg-surface'
-          }`}
-        >
-          Open Requests
+      <SummaryStrip
+        label="Your requests at a glance"
+        figures={[
+          { label: 'Open requests', value: openRequests.length, hint: 'Pending or approved', icon: <Inbox size={18} /> },
+          { label: 'Approved', value: approvedToCollect, hint: 'Ready to collect', icon: <PackageCheck size={18} /> },
+          { label: 'History', value: historyRequests.length, hint: 'Finished requests', icon: <History size={18} /> },
+        ]}
+      />
 
-          <span
-            className={`rounded-full px-2 py-0.5 text-xs ${
-              activeView === 'open'
-                ? 'bg-white/15 text-white'
-                : 'bg-surface text-text-muted'
-            }`}
-          >
-            {openRequests.length}
-          </span>
-        </button>
-
-        <button
-          id="request-history-tab"
-          type="button"
-          role="tab"
-          aria-selected={activeView === 'history'}
-          aria-controls="request-history-panel"
-          onClick={() => setActiveView('history')}
-          className={`flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
-            activeView === 'history'
-              ? 'bg-[#174B3B] text-white shadow-sm'
-              : 'bg-transparent text-text-secondary hover:bg-surface'
-          }`}
-        >
-          Request History
-
-          <span
-            className={`rounded-full px-2 py-0.5 text-xs ${
-              activeView === 'history'
-                ? 'bg-white/15 text-white'
-                : 'bg-surface text-text-muted'
-            }`}
-          >
-            {historyRequests.length}
-          </span>
-        </button>
-      </div>
+      <ViewTabs
+        label="Your request views"
+        tabs={[
+          {
+            id: 'open-requests-tab',
+            panelId: 'open-requests-panel',
+            label: 'Open Requests',
+            count: openRequests.length,
+            selected: activeView === 'open',
+            onSelect: () => setActiveView('open'),
+          },
+          {
+            id: 'request-history-tab',
+            panelId: 'request-history-panel',
+            label: 'Request History',
+            count: historyRequests.length,
+            selected: activeView === 'history',
+            onSelect: () => setActiveView('history'),
+          },
+        ]}
+      />
 
       {activeView === 'open' && (
         <section
@@ -202,7 +183,7 @@ export function YourRequests() {
           {openRequests.length > 0 ? (
             <RequestList requests={openRequests} />
           ) : (
-            <p className="rounded-xl border border-border bg-surface p-5 text-sm text-text-muted">
+            <p className="rounded-3xl border border-border bg-surface p-5 text-sm text-text-muted shadow-card">
               No open requests right now. Your pending and approved requests will appear here.
             </p>
           )}
@@ -223,7 +204,7 @@ export function YourRequests() {
           {historyRequests.length > 0 ? (
             <RequestList requests={historyRequests} />
           ) : (
-            <p className="rounded-xl border border-border bg-surface p-5 text-sm text-text-muted">
+            <p className="rounded-3xl border border-border bg-surface p-5 text-sm text-text-muted shadow-card">
               No request history yet. Collected, declined, cancelled and expired requests will appear here.
             </p>
           )}

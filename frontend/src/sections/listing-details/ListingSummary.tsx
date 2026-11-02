@@ -35,7 +35,7 @@ export function ListingSummary({ listing }: { listing: Listing }) {
       <ListingPhoto
         photoUrl={listing.photoUrl}
         iconSize={48}
-        className="h-50 w-full rounded-[14px] md:h-65 md:rounded-xl"
+        className="h-50 w-full rounded-2xl md:h-65"
       />
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 md:mt-5">

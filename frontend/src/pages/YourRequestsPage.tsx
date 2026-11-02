@@ -11,7 +11,10 @@ export function YourRequestsPage() {
 
   return (
     <PageContainer>
-      <PageHeader title={TITLE} description="Food you've asked for, and what the donor decided." />
+      <PageHeader
+        eyebrow="Recipient · Your requests"
+        title={TITLE}
+        description="Food you've asked for, and what the donor decided." />
       <YourRequests />
     </PageContainer>
   )

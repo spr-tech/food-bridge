@@ -7,10 +7,11 @@
 import { useEffect, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { ArrowLeft, CalendarCheck, PackageCheck, Store, Users } from 'lucide-react'
-import { DESKTOP_QUERY } from '@/components/layout/AppLayout'
 import { ListingPhoto } from '@/components/common/ListingPhoto'
 import { LoadingState } from '@/components/common/LoadingState'
+import { PageHeader } from '@/components/common/PageHeader'
 import { StatusBadge } from '@/components/common/StatusBadge'
+import { SummaryStrip } from '@/components/common/SummaryStrip'
 import { EmptyState } from '@/components/ui/empty-state'
 import { ErrorState } from '@/components/ui/error-state'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -27,12 +28,16 @@ import type { CompletedHandover } from '@/types/api'
 
 const CARD = 'rounded-3xl border border-border bg-surface shadow-card'
 const NOT_RECORDED = 'Not recorded'
+// The table needs about 800px of content width: with the sidebar, that's a 1200px screen.
+// Narrower screens (tablets included) get one card per handover instead of a table that
+// scrolls sideways.
+const TABLE_QUERY = '(min-width: 1200px)'
 const FOCUS =
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus'
 
 export function CompletedHandoversHeader() {
   return (
-    <header className="mb-8">
+    <>
       <Link
         to={ROUTES.admin}
         className={cn(
@@ -43,21 +48,19 @@ export function CompletedHandoversHeader() {
         <ArrowLeft size={16} aria-hidden="true" />
         Back to dashboard
       </Link>
-      <p className="text-[11px] font-bold tracking-widest text-accent uppercase">Handovers</p>
-      <h1 className="mt-2 font-display text-4xl leading-none tracking-tight text-text sm:text-5xl">
-        Completed <em className="text-accent">handovers</em>
-      </h1>
-      <p className="mt-3 max-w-2xl text-text-muted">
-        Food a donor has marked as collected by a recipient organisation.
-      </p>
-    </header>
+      <PageHeader
+        eyebrow="Administrator · Handovers"
+        title="Completed handovers"
+        description="Food a donor has marked as collected by a recipient organisation."
+      />
+    </>
   )
 }
 
 export function CompletedHandovers() {
   const handovers = useCompletedHandovers()
   const now = useNow()
-  const isDesktop = useMediaQuery(DESKTOP_QUERY)
+  const showTable = useMediaQuery(TABLE_QUERY)
   const navigate = useNavigate()
   const sessionEnded = useSessionEnded()
 
@@ -113,11 +116,14 @@ export function CompletedHandovers() {
 
   return (
     <div className="flex flex-col gap-5">
-      <ul className="grid gap-4 sm:grid-cols-3" aria-label="Summary">
-        <Figure icon={<PackageCheck size={20} />} label="Handovers" value={rows.length} featured />
-        <Figure icon={<Store size={20} />} label="Donors" value={donors} />
-        <Figure icon={<Users size={20} />} label="Recipient organisations" value={recipients} />
-      </ul>
+      <SummaryStrip
+        label="Handovers at a glance"
+        figures={[
+          { label: 'Handovers', value: rows.length, icon: <PackageCheck size={18} /> },
+          { label: 'Donors', value: donors, icon: <Store size={18} /> },
+          { label: 'Recipient organisations', value: recipients, icon: <Users size={18} /> },
+        ]}
+      />
 
       <section aria-labelledby="handover-records" className={cn(CARD, 'overflow-hidden')}>
         <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border px-5 py-4 sm:px-6">
@@ -129,7 +135,7 @@ export function CompletedHandovers() {
           )}
         </div>
 
-        {isDesktop ? <HandoverTable rows={rows} today={today} /> : <HandoverCards rows={rows} today={today} />}
+        {showTable ? <HandoverTable rows={rows} today={today} /> : <HandoverCards rows={rows} today={today} />}
       </section>
 
       <p className="text-[13px] leading-relaxed text-text-muted">
@@ -138,43 +144,6 @@ export function CompletedHandovers() {
         the record shows “{NOT_RECORDED}”.
       </p>
     </div>
-  )
-}
-
-function Figure({
-  icon,
-  label,
-  value,
-  featured = false,
-}: {
-  icon: ReactNode
-  label: string
-  value: number
-  featured?: boolean
-}) {
-  return (
-    <li
-      className={cn(
-        'flex items-center gap-4 rounded-3xl border p-5 shadow-card',
-        featured ? 'border-sidebar-dark bg-sidebar-dark' : 'border-border bg-surface',
-      )}
-    >
-      <span
-        aria-hidden="true"
-        className={cn(
-          'grid size-11 shrink-0 place-items-center rounded-2xl',
-          featured ? 'bg-pill-on-dark text-highlight-on-dark' : 'bg-cream text-primary',
-        )}
-      >
-        {icon}
-      </span>
-      <div>
-        <p className={cn('text-sm font-semibold', featured ? 'text-link-on-dark' : 'text-text-muted')}>{label}</p>
-        <p className={cn('font-display text-3xl leading-tight', featured ? 'text-on-dark-heading' : 'text-text')}>
-          {value.toLocaleString('en-GB')}
-        </p>
-      </div>
-    </li>
   )
 }
 

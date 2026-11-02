@@ -57,7 +57,7 @@ export const RequestRow = forwardRef<HTMLDivElement, RequestRowProps>(
       <Card
         ref={ref}
         tabIndex={-1}
-        className="rounded-2xl! border-border shadow-[0_1px_2px_rgb(0_0_0/0.03),0_8px_22px_rgb(30_42_36/0.05)] md:px-1 md:py-0.5"
+        className="rounded-3xl! border-border shadow-card md:px-1 md:py-0.5"
       >
         <div className="flex items-start gap-3 md:gap-4">
           <span
@@ -76,6 +76,7 @@ export const RequestRow = forwardRef<HTMLDivElement, RequestRowProps>(
               <StatusBadge
                 kind="request"
                 status={displayStatus}
+                className="shrink-0 whitespace-nowrap"
               />
             </div>
 

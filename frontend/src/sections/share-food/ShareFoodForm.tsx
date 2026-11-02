@@ -243,7 +243,7 @@ export function ShareFoodForm({ listing }: ShareFoodFormProps) {
           <LeaveGuard active={dirty && !leavingOnPurpose} />
           <FocusFirstError order={FIELD_ORDER} />
 
-          <Card className="shadow-[0_1px_2px_rgb(0_0_0/0.03),0_8px_22px_rgb(30_42_36/0.05)]">
+          <Card className="rounded-3xl! shadow-card">
             <div className="flex flex-col gap-4 md:gap-5 md:p-3.5">
               <p className="text-sm text-text-muted">
                 Fields marked * are required.
@@ -275,7 +275,7 @@ export function ShareFoodForm({ listing }: ShareFoodFormProps) {
                 placeholder="Describe the food and include any collection instructions."
               />
 
-              <div className="grid gap-4 md:grid-cols-[1.3fr_1fr_1fr]">
+              <div className="grid grid-cols-1 gap-4 *:min-w-0 md:grid-cols-[1.3fr_1fr_1fr]">
                 <FormSelect
                   name="category"
                   label="Category"
@@ -284,7 +284,7 @@ export function ShareFoodForm({ listing }: ShareFoodFormProps) {
                   options={CATEGORIES}
                 />
 
-                <div className="grid grid-cols-2 gap-3 md:contents">
+                <div className="grid grid-cols-2 gap-3 *:min-w-0 md:contents">
                   <FormInput
                     name="quantity"
                     label="Quantity"
@@ -303,7 +303,7 @@ export function ShareFoodForm({ listing }: ShareFoodFormProps) {
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-[1.3fr_1fr_1fr]">
+              <div className="grid grid-cols-1 gap-4 *:min-w-0 md:grid-cols-[1.3fr_1fr_1fr]">
                 <FormSelect
                   name="pickupArea"
                   label="Pickup area"
@@ -312,7 +312,7 @@ export function ShareFoodForm({ listing }: ShareFoodFormProps) {
                   options={PICKUP_AREAS}
                 />
 
-                <div className="grid grid-cols-[1.2fr_1fr] gap-3 md:contents">
+                <div className="grid grid-cols-[1.2fr_1fr] gap-3 *:min-w-0 md:contents">
                   <FormDate
                     name="collectionDate"
                     label="Collection date"

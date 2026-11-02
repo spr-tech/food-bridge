@@ -301,7 +301,7 @@ export function RequestsPanel({ listing }: { listing: Listing }) {
         {[0, 1].map((key) => (
           <div
             key={key}
-            className="rounded-2xl border border-border bg-surface p-4"
+            className="rounded-3xl border border-border bg-surface p-4 shadow-card"
           >
             <Skeleton lines={3} />
           </div>
