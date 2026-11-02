@@ -240,6 +240,45 @@ describe('creating a listing', () => {
   })
 })
 
+describe('deleting a listing', () => {
+  const ADMIN_VIEW = () => db.listListings(signInAs('admin'), { status: 'all' }).items.map((l) => l.id)
+
+  it("lets the owning donor delete their Available and Expired listings, with their requests", () => {
+    const donor = signInAs('donor')
+    db.deleteListing(donor, 'lst-01') // Available, three pending requests
+    db.deleteListing(donor, 'lst-04') // Expired
+    expect(db.listMyListings(donor).map((l) => l.id)).not.toContain('lst-01')
+    expect(db.listMyListings(donor).map((l) => l.id)).not.toContain('lst-04')
+    expect(db.listMyRequests(signInAs('recipient')).some((r) => r.listingId === 'lst-01')).toBe(false)
+  })
+
+  it("refuses the owning donor a Reserved or Collected listing with 409", () => {
+    const donor = signInAs('donor')
+    expectError(() => db.deleteListing(donor, 'lst-02'), 409, 'LISTING_NOT_DELETABLE')
+    expectError(() => db.deleteListing(donor, 'lst-03'), 409, 'LISTING_NOT_DELETABLE')
+  })
+
+  it("refuses another donor's listing and every recipient with 403", () => {
+    expectError(() => db.deleteListing(signInAs('donor'), 'lst-06'), 403, 'NOT_OWNER')
+    expectError(() => db.deleteListing(signInAs('recipient'), 'lst-05'), 403, 'NOT_OWNER')
+    expect(ADMIN_VIEW()).toEqual(expect.arrayContaining(['lst-05', 'lst-06']))
+  })
+
+  it('lets an administrator delete any listing, whatever its status', () => {
+    const admin = signInAs('admin')
+    db.deleteListing(admin, 'lst-02') // Reserved
+    db.deleteListing(admin, 'lst-06') // another donor's
+    expect(ADMIN_VIEW()).not.toContain('lst-02')
+    expect(ADMIN_VIEW()).not.toContain('lst-06')
+  })
+
+  it('answers 404 for a listing that has already gone', () => {
+    const donor = signInAs('donor')
+    db.deleteListing(donor, 'lst-05')
+    expectError(() => db.deleteListing(donor, 'lst-05'), 404, 'LISTING_NOT_FOUND')
+  })
+})
+
 describe('browsing', () => {
   it('combines search, category, area and status', () => {
     const recipient = signInAs('recipient')

@@ -1,5 +1,6 @@
 
 import { Link } from 'react-router'
+import { DeleteListingButton } from '@/components/common/DeleteListingButton'
 import { ListingPhoto } from '@/components/common/ListingPhoto'
 import {
   ClockIcon,
@@ -110,6 +111,8 @@ export function YourListingRow({ listing }: { listing: Listing }) {
                 <EditIcon />
               </button>
             )}
+
+            <DeleteListingButton listing={listing} variant="icon" />
 
             <StatusBadge
               kind="listing"
