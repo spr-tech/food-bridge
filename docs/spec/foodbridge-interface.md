@@ -1,8 +1,8 @@
 # FoodBridge: interface spec
 
-Status: draft, 27 Oct 2026. Owner: Muizz Jamiu (interface).
-Reads with: `/docs/intent/foodbridge.md` (what and why), `/openapi.yaml` (every endpoint, field and error shape) and `/docs/design/foodbridge-final/` (how every screen looks, see section 12).
-This file covers only how the screens behave. If it ever disagrees with `openapi.yaml`, the OpenAPI document wins and this file gets corrected.
+Status: draft, 27 Oct 2026; backend integration recorded in section 13 (31 Oct 2026); implementation update in section 14 (1–2 Nov 2026, up to PR #24). Owner: Muizz Jamiu (interface).
+Reads with: `/docs/intent/foodbridge.md` (what and why), the backend's OpenAPI document (every endpoint, field and error shape; `/openapi.yaml` was planned in this repository but has not been added, so use `https://foodbridge-backend-rg9f.onrender.com/v3/api-docs`) and `/docs/design/foodbridge-final/` (how every screen looks, see section 12).
+This file covers only how the screens behave. If it ever disagrees with the OpenAPI document, the OpenAPI document wins and this file gets corrected.
 
 Items marked **TBC** need agreement with the service engineers (Adedayo, Esther) and a line in `/docs/decisions.md`.
 
@@ -23,13 +23,13 @@ Items marked **TBC** need agreement with the service engineers (Adedayo, Esther)
 |---|---|---|---|
 | `/` | Landing page (S0) | Signed out only; a signed-in user goes to their home page | After Monday |
 | `/sign-in` | Sign in | Anyone | Yes |
-| `/listings` | Find food (browse listings) | Recipient | Yes |
+| `/listings` | Find food (browse listings); "All listings" for administrators, without request buttons | Recipient or administrator | Yes |
 | `/listings/:id` | Listing details | Recipient or donor (view differs) | Yes |
 | `/your-listings` | Your listings | Donor | Yes |
 | `/listings/new` | Share food (create listing) | Donor | Yes |
 | `/your-requests` | Your requests | Recipient | Yes |
-| `/requests` | Requests (every request on the donor's listings) | Donor | Once its endpoint exists (**TBC**, see S8). Monday's approve runs from S5 |
-| `/listings/:id/edit` | Edit listing | Owning donor | After Monday |
+| `/requests` | Requests (every request on the donor's listings) | Donor | Built with a temporary layout grouped by listing (section 14); the tabbed S8 screen waits for its endpoint (**TBC**) |
+| `/listings/:id/edit` | Edit listing, only while the listing is Available (section 14) | Owning donor (route is donor-only) | Built after Monday |
 | `/admin` | Dashboard | Administrator | After Monday |
 
 - After sign in: donors land on `/your-listings`, recipients on `/listings`, administrators on `/admin`.
@@ -142,7 +142,7 @@ A public page that explains FoodBridge before asking anyone to sign in. A signed
 | Field | Required | Rule and error message |
 |---|---|---|
 | Food name | Yes | 3 to 80 characters. "Enter the food name" |
-| Description | No | Up to 500 characters, with a counter. Placeholder invites collection instructions: "Add any collection instructions here." (A separate collection notes field comes after Monday.) |
+| Description | Yes (since 1 Nov 2026, PR #18; was optional) | Up to 500 characters, with a counter. "Enter a description"; over the limit: "Description must be 500 characters or less". Placeholder invites collection instructions: "Add any collection instructions here." (A separate collection notes field comes after Monday.) |
 | Category | Yes | Bakery, Cooked meals, Produce, Pastries (list **TBC**). "Choose a category" |
 | Quantity | Yes | Whole number, 1 or more. "Enter a quantity of 1 or more" |
 | Unit | Yes | Loaves, portions, trays, baskets, pieces, boxes (list **TBC**). "Choose a unit" |
@@ -270,6 +270,7 @@ A cancelled request doesn't count: the recipient can request the listing again.
 
 - Approved requests show the pickup area and collect by time prominently.
 - Declined and Expired requests are kept, below the open ones, so the recipient sees what happened.
+- As built (section 14.3): two tabs, "Open requests" (Pending and Approved) and "Request history" (Collected, Declined, Cancelled and Expired), each with a count. The status shown is derived from the request and the listing status together.
 
 **States:**
 - Loading: skeleton rows.
@@ -529,7 +530,7 @@ Google sign-in, Create account, the notifications bell, Dashboard, Transactions,
 | Sign-in layout | Two halves on flat dark green, decorative rings | Photo across the page, form on a white card | Carries the landing page's look through to sign in |
 | Desktop sign-in wordmark | "FoodBridge" in Fraunces | DM Sans 700, "Food" white, "Bridge" `#f0a24b` | One wordmark everywhere |
 | Demo accounts | Four, "Admin" on the phone | S1's three, one per role, "Administrator" | Matches the service's accounts |
-| Share food: Description | Marked required | Optional, with the 500-character counter | S2 rules |
+| Share food: Description | Marked required | Required, with the 500-character counter (optional until 1 Nov 2026) | S2 rules; now matches the design |
 | Share food: Time | Not marked required | Required | The deadline needs a time |
 | Share food: required fields | Asterisk not explained | "Fields marked * are required." | Instructions for every user |
 | Account chevron (desktop) | Shown, opens nothing | Removed | Sign out is already visible |
@@ -706,6 +707,8 @@ The frontend should only expose these actions to the appropriate roles. Confirm 
 
 A reverse-handover endpoint is not currently documented. The frontend must not claim that a completed handover can be reversed through the live API until an endpoint and its rules are agreed.
 
+Update, 2 November 2026: the OpenAPI document now lists `PATCH /api/handovers/{handoverId}/reverse`, but no listing or request response exposes a `handoverId`, so the interface still can't offer reversal (14.5).
+
 ### 13.8 Administrator dashboard
 
 The documented endpoint is:
@@ -726,6 +729,8 @@ It returns summary statistics:
 - `completedHandovers`
 
 The documented response does not include a recent activity feed or estimated portions saved. These must not be presented as live backend figures unless a separate data source or endpoint is added.
+
+Update, 2 November 2026: the documented response now includes `expiredListings` and `estimatedPortionsSaved`, and a separate `GET /api/activity` is documented. The dashboard doesn't use them yet (14.7).
 
 The administrator monitors activity and has the listing-editing and handover responsibilities described in the original capstone brief. The administrator does not replace the donor as the person who decides which recipient request is approved.
 
@@ -756,5 +761,98 @@ The following are not yet established by the documented API alone:
 - Recent activity and estimated portions saved for the administrator dashboard.
 
 These items must be verified with the backend engineer or through live API tests. Do not invent endpoints, fields or permissions to make an interface appear complete.
+
+---
+
+## 14. Implementation update — 1 and 2 November 2026
+
+This section records what the frontend implements on `main` after PR #17 to #24 (merge commit `c857ea6`), checked against the source on 2 November 2026. Where it describes behaviour that differs from sections 1 to 12, the difference is stated. Backend behaviour marked "observed" was seen on the deployed backend on 2 November 2026.
+
+### 14.1 Edit listing, `/listings/:id/edit` (PR #17, #18)
+
+- Reached from the edit button on Your listings (S6). The route is donor-only. The page itself also accepts an administrator, but the route guard stops administrators first.
+- A user who isn't the owning donor (or an administrator) sees "You don't have permission to edit this listing. Only its owning donor or an administrator can edit it."
+- Only an **Available** listing can be edited. Otherwise the page shows, with "Back to listing":
+  - Reserved: "A recipient has reserved this food. You cannot edit the listing while it is reserved."
+  - Collected: "This food has already been collected. The listing can no longer be edited."
+  - Expired: "The collection deadline has passed. This listing can no longer be edited."
+- On Your listings, the Edit button appears only on Available listings (PR #23); other rows show a short reason instead (for example "This listing is reserved and can no longer be edited.").
+- The form is the Share food form (S2) filled in with the listing; it shows the current photo, "Replace photo (optional)" and "Save changes". Success: the toast "Listing updated" and the listing's details page. Errors: "Your changes weren't saved. Try again."; a backend `LISTING_NOT_EDITABLE` code shows "This listing can no longer be edited because its status has changed. Only available listings can be edited."
+- The simulated store checks ownership but not the Available-only rule; the rule is enforced in the interface and is expected from the backend.
+
+### 14.2 Listing photos (S2)
+
+The photo is uploaded first (`POST /api/listings/images`, stored by the backend in Cloudinary), then the listing is saved with the returned URL as `imageReference`. Editing without a new photo keeps the existing one. If the upload fails: "Your photo couldn't be uploaded. Please try again." and nothing is saved. The OpenAPI document still describes the upload reply generically (13.5); the deployed backend was observed replying `{ "imageUrl": "…" }`, and the frontend takes the first usable `http(s)` URL it finds.
+
+### 14.3 What the recipient sees (S4, S7)
+
+The status shown to a recipient comes from `frontend/src/lib/request-status.ts`, from both the request and the listing status:
+
+| Request | Listing | Shown |
+|---|---|---|
+| Pending | Available | Pending (Cancel request available) |
+| Pending | Reserved | Declined; on S4 also "Another organisation's request was approved, so this listing is no longer available." |
+| Pending | Collected | Declined |
+| Pending | Expired | Expired |
+| Approved | Reserved | Approved; on S4 also "This listing is reserved for your organisation. Your collection has been approved." |
+| Approved | Collected | The listing's Collected badge |
+
+- Cancel request is offered only when the shown status is Pending, so a recipient cannot cancel a request that is no longer genuinely pending.
+- On S4 the listing badge is labelled "List status", to tell it apart from "Your request".
+- S7 splits requests into Open requests and Request history (see S7).
+- On a listing its donor has deleted (status `DELETED`), the recipient sees the Deleted badge and "The donor has removed this listing, so it can't be collected." (or "… can't be requested." without a request).
+- **This is a display fallback.** The stored request stays `PENDING`. The S5 rule says the backend stores competing pending requests as `DECLINED` when one is approved; the deployed backend was **observed not doing this**, so the fallback stays until the backend is changed.
+
+### 14.4 Donor requests panel (S5, S8) (PR #23)
+
+- Approve and Decline show only while the listing is Available and none of its requests is Approved. This keeps a donor from approving a second request on a reserved listing, even though the backend still returns a losing request as `PENDING`.
+- Pending requests are shown as Declined once another is approved or the listing is Reserved or Collected, and as Expired on an expired listing (display only, as in 14.3).
+- The approve dialog's count of "other pending requests" includes only requests that can still be decided.
+- **Daily fairness rule (backend).** A recipient who already has an approved request today (Lagos time) can't be approved again while another recipient has none (409 `DAILY_DISTRIBUTION_PRIORITY`). The donor can't see other listings' approvals, so the panel can't tell beforehand. On refusal it shows "This request can't be approved yet." with "[Organisation] has already received food today. Every organisation must get its first food today before anyone gets a second, so this approval was not saved. You can approve another organisation's request or decline this one." That organisation's Approve is then disabled for the rest of the visit, with "Can't be approved yet: this organisation has already received food today and others are still waiting for their first."; Decline stays.
+
+The backend must still refuse a second approval (409 `LISTING_ALREADY_RESERVED`, observed); hiding the buttons is not a security control.
+
+### 14.5 Handover (S5)
+
+The owning donor sees **Mark as collected** on the approved request while the listing is Reserved. A confirmation ("Mark this food as collected?", "This records that [Organisation] collected [food]. The handover is then complete.") precedes `PATCH /api/requests/{requestId}/collected`. Success: "Marked as collected"; 403 or 409: "This request can't be marked as collected."; otherwise "That wasn't saved. Try again." with Try again. Administrators have no handover control in the interface yet. Reversing a handover is not available: the backend now documents `PATCH /api/handovers/{handoverId}/reverse`, but no response exposes a `handoverId` (13.7).
+
+### 14.6 Requests, `/requests` (S8)
+
+Built with a temporary layout: the donor's listings that have pending requests, newest first, each with the S5 requests panel. No tabs or per-status counts, because no aggregate endpoint for a donor's requests (13.6) is documented.
+
+### 14.7 Administrator dashboard, `/admin`
+
+Shows Open listings, Requests waiting, Reserved and Completed handovers from `GET /api/admin/dashboard`. Expired and Food saved (estimate) show "—". The documented dashboard response now includes `expiredListings` and `estimatedPortionsSaved`, but the dashboard doesn't use them yet. No figure is presented as real-world impact.
+
+### 14.8 Your listings and Listing history (S6) (PR #23)
+
+- Two tabs: **Your listings** (Available and Reserved) and **Listing history** (Collected and Expired; Deleted ones too, if the backend ever returns them), each with a count. The tab is kept in the address (`/your-listings?view=history`), so it survives a refresh.
+- Each listing is placed by the status the backend returns. A listing marked collected moves to Listing history without a refresh.
+- "[n] requests waiting" shows only on Available listings.
+- The backend leaves deleted listings out of the donor's list (observed), so Listing history doesn't show them.
+
+### 14.9 Delete listing (PR #22, #23, #24)
+
+- Offered to the owning donor and to administrators, from the listing's row on Your listings (icon) and on listing details, on any listing that isn't already deleted.
+- Confirmation: "Delete this listing?", "[Food] will be taken off FoodBridge: it leaves your listings and recipients can no longer find or request it. You can't undo this." with Cancel focused and "Delete listing". Success: the toast "Listing deleted"; listing details then returns to the role's list.
+- **Collected** listings: Delete is disabled for donors and administrators, with "Collected listings can't be deleted. They're kept as a record of the handover." (PR #24).
+- **Reserved** listings: the backend refuses (409 `LISTING_NOT_DELETABLE`, observed; it deletes only Available and Expired listings), and the dialog says "A reserved listing can't be deleted, because a recipient is due to collect it. Mark it as collected instead."
+- The backend keeps a deleted listing as a record (status `DELETED`, a soft delete), which is why the wording avoids "removed for good". Its requests keep their stored status.
+
+### 14.10 Find food filters (S3) (PR #24)
+
+- Search covers the food name, description, donor, pickup area and category, as the search label says. Category, pickup area, status and search combine.
+- Some listings store the pickup area as longer text ("Surulere, Lagos - …"). The frontend reads the area from its leading name, so these show, filter and edit as Surulere.
+- The backend's area filter matches only the exact stored text, and its keyword search covers only the food name and description (observed). So with a search or an area set, the frontend asks the backend for status and category only, reads every page, and matches area and search itself. Without them, the backend filters and pages as before.
+
+### 14.11 Navigation (section 12)
+
+The menu link of the section a page belongs to stays highlighted on its sub-pages (PR #23): **Your listings** on a donor's listing details and edit page, **Find food** on a recipient's listing details, **All listings** on an administrator's. It follows the address, so it holds after a refresh and with Back and Forward. The navigation counts include only requests still awaiting a decision: a donor's on Available listings, a recipient's that show as Pending.
+
+### 14.12 Known gaps
+
+- Competing requests and duplicate requests: the deployed backend keeps losing requests `PENDING` and accepts a second request from the same recipient on the same listing (observed).
+- Administrators can't edit listings or record handovers in the interface (the edit route is donor-only; no requests panel for administrators).
+- The tabbed S8 Requests screen and reversing a handover wait on the backend (14.5, 14.6).
 
 ---

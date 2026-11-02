@@ -11,19 +11,26 @@
   the phone top bar, account menu and tab bar, and the logo. Empty and error states use the
   shared EmptyState and ErrorState directly.
 - `services/`: RTK Query. `api.ts` is the one `createApi`; each resource adds endpoints in its
-  own file with `injectEndpoints`.
-- `mocks/`: TEMPORARY. The simulated service the endpoints call until the API exists: the
-  rules (`db.ts`), the demo data (`seed.ts`) and the delay and `?simulate=` switches. Screens
-  never import from here.
+  own file with `injectEndpoints` (`auth.ts`, `listings.ts`, `requests.ts`, `admin.ts`).
+  Each endpoint calls the live backend, or the simulated store when mocks are on.
+  `backend-mappers.ts` turns backend responses into our types; `errors.ts` reads status,
+  code and field errors.
+- `mocks/`: the simulated service, used when `VITE_USE_MOCKS` is not `false` and by the
+  tests (except `*.live.test.tsx`, which stub `fetch` instead): the rules (`db.ts`), the demo
+  data (`seed.ts`) and the delay and `?simulate=` switches. Screens never import from here.
 - `schema/`: Yup schemas, one per form.
 - `hooks/`: shared hooks, including the typed Redux hooks in `useAppStore.ts`.
 - `constants/`: routes, roles, status labels and form options. Paths come only from `routes.ts`.
 - `config/`: environment settings (`env.ts`).
 - `types/`: shared TypeScript types.
-- `lib/`: small helpers (`cn.ts` from the shared repo, formatting).
+- `lib/`: small helpers: `cn.ts` from the shared repo, `format.ts`, `deadline.ts` (collection
+  date and time), `photo.ts` (shrinks a photo for the simulated store),
+  `request-status.ts` (the status a recipient sees, from the request and listing status),
+  `listing-permissions.ts` (who is offered Delete and Edit) and `listing-search.ts` (Find
+  food's search and pickup area matching).
 - `contexts/`: empty on purpose. Shared state lives in Redux.
 - `styles/tokens.css`: every colour, font and radius. No hard-coded colours elsewhere.
-- `styles/layout.css`: the app frame, including the sidebar flood with its exact timings
-  (from `docs/design/foodbridge-final/foodbridge-sidebar-animation.html`).
+- `styles/layout.css`: the app frame. The sidebar stays dark green; there is no longer a
+  sidebar flood animation.
 - `test/`: `setup.ts` (Vitest setup), `render.tsx` (render routes, sign in as a demo account,
   find a toast's action) and `mockDb.ts` (change the simulated data behind a screen). Test files sit next to what they test, e.g. `lib/format.test.ts`.
