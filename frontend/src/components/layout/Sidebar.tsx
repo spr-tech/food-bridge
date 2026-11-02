@@ -2,11 +2,11 @@
 // It remains dark green permanently, with white navigation text.
 // There is no flood animation or theme transition when navigating.
 // The current link (activeNavItem) also covers the pages opened from it, such as a listing.
-import { useId } from 'react'
+// Only pages that exist are listed: unfinished ideas are left out rather than shown disabled.
 import { Link, useLocation } from 'react-router'
 import { Logo } from '@/components/layout/Logo'
 import { ArchMark, NavIcon } from '@/components/layout/NavIcons'
-import { activeNavItem, COMING_SOON, type NavItem } from '@/constants/roles'
+import { activeNavItem, type NavItem } from '@/constants/roles'
 
 export type NavCounts = Partial<Record<string, number>>
 
@@ -16,7 +16,6 @@ type SidebarProps = {
 }
 
 export function Sidebar({ items, counts }: SidebarProps) {
-  const comingSoonId = useId()
   const active = activeNavItem(items, useLocation().pathname)
 
   return (
@@ -24,6 +23,9 @@ export function Sidebar({ items, counts }: SidebarProps) {
       <Logo variant="sidebar" />
 
       <nav aria-label="Main">
+        <p className="fb-sect" aria-hidden="true">
+          Menu
+        </p>
         <ul className="fb-nav">
           {items.map((item) => {
             const count = counts[item.to]
@@ -35,7 +37,9 @@ export function Sidebar({ items, counts }: SidebarProps) {
                   aria-current={item === active ? 'page' : undefined}
                   className="fb-link"
                 >
-                  <NavIcon name={item.icon} />
+                  <span className="fb-link__icon">
+                    <NavIcon name={item.icon} />
+                  </span>
                   {item.label}
 
                   {count !== undefined && (
@@ -51,30 +55,13 @@ export function Sidebar({ items, counts }: SidebarProps) {
         </ul>
       </nav>
 
-      {/* Not links and not focusable: shown so people know what's planned. */}
-      <p id={comingSoonId} className="fb-sect">
-        Coming soon
-      </p>
-
-      <ul className="fb-nav" aria-labelledby={comingSoonId}>
-        {COMING_SOON.map((item) => (
-          <li key={item.label}>
-            <div className="fb-later" aria-disabled="true" title="Coming soon">
-              <NavIcon name={item.icon} />
-              {item.label}
-              <span className="fb-soon">Soon</span>
-            </div>
-          </li>
-        ))}
-      </ul>
-
       <div className="fb-tag">
-        <ArchMark />
-        <span>
-          Together we
-          <br />
-          reduce food waste.
+        <span className="fb-tag__mark">
+          <ArchMark />
         </span>
+        <p className="fb-tag__title">
+          Together we <em>reduce</em> food waste.
+        </p>
       </div>
     </aside>
   )

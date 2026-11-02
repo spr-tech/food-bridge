@@ -1,4 +1,4 @@
-// AppLayout: permanent dark-green sidebar, navigation, Coming soon items,
+// AppLayout: permanent dark-green sidebar, navigation (no Coming soon items),
 // notification counts, sign-out and phone layout.
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -113,36 +113,35 @@ describe('AppLayout sidebar', () => {
     expect(sidebarState()).toBe('dark')
   })
 
-  it('never lets Tab reach the Coming soon items', async () => {
-    const user = userEvent.setup()
+  it('shows no Coming soon items, only links to pages that exist', () => {
     renderLayout()
 
-    expect(screen.getByText('Collections')).toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: /Collections|Impact/ })).not.toBeInTheDocument()
+    expect(screen.queryByText(/Coming soon/i)).not.toBeInTheDocument()
+    expect(screen.queryByText('Collections')).not.toBeInTheDocument()
+    expect(screen.queryByText('Impact')).not.toBeInTheDocument()
 
-    // Tab through everything (focus wraps back to the page after the last control).
-    const reached: Element[] = []
+    const nav = screen.getByRole('navigation', { name: 'Main' })
+    expect(within(nav).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
+      ROUTES.yourListings,
+      ROUTES.createListing,
+      ROUTES.requests,
+    ])
+  })
 
-    for (let i = 0; i < 10; i += 1) {
-      await user.tab()
+  it('gives the administrator Dashboard, All listings and Handovers', () => {
+    signInAs('admin')
+    renderLayout(ROUTES.listings)
 
-      if (document.activeElement && document.activeElement !== document.body) {
-        reached.push(document.activeElement)
-      }
-    }
-
-    expect(reached.map((element) => element.textContent)).toContain('Sign out')
-
-    const comingSoon = [
-      screen.getByText('Collections'),
-      screen.getByText('Impact'),
-    ].map((label) => label.closest('.fb-later'))
-
-    expect(
-      reached.some((element) =>
-        comingSoon.some((item) => item?.contains(element)),
-      ),
-    ).toBe(false)
+    const nav = screen.getByRole('navigation', { name: 'Main' })
+    expect(within(nav).getAllByRole('link').map((link) => link.textContent)).toEqual([
+      'Dashboard',
+      'All listings',
+      'Handovers',
+    ])
+    expect(within(nav).getByRole('link', { name: 'Handovers' })).toHaveAttribute(
+      'href',
+      ROUTES.completedHandovers,
+    )
   })
 
   it('marks the current page link with aria-current="page"', () => {

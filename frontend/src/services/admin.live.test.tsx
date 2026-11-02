@@ -6,7 +6,12 @@ import type { ReactNode } from 'react'
 import { Provider } from 'react-redux'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { makeStore } from '@/app/store'
-import { useAdminRequests, useDistributionToday, useRecentActivity } from '@/services/admin'
+import {
+  useAdminRequests,
+  useCompletedHandovers,
+  useDistributionToday,
+  useRecentActivity,
+} from '@/services/admin'
 import { errorStatus } from '@/services/errors'
 import { signInAs } from '@/test/render'
 
@@ -152,5 +157,119 @@ describe('useRecentActivity (live service)', () => {
 
     await waitFor(() => expect(result.current.data).toEqual([]))
     expect(new URL(calls()[0].url).searchParams.get('limit')).toBe('10')
+  })
+})
+
+describe('useCompletedHandovers (live service)', () => {
+  const OTHER_ID = '3f2b8c1a-9d4e-4b7f-a6c2-1e5d7f9a0b35'
+  const listing = (id: string, foodName: string, status = 'COLLECTED') => ({
+    id,
+    foodName,
+    description: 'Fresh.',
+    category: 'BAKERY',
+    quantity: 40,
+    unit: 'ITEMS',
+    imageReference: null,
+    pickupArea: 'Yaba',
+    collectionDeadline: '2030-01-01T18:00:00Z',
+    status,
+    donorId: 'acc-donor',
+    donorName: "Mama's Oven",
+    createdAt: '2030-01-01T08:00:00Z',
+    pendingRequestCount: 0,
+  })
+  const request = (id: string, listingId: string, recipientName: string, status: string) => ({
+    id,
+    listingId,
+    recipientId: `acc-${id}`,
+    recipientName,
+    status,
+    createdAt: '2030-01-01T09:00:00Z',
+  })
+
+  function answer(routes: Record<string, unknown>) {
+    fetchMock.mockImplementation(async (input) => {
+      const path = new URL((input as Request).url).pathname
+      if (!(path in routes)) return Response.json({ code: 'NOT_FOUND', message: 'No.' }, { status: 404 })
+      const body = routes[path]
+      return body instanceof Response ? body : Response.json(body)
+    })
+  }
+
+  it('joins collected listings with their approved request and COLLECTED activity', async () => {
+    answer({
+      '/api/listings': [listing(LISTING_ID, 'Bread loaves'), listing(OTHER_ID, 'Rice', 'AVAILABLE')],
+      '/api/admin/requests': [
+        request('r1', LISTING_ID, 'Grace Shelter', 'PENDING'),
+        request('r2', LISTING_ID, 'Hope Community Kitchen', 'COLLECTED'),
+      ],
+      '/api/activity': [
+        {
+          id: 'e1',
+          actorName: "Mama's Oven",
+          type: 'COLLECTED',
+          listingId: LISTING_ID,
+          listingTitle: 'Bread loaves',
+          details: '{}',
+          createdAt: '2030-01-01T17:00:00Z',
+        },
+      ],
+    })
+    const { result } = renderHook(() => useCompletedHandovers(), { wrapper: wrapper() })
+
+    await waitFor(() => expect(result.current.data).toBeDefined())
+    // Only the Collected listing, even if the service's filter let another through.
+    expect(result.current.data).toEqual([
+      expect.objectContaining({
+        listingId: LISTING_ID,
+        foodName: 'Bread loaves',
+        donorName: "Mama's Oven",
+        recipientName: 'Hope Community Kitchen',
+        quantity: 40,
+        collectedAt: '2030-01-01T17:00:00Z',
+      }),
+    ])
+
+    const listingsCall = new URL(calls()[0].url)
+    expect(listingsCall.pathname).toBe('/api/listings')
+    expect(Object.fromEntries(listingsCall.searchParams)).toEqual({
+      availability: 'COLLECTED',
+      offset: '0',
+      limit: '100',
+    })
+    expect(Object.fromEntries(new URL(calls()[1].url).searchParams)).toEqual({ offset: '0', limit: '100' })
+    expect(new URL(calls()[2].url).searchParams.get('limit')).toBe('100')
+    expect(calls().every((call) => call.headers.get('Authorization') === 'Bearer test-token-admin')).toBe(true)
+  })
+
+  it('leaves the recipient and time unrecorded rather than guessing, and survives an activity failure', async () => {
+    answer({
+      '/api/listings': [listing(LISTING_ID, 'Bread loaves')],
+      '/api/admin/requests': [request('r1', LISTING_ID, 'Grace Shelter', 'DECLINED')],
+      '/api/activity': Response.json({ code: 'SERVER_ERROR', message: 'No.' }, { status: 500 }),
+    })
+    const { result } = renderHook(() => useCompletedHandovers(), { wrapper: wrapper() })
+
+    await waitFor(() => expect(result.current.data).toHaveLength(1))
+    expect(result.current.data?.[0]).toMatchObject({ recipientName: null, collectedAt: null })
+  })
+
+  it('asks for nothing more when no listing is collected', async () => {
+    answer({ '/api/listings': [] })
+    const { result } = renderHook(() => useCompletedHandovers(), { wrapper: wrapper() })
+
+    await waitFor(() => expect(result.current.data).toEqual([]))
+    expect(calls()).toHaveLength(1)
+  })
+
+  it('passes a 403 from the requests list on with its status', async () => {
+    answer({
+      '/api/listings': [listing(LISTING_ID, 'Bread loaves')],
+      '/api/admin/requests': Response.json({ code: 'FORBIDDEN', message: 'No.' }, { status: 403 }),
+    })
+    const { result } = renderHook(() => useCompletedHandovers(), { wrapper: wrapper() })
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(errorStatus(result.current.error)).toBe(403)
   })
 })

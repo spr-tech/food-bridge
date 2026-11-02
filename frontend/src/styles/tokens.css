@@ -91,4 +91,7 @@
   --color-disabled-text: #7a817c;
   --color-chip-bg: #efeee9;
   --color-chip-text: #4a514c;
+
+  /* Dashboard cards: a soft, warm lift (shadow-card) */
+  --shadow-card: 0 1px 2px rgb(30 42 36 / 0.04), 0 12px 28px -18px rgb(30 42 36 / 0.22);
 }

@@ -1,19 +1,108 @@
-// Admin dashboard statistics, today's distribution, every request and recent activity.
-// Screens use these hooks; the endpoints handle live and simulated data.
+// Admin dashboard statistics, today's distribution, every request, recent activity and
+// completed handovers. Screens use these hooks; the endpoints handle live and simulated data.
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError, FetchBaseQueryMeta } from '@reduxjs/toolkit/query'
 import * as db from '@/mocks/db'
 import { simulate } from '@/mocks/simulate'
 import { api, LIST_QUERY_OPTIONS } from '@/services/api'
 import { env } from '@/config/env'
-import { mapBackendActivity, mapBackendRequest } from '@/services/backend-mappers'
+import {
+  mapBackendActivity,
+  mapBackendListing,
+  mapBackendRequest,
+} from '@/services/backend-mappers'
 import type {
   ActivityEntry,
   AdminRequestFilters,
   BackendActivityResponse,
   BackendDailyDistributionSummary,
   BackendFoodRequest,
+  BackendListingResponse,
+  CompletedHandover,
   DailyDistribution,
+  Listing,
+  ListingRequest,
   RequestPage,
 } from '@/types/api'
+
+// The most rows the service returns in one call (it answers 400 INVALID_PAGE above), and
+// how far the activity log reaches back (GET /api/activity allows 1 to 100).
+const SERVICE_PAGE_LIMIT = 100
+const ACTIVITY_REACH = 100
+// A guard against a service that never reports its last page.
+const MAX_PAGES = 50
+
+// The baseQuery a queryFn receives.
+type BaseQuery = (
+  arg: string | FetchArgs,
+) => ReturnType<BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, object, FetchBaseQueryMeta>>
+
+// Every page of a list endpoint, 100 rows at a time, using X-Total-Count to stop.
+async function readAllPages<Row>(
+  baseQuery: BaseQuery,
+  url: string,
+  params: Record<string, string> = {},
+): Promise<{ data: Row[] } | { error: FetchBaseQueryError }> {
+  const rows: Row[] = []
+
+  for (let page = 0; page < MAX_PAGES; page += 1) {
+    const result = await baseQuery({
+      url,
+      params: { ...params, offset: page * SERVICE_PAGE_LIMIT, limit: SERVICE_PAGE_LIMIT },
+    })
+    if (result.error) return { error: result.error }
+
+    const pageRows = Array.isArray(result.data) ? (result.data as Row[]) : []
+    rows.push(...pageRows)
+
+    const total = Number(result.meta?.response?.headers.get('x-total-count') ?? NaN)
+    if (pageRows.length < SERVICE_PAGE_LIMIT || (Number.isFinite(total) && rows.length >= total)) {
+      break
+    }
+  }
+
+  return { data: rows }
+}
+
+// One row per Collected listing: its approved request names the recipient, and the latest
+// COLLECTED activity event on it gives the collection time. Newest collections first; rows
+// whose time isn't recorded follow, by collection deadline.
+export function joinCompletedHandovers(
+  listings: Listing[],
+  requests: ListingRequest[],
+  activity: ActivityEntry[],
+): CompletedHandover[] {
+  const collected = listings.filter((listing) => listing.status === 'COLLECTED')
+
+  return collected
+    .map((listing) => {
+      const approved = requests.find(
+        (request) => request.listingId === listing.id && request.status === 'APPROVED',
+      )
+      const event = activity
+        .filter((entry) => entry.listingId === listing.id && entry.type.toUpperCase() === 'COLLECTED')
+        .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))[0]
+
+      return {
+        listingId: listing.id,
+        foodName: listing.foodName,
+        category: listing.category,
+        quantity: listing.quantity,
+        unit: listing.unit,
+        pickupArea: listing.pickupArea,
+        photoUrl: listing.photoUrl,
+        donorName: listing.donorName,
+        recipientName: approved?.recipientName ?? null,
+        collectedAt: event?.createdAt ?? null,
+        deadline: listing.deadline,
+      }
+    })
+    .sort((a, b) => {
+      if (a.collectedAt && b.collectedAt) return Date.parse(b.collectedAt) - Date.parse(a.collectedAt)
+      if (a.collectedAt) return -1
+      if (b.collectedAt) return 1
+      return Date.parse(b.deadline) - Date.parse(a.deadline)
+    })
+}
 
 type BackendAdminDashboardResponse = {
   totalUsers: number
@@ -178,6 +267,58 @@ const adminApi = api.injectEndpoints({
         { type: 'Request', id: 'LIST' },
       ],
     }),
+
+    // -----------------------------------------------------------------------
+    // Completed handovers, from three documented reads (there is no handover
+    // endpoint to list them): GET /api/listings?availability=COLLECTED, every page;
+    // GET /api/admin/requests, every page, for each listing's approved request; and
+    // GET /api/activity?limit=100 for the COLLECTED event's time. Activity is
+    // optional: if it fails, the rows show without a collection time.
+    // -----------------------------------------------------------------------
+    getCompletedHandovers: build.query<CompletedHandover[], void>({
+      queryFn: async (_arg, _api, _extraOptions, baseQuery) => {
+        if (env.useMocks) {
+          return simulate((actor) => {
+            const listings = db.listListings(actor, { status: 'COLLECTED', limit: 1000 }).items
+            const requests: ListingRequest[] = []
+            for (let offset = 0; ; offset += SERVICE_PAGE_LIMIT) {
+              const page = db.listAllRequests(actor, { offset, limit: SERVICE_PAGE_LIMIT })
+              requests.push(...page.items)
+              if (requests.length >= page.total || page.items.length === 0) break
+            }
+            const activity = db.listActivity(actor, ACTIVITY_REACH)
+            return joinCompletedHandovers(listings, requests, activity)
+          }, () => [])
+        }
+
+        const listings = await readAllPages<BackendListingResponse>(baseQuery, '/api/listings', {
+          availability: 'COLLECTED',
+        })
+        if ('error' in listings) return { error: listings.error }
+        if (listings.data.length === 0) return { data: [] }
+
+        const requests = await readAllPages<BackendFoodRequest>(baseQuery, '/api/admin/requests')
+        if ('error' in requests) return { error: requests.error }
+
+        const activity = await baseQuery({ url: '/api/activity', params: { limit: ACTIVITY_REACH } })
+        const activityRows =
+          !activity.error && Array.isArray(activity.data)
+            ? (activity.data as BackendActivityResponse[]).map(mapBackendActivity)
+            : []
+
+        return {
+          data: joinCompletedHandovers(
+            listings.data.map(mapBackendListing),
+            requests.data.map((request) => mapBackendRequest(request)),
+            activityRows,
+          ),
+        }
+      },
+      providesTags: [
+        { type: 'Listing', id: 'LIST' },
+        { type: 'Request', id: 'LIST' },
+      ],
+    }),
   }),
 })
 
@@ -195,4 +336,8 @@ export function useAdminRequests(filters: AdminRequestFilters = {}) {
 
 export function useRecentActivity(limit = 20) {
   return adminApi.useGetRecentActivityQuery(limit, LIST_QUERY_OPTIONS)
+}
+
+export function useCompletedHandovers() {
+  return adminApi.useGetCompletedHandoversQuery(undefined, LIST_QUERY_OPTIONS)
 }

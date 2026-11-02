@@ -44,22 +44,16 @@ export const ROLE_CONFIG: Record<Role, RoleConfig> = {
       { label: 'Your requests', to: ROUTES.yourRequests, icon: 'requests-list' },
     ],
   },
-  // Not designed yet (after Monday): the same frame with its own two links.
   admin: {
     homePath: ROUTES.admin,
     roleLabel: 'Administrator',
     nav: [
       { label: 'Dashboard', to: ROUTES.admin, icon: 'home' },
       { label: 'All listings', to: ROUTES.listings, icon: 'search', includes: [ROUTES.listingDetail] },
+      { label: 'Handovers', to: ROUTES.completedHandovers, icon: 'handover' },
     ],
   },
 }
-
-// The links shown disabled under "Coming soon" for every role.
-export const COMING_SOON: { label: string; icon: NavIconName }[] = [
-  { label: 'Collections', icon: 'calendar' },
-  { label: 'Impact', icon: 'impact' },
-]
 
 // The link to highlight at pathname: one whose own page it is wins, so /listings/new stays
 // Share food rather than a listing; otherwise the first that includes it. None for pages

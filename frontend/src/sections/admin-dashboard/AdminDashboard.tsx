@@ -1,11 +1,13 @@
 // The administrator's dashboard (brief journey 5): open listings, requests waiting,
 // reserved, completed handovers, expired, and an estimate of food saved.
 // Some figures and destinations remain unavailable until the backend contract is updated.
-// Below them: today's progress through the daily fairness rule (GET
+// Below them: the listing pipeline and the share collected (both from GET
+// /api/admin/dashboard), today's progress through the daily fairness rule (GET
 // /api/admin/distribution/today) and recent activity (GET /api/activity). Each part loads
 // and fails on its own, so one slow or failing call never hides the others.
-import { useEffect } from 'react'
+import { useEffect, useId, type ReactNode } from 'react'
 import { Link } from 'react-router'
+import { ArrowUpRight, ListChecks, PackageCheck, ShoppingBasket, Truck } from 'lucide-react'
 import { LoadingState } from '@/components/common/LoadingState'
 import { EmptyState } from '@/components/ui/empty-state'
 import { ErrorState } from '@/components/ui/error-state'
@@ -14,44 +16,153 @@ import { activityLabel } from '@/constants/activity'
 import { listingDetailPath, ROUTES } from '@/constants/routes'
 import { useNow } from '@/hooks/useNow'
 import { useSessionEnded } from '@/hooks/useSessionEnded'
-import { formatDateTime, formatUpdated } from '@/lib/format'
+import { cn } from '@/lib/cn'
+import { formatDateTime, formatLongDay, formatUpdated, initials } from '@/lib/format'
 import { errorStatus } from '@/services/errors'
-import { useAdminDashboard, useDistributionToday, useRecentActivity } from '@/services/admin'
+import {
+  useAdminDashboard,
+  useDistributionToday,
+  useRecentActivity,
+  type AdminDashboardSummary,
+} from '@/services/admin'
 
 // How many activity rows the dashboard shows (the service allows 1 to 100).
 const ACTIVITY_LIMIT = 10
 
-const SECTION_HEADING = 'mb-3 font-sans text-lg font-bold'
+const CARD = 'rounded-3xl border border-border bg-surface shadow-card'
+const EYEBROW = 'text-[11px] font-bold tracking-widest text-text-muted uppercase'
+const FOCUS =
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus'
 
 type Stat = {
   label: string
   value: number | string
   hint: string
   to?: string
+  icon: ReactNode
+  featured?: boolean
 }
 
-function StatCard({ stat }: { stat: Stat }) {
-  const value =
-    typeof stat.value === 'number'
-      ? stat.value.toLocaleString('en-GB')
-      : stat.value
+const formatValue = (value: number | string) =>
+  typeof value === 'number' ? value.toLocaleString('en-GB') : value
 
+// A headline figure. Linked cards lift on hover and show an arrow; the featured card is
+// the dark green of the sidebar.
+function StatCard({ stat }: { stat: Stat }) {
   const content = (
     <>
-      <p className="text-sm font-semibold text-text-muted">{stat.label}</p>
-      <p className="mt-1 font-display text-4xl">{value}</p>
-      <p className="mt-1 text-[13px] text-text-muted">{stat.hint}</p>
+      <div className="flex items-start justify-between gap-3">
+        <span
+          aria-hidden="true"
+          className={cn(
+            'grid size-10 place-items-center rounded-2xl',
+            stat.featured ? 'bg-pill-on-dark text-highlight-on-dark' : 'bg-cream text-primary',
+          )}
+        >
+          {stat.icon}
+        </span>
+        {stat.to && (
+          <span
+            aria-hidden="true"
+            className={cn(
+              'grid size-9 place-items-center rounded-full border transition-colors',
+              stat.featured
+                ? 'border-pill-on-dark text-on-dark-heading group-hover:bg-highlight-on-dark group-hover:text-on-count'
+                : 'border-border text-text-muted group-hover:border-primary group-hover:bg-primary group-hover:text-on-primary',
+            )}
+          >
+            <ArrowUpRight size={16} />
+          </span>
+        )}
+      </div>
+      <div className="mt-6">
+        <p className={cn('text-sm font-semibold', stat.featured ? 'text-link-on-dark' : 'text-text-muted')}>
+          {stat.label}
+        </p>
+        <p
+          className={cn(
+            'mt-1 font-display text-5xl leading-none tracking-tight',
+            stat.featured ? 'text-on-dark-heading' : 'text-text',
+          )}
+        >
+          {formatValue(stat.value)}
+        </p>
+        <p className={cn('mt-3 text-[13px] leading-snug', stat.featured ? 'text-footer-on-dark' : 'text-text-muted')}>
+          {stat.hint}
+        </p>
+      </div>
     </>
   )
 
-  const box = 'block rounded-2xl border border-border bg-surface p-5'
+  const box = cn(
+    'group flex h-full flex-col rounded-3xl border p-5 shadow-card',
+    stat.featured
+      ? 'border-sidebar-dark bg-sidebar-dark'
+      : 'border-border bg-surface',
+  )
 
   return stat.to ? (
-    <Link to={stat.to} className={`${box} hover:bg-surface-hover`}>
+    <Link
+      to={stat.to}
+      className={cn(
+        box,
+        FOCUS,
+        'transition motion-safe:hover:-translate-y-0.5',
+        !stat.featured && 'hover:border-border-hover',
+      )}
+    >
       {content}
     </Link>
   ) : (
     <div className={box}>{content}</div>
+  )
+}
+
+// A titled card. Its h2 names the region.
+function Panel({
+  eyebrow,
+  title,
+  action,
+  className,
+  children,
+}: {
+  eyebrow: string
+  title: string
+  action?: ReactNode
+  className?: string
+  children: ReactNode
+}) {
+  const headingId = useId()
+
+  return (
+    <section aria-labelledby={headingId} className={cn(CARD, 'flex min-w-0 flex-col p-5 sm:p-6', className)}>
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <div>
+          <p className={EYEBROW}>{eyebrow}</p>
+          <h2 id={headingId} className="mt-1 font-display text-2xl leading-tight text-text">
+            {title}
+          </h2>
+        </div>
+        {action}
+      </div>
+      {children}
+    </section>
+  )
+}
+
+// A small pill-shaped link in a panel's corner.
+function PanelLink({ to, children }: { to: string; children: ReactNode }) {
+  return (
+    <Link
+      to={to}
+      className={cn(
+        'inline-flex shrink-0 items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[13px] font-semibold text-primary transition-colors hover:border-primary hover:bg-surface-hover',
+        FOCUS,
+      )}
+    >
+      {children}
+      <ArrowUpRight size={14} aria-hidden="true" />
+    </Link>
   )
 }
 
@@ -66,66 +177,271 @@ function useEndSessionOn401(error: unknown) {
   }, [error, sessionEnded])
 }
 
+// The page's header: today's date, the one h1, when the figures were fetched, and links
+// to the two lists an administrator works from.
+export function DashboardHeader() {
+  const dashboard = useAdminDashboard()
+  const now = useNow()
+
+  return (
+    <header className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p className={cn(EYEBROW, 'text-accent')}>
+          <span>Today</span>
+          <span aria-hidden="true"> · </span>
+          <span>{formatLongDay(new Date(now))}</span>
+        </p>
+        <h1 className="mt-2 font-display text-5xl leading-none tracking-tight text-text sm:text-6xl">
+          Dash<em className="text-accent">board</em>
+        </h1>
+        <p className="mt-3 max-w-xl text-text-muted">How FoodBridge is doing, across every listing.</p>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        {dashboard.fulfilledTimeStamp && (
+          <p className="inline-flex items-center gap-2 rounded-full bg-cream px-3 py-1.5 text-[13px] text-muted-on-cream">
+            <span aria-hidden="true" className="size-2 rounded-full bg-success" />
+            {formatUpdated(dashboard.fulfilledTimeStamp, now)}
+          </p>
+        )}
+        <Link
+          to={ROUTES.listings}
+          className={cn(
+            'inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-text transition-colors hover:bg-surface-hover',
+            FOCUS,
+          )}
+        >
+          <ShoppingBasket size={16} aria-hidden="true" />
+          Browse all listings
+        </Link>
+        <Link
+          to={ROUTES.completedHandovers}
+          className={cn(
+            'inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-hover',
+            FOCUS,
+          )}
+        >
+          <PackageCheck size={16} aria-hidden="true" />
+          View handovers
+        </Link>
+      </div>
+    </header>
+  )
+}
+
 export function AdminDashboard() {
   return (
-    <>
+    <div className="flex flex-col gap-5">
       <DashboardStats />
-      <DistributionToday />
-      <RecentActivity />
-    </>
+      <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+        <ListingPipeline />
+        <DistributionToday />
+        <HandoverShare className="lg:col-span-2 xl:col-span-1" />
+      </div>
+      <div className="grid gap-5 xl:grid-cols-3">
+        <RecentActivity className="xl:col-span-2" />
+        <MoreFigures />
+      </div>
+    </div>
   )
 }
 
 function DashboardStats() {
   const dashboard = useAdminDashboard()
-  const now = useNow()
   useEndSessionOn401(dashboard.error)
 
+  let body
   if (dashboard.isLoading) {
-    return (
+    body = (
       <LoadingState label="Loading the dashboard">
-        <Skeleton shape="card" />
-        <Skeleton shape="card" />
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Skeleton shape="card" />
+          <Skeleton shape="card" />
+          <Skeleton shape="card" />
+          <Skeleton shape="card" />
+        </div>
       </LoadingState>
     )
-  }
+  } else if (dashboard.isError || !dashboard.data) {
+    body = (
+      <div className={CARD}>
+        <ErrorState
+          headingLevel="h3"
+          title="We couldn't load the dashboard."
+          description="Check your connection and try again."
+          onRetry={() => void dashboard.refetch()}
+          retrying={dashboard.isFetching}
+        />
+      </div>
+    )
+  } else {
+    const summary = dashboard.data
 
-  if (dashboard.isError || !dashboard.data) {
-    return (
-      <ErrorState
-        title="We couldn't load the dashboard."
-        description="Check your connection and try again."
-        onRetry={() => void dashboard.refetch()}
-        retrying={dashboard.isFetching}
-      />
+    const stats: Stat[] = [
+      {
+        label: 'Completed handovers',
+        value: summary.completedHandovers,
+        hint: 'Food collected by a recipient. View every handover.',
+        to: ROUTES.completedHandovers,
+        icon: <PackageCheck size={20} />,
+        featured: true,
+      },
+      {
+        label: 'Open listings',
+        value: summary.availableListings,
+        hint: 'Available to request now',
+        to: `${ROUTES.listings}?status=available`,
+        icon: <ShoppingBasket size={20} />,
+      },
+      {
+        label: 'Requests waiting',
+        value: summary.pendingRequests,
+        hint: 'Pending donor decisions; admin request view not connected yet',
+        icon: <ListChecks size={20} />,
+      },
+      {
+        label: 'Reserved',
+        value: summary.reservedListings,
+        hint: 'A request approved, awaiting collection',
+        to: `${ROUTES.listings}?status=reserved`,
+        icon: <Truck size={20} />,
+      },
+    ]
+
+    body = (
+      <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {stats.map((stat) => (
+          <li key={stat.label}>
+            <StatCard stat={stat} />
+          </li>
+        ))}
+      </ul>
     )
   }
 
+  return (
+    <section aria-labelledby="summary-heading">
+      <h2 id="summary-heading" className="sr-only">
+        Platform summary
+      </h2>
+      {body}
+    </section>
+  )
+}
+
+// What the cards below the headline figures show while the summary isn't there: a
+// skeleton while it loads, otherwise a short line (the summary's own error offers Try again).
+function SummaryPending({ loading }: { loading: boolean }) {
+  return loading ? (
+    <LoadingState label="Loading the figures">
+      <Skeleton lines={4} />
+    </LoadingState>
+  ) : (
+    <p className="text-sm text-text-muted">These figures appear once the dashboard loads.</p>
+  )
+}
+
+// Listings by stage, as bars on one scale. Each bar carries its label and value as text,
+// so the figures don't depend on the bar's length or colour.
+function ListingPipeline() {
+  const dashboard = useAdminDashboard()
   const summary = dashboard.data
 
-  const stats: Stat[] = [
-    {
-      label: 'Open listings',
-      value: summary.availableListings,
-      hint: 'Available to request now',
-      to: `${ROUTES.listings}?status=available`,
-    },
-    {
-      label: 'Requests waiting',
-      value: summary.pendingRequests,
-      hint: 'Pending donor decisions; admin request view not connected yet',
-    },
-    {
-      label: 'Reserved',
-      value: summary.reservedListings,
-      hint: 'A request approved, awaiting collection',
-      to: `${ROUTES.listings}?status=reserved`,
-    },
-    {
-      label: 'Completed handovers',
-      value: summary.completedHandovers,
-      hint: 'Collected; listing filter awaiting backend correction',
-    },
+  return (
+    <Panel eyebrow="Listings" title="Listing pipeline">
+      {summary ? <PipelineBars summary={summary} /> : <SummaryPending loading={dashboard.isLoading} />}
+    </Panel>
+  )
+}
+
+function PipelineBars({ summary }: { summary: AdminDashboardSummary }) {
+  const stages = [
+    { label: 'Open', value: summary.availableListings },
+    { label: 'Reserved', value: summary.reservedListings },
+    { label: 'Collected', value: summary.collectedListings },
+  ]
+  const max = Math.max(1, ...stages.map((stage) => stage.value))
+
+  return (
+    <>
+      <ul className="grid flex-1 grid-cols-3 gap-4" aria-label="Listings by stage">
+        {stages.map((stage) => (
+          <li key={stage.label} className="flex flex-col items-center gap-2">
+            <span className="font-display text-2xl text-text">{formatValue(stage.value)}</span>
+            <span className="flex min-h-36 w-full max-w-16 flex-1 items-end overflow-hidden rounded-2xl bg-cream" aria-hidden="true">
+              <span
+                className="block w-full rounded-2xl bg-primary"
+                style={{ height: `${Math.max(4, (stage.value / max) * 100)}%` }}
+              />
+            </span>
+            <span className="text-[13px] font-semibold text-text-muted">{stage.label}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-5 border-t border-border pt-4 text-[13px] text-text-muted">
+        {summary.totalListings.toLocaleString('en-GB')} listings recorded in total
+      </p>
+    </>
+  )
+}
+
+// The share of every recorded listing that has been collected, as a ring meter.
+function HandoverShare({ className }: { className?: string }) {
+  const dashboard = useAdminDashboard()
+  const summary = dashboard.data
+
+  return (
+    <Panel
+      eyebrow="Handovers"
+      title="Share collected"
+      className={className}
+      action={<PanelLink to={ROUTES.completedHandovers}>View all</PanelLink>}
+    >
+      {summary ? <ShareRing summary={summary} /> : <SummaryPending loading={dashboard.isLoading} />}
+    </Panel>
+  )
+}
+
+const RING_RADIUS = 52
+const RING_LENGTH = 2 * Math.PI * RING_RADIUS
+
+function ShareRing({ summary }: { summary: AdminDashboardSummary }) {
+  const share =
+    summary.totalListings > 0 ? Math.round((summary.collectedListings / summary.totalListings) * 100) : null
+
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-4 sm:flex-row lg:flex-col xl:flex-col">
+      <div className="relative size-44">
+        <svg viewBox="0 0 128 128" className="size-full -rotate-90" aria-hidden="true">
+          <circle cx="64" cy="64" r={RING_RADIUS} fill="none" strokeWidth="14" className="stroke-cream" />
+          {share !== null && share > 0 && (
+            <circle
+              cx="64"
+              cy="64"
+              r={RING_RADIUS}
+              fill="none"
+              strokeWidth="14"
+              strokeDasharray={`${(share / 100) * RING_LENGTH} ${RING_LENGTH}`}
+              className="stroke-primary"
+            />
+          )}
+        </svg>
+        <div className="absolute inset-0 grid place-content-center text-center">
+          <p className="font-display text-4xl leading-none text-text">{share === null ? '—' : `${share}%`}</p>
+          <p className="mt-1 text-[11px] font-bold tracking-widest text-text-muted uppercase">Collected</p>
+        </div>
+      </div>
+      <p className="max-w-60 text-center text-[13px] text-text-muted">
+        {summary.collectedListings.toLocaleString('en-GB')} of {summary.totalListings.toLocaleString('en-GB')}{' '}
+        listings have been collected by a recipient.
+      </p>
+    </div>
+  )
+}
+
+// The figures the backend doesn't yet supply in a confirmed form.
+function MoreFigures() {
+  const figures = [
     {
       label: 'Expired',
       value: '—',
@@ -139,21 +455,17 @@ function DashboardStats() {
   ]
 
   return (
-    <>
-      {dashboard.fulfilledTimeStamp && (
-        <p className="mb-4 text-[13px] text-text-muted">
-          {formatUpdated(dashboard.fulfilledTimeStamp, now)}
-        </p>
-      )}
-
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {stats.map((stat) => (
-          <li key={stat.label}>
-            <StatCard stat={stat} />
+    <Panel eyebrow="Awaiting the backend" title="More figures">
+      <ul className="flex flex-col gap-3">
+        {figures.map((figure) => (
+          <li key={figure.label} className="rounded-2xl bg-cream p-4">
+            <p className="text-sm font-semibold text-muted-on-cream">{figure.label}</p>
+            <p className="mt-1 font-display text-3xl leading-none text-text">{figure.value}</p>
+            <p className="mt-2 text-[13px] leading-snug text-muted-on-cream">{figure.hint}</p>
           </li>
         ))}
       </ul>
-    </>
+    </Panel>
   )
 }
 
@@ -165,7 +477,7 @@ function DistributionToday() {
   if (distribution.isLoading) {
     body = (
       <LoadingState label="Loading today's distribution">
-        <Skeleton shape="card" />
+        <Skeleton lines={4} />
       </LoadingState>
     )
   } else if (distribution.isError || !distribution.data) {
@@ -180,7 +492,9 @@ function DistributionToday() {
     )
   } else {
     const today = distribution.data
-    const stats: Stat[] = [
+    const served =
+      today.totalRecipients > 0 ? Math.min(100, (today.recipientsServedToday / today.totalRecipients) * 100) : 0
+    const stats = [
       {
         label: 'Organisations served',
         value: `${today.recipientsServedToday.toLocaleString('en-GB')} of ${today.totalRecipients.toLocaleString('en-GB')}`,
@@ -188,27 +502,48 @@ function DistributionToday() {
       },
       {
         label: 'Still waiting',
-        value: today.recipientsWaitingToday,
+        value: formatValue(today.recipientsWaitingToday),
         hint: 'Recipient organisations with no approval yet today',
       },
       {
         label: 'Approved today',
-        value: today.approvedListingsToday,
+        value: formatValue(today.approvedListingsToday),
         hint: 'Requests approved since midnight, Lagos time',
       },
     ]
 
     body = (
       <>
-        <p className="mb-4 text-sm">
+        <span
+          className={cn(
+            'mb-3 inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-xs font-bold',
+            today.firstRoundInProgress
+              ? 'bg-status-pending-bg text-status-pending-text'
+              : 'bg-status-available-bg text-status-available-text',
+          )}
+        >
+          <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
+          {today.firstRoundInProgress ? 'In progress' : 'Complete'}
+        </span>
+        <p className="mb-5 text-sm leading-relaxed text-text-body">
           {today.firstRoundInProgress
             ? 'First round in progress: an organisation that has received food today can’t be approved again until every organisation has had its first.'
             : 'First round complete: every recipient organisation has received food today.'}
         </p>
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+        <div className="mb-5 h-2.5 overflow-hidden rounded-full bg-cream" aria-hidden="true">
+          <div className="h-full rounded-full bg-accent" style={{ width: `${served}%` }} />
+        </div>
+
+        <ul className="mt-auto flex flex-col gap-2.5">
           {stats.map((stat) => (
-            <li key={stat.label}>
-              <StatCard stat={stat} />
+            <li
+              key={stat.label}
+              className="grid grid-cols-[1fr_auto] items-center gap-x-4 rounded-2xl border border-border px-4 py-3"
+            >
+              <p className="text-[13px] font-semibold text-text">{stat.label}</p>
+              <p className="row-span-2 font-display text-2xl leading-tight text-text">{stat.value}</p>
+              <p className="text-xs leading-snug text-text-muted">{stat.hint}</p>
             </li>
           ))}
         </ul>
@@ -217,16 +552,13 @@ function DistributionToday() {
   }
 
   return (
-    <section aria-labelledby="distribution-heading" className="mt-10">
-      <h2 id="distribution-heading" className={SECTION_HEADING}>
-        Today’s distribution
-      </h2>
+    <Panel eyebrow="Daily fairness rule" title="Today’s distribution">
       {body}
-    </section>
+    </Panel>
   )
 }
 
-function RecentActivity() {
+function RecentActivity({ className }: { className?: string }) {
   const activity = useRecentActivity(ACTIVITY_LIMIT)
   const now = useNow()
   useEndSessionOn401(activity.error)
@@ -254,32 +586,44 @@ function RecentActivity() {
     )
   } else {
     body = (
-      <ul className="divide-y divide-border rounded-2xl border border-border bg-surface">
+      <ul className="-mx-2 flex flex-col">
         {activity.data.map((entry) => (
-          <li key={entry.id} className="flex flex-col gap-0.5 px-5 py-3">
-            <p className="text-sm">
-              <span className="font-semibold">{entry.actorName}</span> {activityLabel(entry.type).toLowerCase()}
-              {entry.listingTitle && (
-                <>
-                  {': '}
-                  {entry.listingId ? (
-                    <Link
-                      to={listingDetailPath(entry.listingId)}
-                      className="font-medium text-primary underline underline-offset-4"
-                    >
-                      {entry.listingTitle}
-                    </Link>
-                  ) : (
-                    entry.listingTitle
-                  )}
-                </>
+          <li
+            key={entry.id}
+            className="flex items-start gap-3 rounded-2xl px-2 py-3 transition-colors hover:bg-bg"
+          >
+            <span
+              aria-hidden="true"
+              className="grid size-9 shrink-0 place-items-center rounded-full bg-cream text-xs font-bold text-primary"
+            >
+              {initials(entry.actorName) || '·'}
+            </span>
+            <div className="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+              <p className="min-w-0 text-sm text-text-body">
+                <span className="font-semibold text-text">{entry.actorName}</span>{' '}
+                {activityLabel(entry.type).toLowerCase()}
+                {entry.listingTitle && (
+                  <>
+                    {': '}
+                    {entry.listingId ? (
+                      <Link
+                        to={listingDetailPath(entry.listingId)}
+                        className="font-medium wrap-break-word text-primary underline underline-offset-4"
+                      >
+                        {entry.listingTitle}
+                      </Link>
+                    ) : (
+                      entry.listingTitle
+                    )}
+                  </>
+                )}
+              </p>
+              {entry.createdAt && (
+                <time dateTime={entry.createdAt} className="shrink-0 text-xs text-text-muted">
+                  {formatDateTime(entry.createdAt, new Date(now))}
+                </time>
               )}
-            </p>
-            {entry.createdAt && (
-              <time dateTime={entry.createdAt} className="text-[13px] text-text-muted">
-                {formatDateTime(entry.createdAt, new Date(now))}
-              </time>
-            )}
+            </div>
           </li>
         ))}
       </ul>
@@ -287,11 +631,8 @@ function RecentActivity() {
   }
 
   return (
-    <section aria-labelledby="activity-heading" className="mt-10">
-      <h2 id="activity-heading" className={SECTION_HEADING}>
-        Recent activity
-      </h2>
+    <Panel eyebrow="Platform" title="Recent activity" className={className}>
       {body}
-    </section>
+    </Panel>
   )
 }

@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest'
 import { PageContainer } from '@/components/common/PageContainer'
 import { listingDetailPath, ROUTES } from '@/constants/routes'
 import { BrowsePage } from '@/pages/BrowsePage'
+import { CompletedHandoversPage } from '@/pages/CompletedHandoversPage'
 import { CreateListingPage } from '@/pages/CreateListingPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { ListingDetailPage } from '@/pages/ListingDetailPage'
@@ -20,6 +21,7 @@ describe('PageContainer', () => {
     ['details', 'max-w-200'],
     ['form', 'max-w-215'],
     ['wide', 'max-w-270'],
+    ['dashboard', 'max-w-320'],
   ] as const)('centres a "%s" page up to %s, full width below it', (width, maxWidth) => {
     render(<PageContainer width={width}>Page</PageContainer>)
 
@@ -44,7 +46,8 @@ describe('Pages in the container', () => {
     ['Your listings', 'donor', ROUTES.yourListings, <YourListingsPage />, 'wide'],
     ['Your requests', 'recipient', ROUTES.yourRequests, <YourRequestsPage />, 'wide'],
     ['Requests', 'donor', ROUTES.requests, <RequestsPage />, 'wide'],
-    ['Dashboard', 'admin', ROUTES.admin, <DashboardPage />, 'wide'],
+    ['Dashboard', 'admin', ROUTES.admin, <DashboardPage />, 'dashboard'],
+    ['Completed handovers', 'admin', ROUTES.completedHandovers, <CompletedHandoversPage />, 'dashboard'],
     ['Page not found', 'donor', '/nowhere', <NotFoundPage />, 'wide'],
   ] as const)('%s uses the container (%s)', (_name, who, path, page, width) => {
     signInAs(who)
