@@ -97,7 +97,7 @@ describe('dashboard More figures (live service)', () => {
     renderRoutes([{ path: '/', element: <AdminDashboard /> }])
 
     const panel = (await screen.findByRole('heading', { name: 'More figures' })).closest('section')!
-    const saved = within(panel).getByText('Food saved, by unit').closest('li')!
+    const saved = (await within(panel).findByText('Food saved, by unit')).closest('li')!
     const totals = await within(saved).findByRole('list', { name: 'Food saved by unit' })
 
     // 30 + 15 portions and 12 kg; the reversed 99 portions are left out.
