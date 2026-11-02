@@ -87,7 +87,7 @@ export function RecipientAction({ listing }: { listing: Listing }) {
       <div
         ref={statusRef}
         tabIndex={-1}
-        className="rounded-xl border border-border bg-bg p-4"
+        className="rounded-2xl border border-border bg-bg p-4"
       >
         <p className="flex flex-wrap items-center gap-2.5 text-sm font-semibold">
           <span>Your request</span>

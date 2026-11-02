@@ -80,7 +80,7 @@ describe('Completed handovers', () => {
     signInAs('admin')
     renderHandovers()
 
-    const summary = await screen.findByRole('list', { name: 'Summary' })
+    const summary = await screen.findByRole('list', { name: 'Handovers at a glance' })
     expect(within(summary).getByText('Handovers').nextElementSibling).toHaveTextContent('1')
     expect(within(summary).getByText('Recipient organisations').nextElementSibling).toHaveTextContent('1')
 

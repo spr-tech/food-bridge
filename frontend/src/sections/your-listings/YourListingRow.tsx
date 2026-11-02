@@ -82,10 +82,10 @@ export function YourListingRow({ listing }: { listing: Listing }) {
     : editUnavailableMessage(listing.status)
 
   return (
-    <article className="relative flex gap-4 rounded-2xl border border-border bg-surface p-3.5 hover:bg-surface-hover has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-focus">
+    <article className="relative flex gap-4 rounded-3xl border border-border bg-surface p-4 shadow-card transition-colors hover:bg-surface-hover has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-focus">
       <ListingPhoto
         photoUrl={listing.photoUrl}
-        className="h-15.5 w-21 shrink-0 rounded-md"
+        className="h-15.5 w-21 shrink-0 rounded-xl"
       />
 
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -105,7 +105,7 @@ export function YourListingRow({ listing }: { listing: Listing }) {
                 to={editPath}
                 aria-label={`Edit ${listing.foodName}`}
                 title="Edit listing"
-                className="inline-flex size-8 cursor-pointer items-center justify-center rounded-lg border border-border bg-surface-hover text-primary transition-colors hover:border-primary hover:bg-primary hover:text-on-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                className="inline-flex size-8 cursor-pointer items-center justify-center rounded-full border border-border bg-surface-hover text-primary transition-colors hover:border-primary hover:bg-primary hover:text-on-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
               >
                 <EditIcon />
               </Link>

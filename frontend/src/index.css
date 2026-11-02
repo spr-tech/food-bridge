@@ -35,4 +35,39 @@
     outline: var(--focus-ring-width) solid var(--color-focus);
     outline-offset: var(--focus-ring-offset);
   }
+
+  /* Buttons are pills, like the dashboard's. The shared Button reads its corners from
+     --radius-md, so it is set here per button rather than by editing the component.
+     Select triggers and checkboxes keep the input corners they sit beside. */
+  button:not([role='combobox'], [role='checkbox']) {
+    --radius-md: 9999px;
+  }
+
+  /* Everything clickable shows the pointer; anything disabled shows not-allowed.
+     A cursor utility on the element (e.g. cursor-wait while loading) still wins. */
+  button,
+  [role='button'],
+  [role='tab'],
+  [role='option']:not([data-disabled]),
+  [role='menuitem'],
+  summary,
+  input[type='file'],
+  input[type='checkbox'],
+  input[type='radio'],
+  label:has(> input[type='file']) {
+    cursor: pointer;
+  }
+  button:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
+  /* A disabled button keeps its resting colours on hover, so it never looks clickable.
+     These are the variables the shared Button's hover colours read. */
+  button:disabled,
+  button[aria-disabled='true'] {
+    --color-primary-hover: var(--color-primary);
+    --color-danger-hover: var(--color-danger);
+    --color-surface: var(--color-bg);
+  }
 }

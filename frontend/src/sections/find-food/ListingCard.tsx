@@ -88,9 +88,9 @@ const pending =
   }
 
   return (
-    <Card className="h-full rounded-2xl border-border shadow-[0_1px_2px_rgb(0_0_0/0.03),0_8px_22px_rgb(30_42_36/0.05)]">
+    <Card className="h-full rounded-3xl! border-border shadow-card transition-shadow hover:shadow-md">
       <div className="flex flex-col items-start justify-between gap-3">
-        <ListingPhoto photoUrl={listing.photoUrl} className="h-50 w-full shrink-0 rounded-md" />
+        <ListingPhoto photoUrl={listing.photoUrl} className="h-50 w-full shrink-0 rounded-2xl" />
         <StatusBadge kind="listing" status={listing.status} />
       </div>
       <h2 className="mt-3 mb-0.75 line-clamp-2 text-lg leading-snug wrap-break-word">{listing.foodName}</h2>
@@ -114,7 +114,7 @@ const pending =
           aria-label={`View listing: ${listing.foodName}`}
           className={cn(
             CARD_BUTTON,
-            'inline-flex items-center justify-center rounded-md border border-border-input bg-surface text-primary hover:bg-surface-hover',
+            'inline-flex items-center justify-center rounded-full border border-border-input bg-surface text-primary transition-colors hover:border-primary hover:bg-surface-hover',
           )}
         >
           View listing

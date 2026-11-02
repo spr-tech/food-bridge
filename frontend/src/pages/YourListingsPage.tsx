@@ -16,10 +16,12 @@ export function YourListingsPage() {
 
   return (
     <PageContainer>
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <PageHeader title={TITLE} description="Food you've shared, newest first. Open one to see its requests; finished listings move to Listing history." />
-        <Button onClick={() => void navigate(ROUTES.createListing)}>List surplus food</Button>
-      </div>
+      <PageHeader
+        eyebrow="Donor · Your listings"
+        title={TITLE}
+        description="Food you've shared, newest first. Open one to see its requests; finished listings move to Listing history."
+        actions={<Button onClick={() => void navigate(ROUTES.createListing)}>List surplus food</Button>}
+      />
       <YourListings />
     </PageContainer>
   )

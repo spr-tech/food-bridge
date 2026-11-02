@@ -1,6 +1,7 @@
 // The dashboard's More figures against the live service (mocks off, fetch stubbed): the
-// expired count and the estimate of food saved come from GET /api/admin/dashboard
-// (expiredListings, estimatedPortionsSaved), no longer shown as "—".
+// expired count comes from GET /api/admin/dashboard (expiredListings); the estimate of food
+// saved totals the quantity listed on each completed handover per unit, never adding units
+// together, and leaves out a handover that was reversed.
 import { screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AdminDashboard } from '@/sections/admin-dashboard/AdminDashboard'
@@ -25,6 +26,31 @@ const DASHBOARD = {
   estimatedPortionsSaved: 1240,
 }
 
+const listing = (id: string, quantity: number, unit: string, status = 'COLLECTED') => ({
+  id,
+  foodName: `Food ${id}`,
+  description: 'Fresh.',
+  category: 'PREPARED_MEALS',
+  quantity,
+  unit,
+  imageReference: null,
+  pickupArea: 'Yaba',
+  collectionDeadline: '2030-01-01T18:00:00Z',
+  status,
+  donorId: 'acc-donor',
+  donorName: "Mama's Oven",
+  createdAt: '2030-01-01T08:00:00Z',
+  pendingRequestCount: 0,
+})
+
+// Two portion handovers, one in kg, and a reversed one that must not count.
+const LISTINGS = [
+  listing('3f2b8c1a-0000-4000-8000-000000000001', 30, 'PORTIONS'),
+  listing('3f2b8c1a-0000-4000-8000-000000000002', 15, 'PORTIONS'),
+  listing('3f2b8c1a-0000-4000-8000-000000000003', 12, 'KG'),
+  listing('3f2b8c1a-0000-4000-8000-000000000004', 99, 'PORTIONS', 'REVERSED'),
+]
+
 const fetchMock = vi.fn<typeof fetch>()
 
 beforeEach(() => {
@@ -43,6 +69,8 @@ beforeEach(() => {
       })
     }
     if (url.pathname === '/api/activity') return Response.json([])
+    if (url.pathname === '/api/listings') return Response.json(LISTINGS)
+    if (url.pathname === '/api/admin/requests') return Response.json([])
     return new Response(null, { status: 404 })
   })
   vi.stubGlobal('fetch', fetchMock)
@@ -54,7 +82,7 @@ afterEach(() => {
 })
 
 describe('dashboard More figures (live service)', () => {
-  it("shows the service's expired count and portions saved", async () => {
+  it("shows the service's expired count and the food saved per unit", async () => {
     renderRoutes([{ path: '/', element: <AdminDashboard /> }])
 
     const panel = (await screen.findByRole('heading', { name: 'More figures' })).closest('section')!
@@ -62,7 +90,8 @@ describe('dashboard More figures (live service)', () => {
     const saved = within(panel).getByText('Food saved (estimate)').closest('li')!
 
     expect(expired).toHaveTextContent('17')
-    expect(saved).toHaveTextContent('1,240 portions')
+    expect(await within(saved).findByText('45 portions · 12 kg')).toBeInTheDocument()
+    expect(saved).toHaveTextContent('Based on the quantity listed')
     expect(within(panel).queryByText('—')).not.toBeInTheDocument()
     expect(within(panel).queryByText(/Awaiting the backend/)).not.toBeInTheDocument()
   })

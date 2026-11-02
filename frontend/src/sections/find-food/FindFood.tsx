@@ -166,6 +166,7 @@ export function FindFood() {
   return (
     <div>
       <FilterBar
+        className="mb-6 rounded-3xl border border-border bg-surface p-4 shadow-card sm:p-5"
         query={query}
         onQueryChange={setQuery}
         searchLabel="Search by food name, donor or area"

@@ -2,6 +2,7 @@
 // distribution (the daily fairness rule's progress) and recent activity, each loading on
 // its own.
 import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { ROUTES } from '@/constants/routes'
 import * as db from '@/mocks/db'
@@ -48,12 +49,50 @@ describe('Admin dashboard', () => {
 
     const activity = await screen.findByRole('region', { name: 'Recent activity' })
     const rows = await within(activity).findAllByRole('listitem')
-    expect(rows).toHaveLength(10)
+    // Five at a time.
+    expect(rows).toHaveLength(5)
     // The newest seeded event: Grace Shelter's request for the loaves, half an hour ago.
     expect(rows[0]).toHaveTextContent('Grace Shelter requested food: Wholewheat bread loaves')
     expect(within(rows[0]).getByRole('link', { name: 'Wholewheat bread loaves' })).toHaveAttribute(
       'href',
       '/listings/lst-01',
     )
+  })
+
+  it('shows five more entries at a time, then back to five with Show less', async () => {
+    signInAs('admin')
+    const user = userEvent.setup()
+    renderDashboard()
+
+    const activity = await screen.findByRole('region', { name: 'Recent activity' })
+    await within(activity).findAllByRole('listitem')
+    const total = Number(within(activity).getByText(/^Showing 5 of \d+$/).textContent?.match(/of (\d+)/)?.[1])
+    expect(total).toBeGreaterThan(10)
+    expect(within(activity).queryByRole('button', { name: 'Show less' })).not.toBeInTheDocument()
+
+    await user.click(within(activity).getByRole('button', { name: 'Show more' }))
+    expect(within(activity).getAllByRole('listitem')).toHaveLength(10)
+    expect(within(activity).getByText(`Showing 10 of ${total}`)).toBeInTheDocument()
+
+    await user.click(within(activity).getByRole('button', { name: 'Show less' }))
+    expect(within(activity).getAllByRole('listitem')).toHaveLength(5)
+    // Focus moves to Show more, which stays, rather than being lost with Show less.
+    expect(within(activity).getByRole('button', { name: 'Show more' })).toHaveFocus()
+  })
+
+  it('stops at the last entry: Show more is marked unavailable', async () => {
+    signInAs('admin')
+    const user = userEvent.setup()
+    renderDashboard()
+
+    const activity = await screen.findByRole('region', { name: 'Recent activity' })
+    await within(activity).findAllByRole('listitem')
+    const showMore = within(activity).getByRole('button', { name: 'Show more' })
+    while (showMore.getAttribute('aria-disabled') !== 'true') await user.click(showMore)
+
+    const total = within(activity).getAllByRole('listitem').length
+    expect(within(activity).getByText(`Showing ${total} of ${total}`)).toBeInTheDocument()
+    await user.click(showMore)
+    expect(within(activity).getAllByRole('listitem')).toHaveLength(total)
   })
 })

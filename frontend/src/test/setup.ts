@@ -4,8 +4,6 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach } from 'vitest'
 import { clearSession } from '@/app/session'
-import { resetMockDb } from '@/mocks/db'
-import { resetSimulateSwitches } from '@/mocks/simulate'
 
 // Radix (the shared Checkbox and Select) measures elements and captures the pointer.
 // jsdom has neither, so these stand-ins do nothing, as a browser would in a test.
@@ -35,10 +33,19 @@ window.matchMedia ??= (query: string) =>
   }) as MediaQueryList
 
 // Each test starts signed out, with the simulated data back at its seed.
-afterEach(() => {
+// The simulated store is imported here, after the test file's imports, not at the top:
+// it loads src/constants/listingOptions, which picks its units and categories from env
+// once. Imported up front it would load before a *.live.test's vi.mock('@/config/env')
+// applies, so live tests would see the simulated units ("loaves") instead of the
+// service's ("PORTIONS" shown as "portions").
+afterEach(async () => {
   cleanup()
   clearSession()
   sessionStorage.clear()
+  const [{ resetMockDb }, { resetSimulateSwitches }] = await Promise.all([
+    import('@/mocks/db'),
+    import('@/mocks/simulate'),
+  ])
   resetMockDb()
   resetSimulateSwitches()
   window.history.replaceState(null, '', '/')

@@ -87,7 +87,7 @@ export function DeleteListingButton({ listing, variant = 'button', onDeleted }: 
           aria-label={`Delete listing: ${listing.foodName}`}
           aria-describedby={reasonId}
           title={blocked}
-          className="inline-flex size-8 cursor-not-allowed items-center justify-center rounded-lg border border-border bg-surface text-text-muted opacity-50"
+          className="inline-flex size-8 cursor-not-allowed items-center justify-center rounded-full border border-border bg-surface text-text-muted opacity-50"
         >
           <TrashIcon />
         </button>
@@ -132,7 +132,7 @@ export function DeleteListingButton({ listing, variant = 'button', onDeleted }: 
         type="button"
         aria-label={label}
         title="Delete listing"
-        className="inline-flex size-8 cursor-pointer items-center justify-center rounded-lg border border-border bg-surface-hover text-danger transition-colors hover:border-danger hover:bg-danger hover:text-on-danger focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+        className="inline-flex size-8 cursor-pointer items-center justify-center rounded-full border border-border bg-surface-hover text-danger transition-colors hover:border-danger hover:bg-danger hover:text-on-danger focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
       >
         <TrashIcon />
       </button>
