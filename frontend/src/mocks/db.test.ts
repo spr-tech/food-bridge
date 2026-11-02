@@ -388,3 +388,81 @@ describe('simulate switches', () => {
     })
   })
 })
+
+describe('signed-in account and administrator views', () => {
+  it("returns the stored session's account, and 401 for an account it doesn't know", () => {
+    const donor = signInAs('donor')
+
+    expect(db.getMe(donor)).toEqual({
+      accountId: 'acc-donor',
+      role: 'donor',
+      organisationName: "Mama's Oven",
+      email: 'donor@foodbridge.test',
+    })
+    expectError(() => db.getMe({ ...donor, accountId: 'acc-gone' }), 401, 'SESSION_EXPIRED')
+    expectError(() => db.getMe(null), 401, 'SESSION_EXPIRED')
+  })
+
+  it('lets only an administrator see distribution, every request and activity', () => {
+    for (const who of ['donor', 'recipient'] as const) {
+      const actor = signInAs(who)
+      expectError(() => db.distributionToday(actor), 403, 'NOT_ALLOWED')
+      expectError(() => db.listAllRequests(actor), 403, 'NOT_ALLOWED')
+      expectError(() => db.listActivity(actor), 403, 'NOT_ALLOWED')
+    }
+  })
+
+  it('lists every request newest first, by status, a page at a time', () => {
+    const admin = signInAs('admin')
+
+    const all = db.listAllRequests(admin)
+    expect(all.total).toBe(12)
+    expect(all.items.map((request) => request.id).slice(0, 2)).toEqual(['req-03', 'req-02'])
+
+    const approved = db.listAllRequests(admin, { status: 'APPROVED' })
+    expect(approved.items.map((request) => request.id).sort()).toEqual(['req-04', 'req-06', 'req-10'])
+
+    const page = db.listAllRequests(admin, { offset: 10, limit: 5 })
+    expect(page).toMatchObject({ total: 12 })
+    expect(page.items).toHaveLength(2)
+
+    expectError(() => db.listAllRequests(admin, { limit: 101 }), 400, 'INVALID_PAGE')
+  })
+
+  it("counts today's approvals per recipient organisation, as the fairness rule does", () => {
+    const donor = signInAs('donor')
+    const admin = signInAs('admin')
+    expect(db.distributionToday(admin)).toMatchObject({
+      totalRecipients: 3,
+      approvedListingsToday: 0,
+      recipientsServedToday: 0,
+      recipientsWaitingToday: 3,
+      firstRoundInProgress: true,
+    })
+
+    db.decideRequest(donor, { requestId: 'req-01', decision: 'APPROVED' })
+
+    expect(db.distributionToday(admin)).toMatchObject({
+      approvedListingsToday: 1,
+      recipientsServedToday: 1,
+      recipientsWaitingToday: 2,
+      firstRoundInProgress: true,
+    })
+  })
+
+  it('lists activity newest first, including an approval once it happens', () => {
+    const donor = signInAs('donor')
+    db.decideRequest(donor, { requestId: 'req-01', decision: 'APPROVED' })
+    const admin = signInAs('admin')
+
+    const [latest] = db.listActivity(admin, 5)
+    expect(latest).toMatchObject({
+      actorName: "Mama's Oven",
+      type: 'REQUEST_APPROVED',
+      listingId: 'lst-01',
+      listingTitle: 'Wholewheat bread loaves',
+    })
+    expect(db.listActivity(admin, 5)).toHaveLength(5)
+    expectError(() => db.listActivity(admin, 0), 400, 'INVALID_REQUEST')
+  })
+})

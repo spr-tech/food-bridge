@@ -105,10 +105,21 @@ export function SignInForm({ sessionEnded }: { sessionEnded: boolean }) {
                 autoComplete="current-password"
                 icon={<LockIcon />}
               />
-              <Button ref={signInButton} type="submit" size="lg" loading={isSubmitting} className="mt-1 w-full hover:cursor-pointer">
+                   <Button
+                ref={signInButton}
+                type="submit"
+                size="lg"
+                loading={isSubmitting}
+                className="mt-1 w-full hover:cursor-pointer"
+              >
                 Sign in
               </Button>
 
+              {isSubmitting && (
+                <p role="status" className="text-center text-sm text-text-muted">
+                  Hang tight, we’re getting things ready for you
+                </p>
+              )}
               <div className="lg:hidden">
                 <DemoAccountChips onPick={pick} />
               </div>

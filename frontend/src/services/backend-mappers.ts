@@ -1,5 +1,7 @@
 import { pickupAreaValue } from '@/constants/listingOptions'
 import type {
+  ActivityEntry,
+  BackendActivityResponse,
   BackendFoodRequest,
   BackendListingResponse,
   Listing,
@@ -9,6 +11,20 @@ import type {
 
 function asString(value: unknown, fallback = ''): string {
   return typeof value === 'string' ? value : fallback
+}
+
+// Convert one GET /api/activity row. The actor's account may have no display name, and
+// an activity need not be about a listing.
+export function mapBackendActivity(dto: BackendActivityResponse): ActivityEntry {
+  return {
+    id: asString(dto.id),
+    actorName: asString(dto.actorName, 'Someone'),
+    type: asString(dto.type).toUpperCase(),
+    listingId: dto.listingId ?? null,
+    listingTitle: dto.listingTitle ?? null,
+    details: dto.details ?? null,
+    createdAt: asString(dto.createdAt),
+  }
 }
 
 // Convert backend listing response into the frontend Listing type.

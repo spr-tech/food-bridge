@@ -2,7 +2,9 @@
 // and the shared ToastProvider), and sign in as one of the seeded demo accounts.
 import { render, screen, waitFor, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { createMemoryRouter, Outlet, RouterProvider, type RouteObject } from 'react-router'
+import { createMemoryRouter, Outlet, type RouteObject } from 'react-router'
+// From react-router/dom, like the app (src/app/providers.tsx), so flushSync navigations work.
+import { RouterProvider } from 'react-router/dom'
 import { expect } from 'vitest'
 import { saveSession } from '@/app/session'
 import { makeStore } from '@/app/store'

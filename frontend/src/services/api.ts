@@ -6,8 +6,7 @@ import { env } from '@/config/env'
 
 // TEMPORARY: true while every endpoint is simulated (src/mocks/). The demo line says
 // "(simulated)" while it is. Set to false once the endpoints call the service.
-export const DATA_IS_SIMULATED = true
-
+export const DATA_IS_SIMULATED = env.useMocks
 // Caching plan (keepUnusedDataFor stays at the 60s default):
 // - list endpoints use refetchOnMountOrArgChange: 30 and refetchOnReconnect: true
 // - listing cards prefetch their detail with usePrefetch on hover and focus (ifOlderThan: 30)
