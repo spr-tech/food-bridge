@@ -3,6 +3,7 @@
 
 import * as db from '@/mocks/db'
 import { simulate, simulateWrite } from '@/mocks/simulate'
+import { matchesListingSearch, matchesPickupArea } from '@/lib/listing-search'
 import { shrinkPhoto } from '@/lib/photo'
 import { api, LIST_QUERY_OPTIONS } from '@/services/api'
 import { env } from '@/config/env'
@@ -19,6 +20,9 @@ import type {
   ListingFilters,
   ListingPage,
 } from '@/types/api'
+
+// The most listings the service returns in one call (it answers 400 INVALID_PAGE above).
+const SERVICE_PAGE_LIMIT = 100
 
 function queryParams(
   filters: ListingFilters,
@@ -77,6 +81,57 @@ const listingsApi = api.injectEndpoints({
             (actor) => db.listListings(actor, filters),
             () => ({ items: [], total: 0 }),
           )
+        }
+
+        // The service's keyword search skips the donor and area, and its area filter only
+        // matches the exact stored text ("surulere", not "Surulere, Lagos - …"). With a
+        // search or an area, ask it for status and category only, load every page, and
+        // match the search and area here.
+        if (filters.q?.trim() || filters.area) {
+          const listings: Listing[] = []
+
+          for (let offset = 0; ; offset += SERVICE_PAGE_LIMIT) {
+            const page = await baseQuery({
+              url: '/api/listings',
+              params: {
+                ...queryParams({ ...filters, q: undefined, area: undefined }),
+                offset,
+                limit: SERVICE_PAGE_LIMIT,
+              },
+            })
+
+            if (page.error) return { error: page.error }
+
+            const rows = Array.isArray(page.data)
+              ? (page.data as BackendListingResponse[])
+              : []
+
+            listings.push(...rows.map(mapBackendListing))
+
+            const pageTotal = Number(
+              page.meta?.response?.headers.get('x-total-count'),
+            )
+
+            if (
+              rows.length < SERVICE_PAGE_LIMIT ||
+              (Number.isFinite(pageTotal) && listings.length >= pageTotal)
+            ) {
+              break
+            }
+          }
+
+          const matches = listings.filter(
+            (listing) =>
+              matchesPickupArea(listing, filters.area) &&
+              matchesListingSearch(listing, filters.q ?? ''),
+          )
+
+          return {
+            data: {
+              items: matches.slice(0, filters.limit ?? 50),
+              total: matches.length,
+            },
+          }
         }
 
         const result = await baseQuery({

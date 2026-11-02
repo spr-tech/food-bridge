@@ -31,7 +31,7 @@ function editUnavailableMessage(status: Listing['status']): string {
       return 'This listing is reserved and can no longer be edited.'
 
     case 'COLLECTED':
-      return 'This listing has already been collected and can no longer be edited.'
+      return 'This listing has already been collected and can no longer be edited or deleted.'
 
     case 'EXPIRED':
       return 'This listing has expired and can no longer be edited.'

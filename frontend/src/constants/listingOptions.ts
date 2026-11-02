@@ -62,6 +62,18 @@ export const PICKUP_AREAS: Option[] = [
   { value: 'ajegunle', label: 'Ajegunle' },
 ]
 
+// The pickup area option a stored area belongs to. The contract keeps the area as free
+// text, and some listings hold a longer description that starts with the area, e.g.
+// "Surulere, Lagos - neighbourhood kitchen desk" is Surulere. Text that starts with no
+// known area is returned as it is.
+export function pickupAreaValue(raw: string): string {
+  const text = raw.trim().toLowerCase()
+  const match = PICKUP_AREAS.find(
+    (option) => text === option.value || new RegExp(`^${option.value}\\b`).test(text),
+  )
+  return match?.value ?? raw
+}
+
 // ---------------------------------------------------------------------------
 // Explanation
 // - The service only accepts these category values: PREPARED_MEALS, PRODUCE, BAKERY,

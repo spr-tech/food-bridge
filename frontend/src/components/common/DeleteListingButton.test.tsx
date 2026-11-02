@@ -79,10 +79,13 @@ describe('Your listings rows', () => {
     expect(deleteButton('Assorted pastries')).toBeInTheDocument()
   })
 
-  it('offers it on Collected and Expired listings in Listing history', async () => {
+  it('offers it on Expired listings in Listing history, and shows it disabled with the reason on Collected ones', async () => {
     await userEvent.setup().click(screen.getByRole('tab', { name: /Listing history/ }))
-    expect(deleteButton('Meat pies')).toBeInTheDocument()
-    expect(deleteButton('Agege bread')).toBeInTheDocument()
+    expect(deleteButton('Agege bread')).toBeEnabled()
+    expect(deleteButton('Meat pies')).toBeDisabled()
+    expect(deleteButton('Meat pies')).toHaveAccessibleDescription(
+      "Collected listings can't be deleted. They're kept as a record of the handover.",
+    )
   })
 
   it("explains the service's refusal of a Reserved listing and keeps it", async () => {
@@ -178,16 +181,23 @@ describe('Listing details', () => {
     expect(deleteButton(foodName)).toBeInTheDocument()
   })
 
-  it.each([
-    ['lst-02', 'Assorted pastries', "A reserved listing can't be deleted"],
-    ['lst-03', 'Meat pies', "A collected listing can't be deleted"],
-  ])("offers it on the donor's Reserved or Collected listing (%s) and explains the refusal", async (id, foodName, why) => {
-    const { router } = await openDetails('donor', id, foodName)
-    const dialog = await confirmDelete(userEvent.setup(), foodName)
+  it("offers it on the donor's Reserved listing and explains the refusal", async () => {
+    const { router } = await openDetails('donor', 'lst-02', 'Assorted pastries')
+    const dialog = await confirmDelete(userEvent.setup(), 'Assorted pastries')
 
-    expect(await within(dialog).findByRole('alert')).toHaveTextContent(why)
-    expect(router.state.location.pathname).toBe(listingDetailPath(id))
-    expect(db.getListing(ADMIN, id).id).toBe(id)
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent("A reserved listing can't be deleted")
+    expect(router.state.location.pathname).toBe(listingDetailPath('lst-02'))
+    expect(db.getListing(ADMIN, 'lst-02').id).toBe('lst-02')
+  })
+
+  it.each(['donor', 'admin'] as const)('shows it disabled, with the reason, on a Collected listing (%s)', async (who) => {
+    await openDetails(who, 'lst-03', 'Meat pies')
+
+    expect(deleteButton('Meat pies')).toBeDisabled()
+    expect(screen.getByText("Collected listings can't be deleted. They're kept as a record of the handover.")).toBeInTheDocument()
+    expect(deleteButton('Meat pies')).toHaveAccessibleDescription(
+      "Collected listings can't be deleted. They're kept as a record of the handover.",
+    )
   })
 
   it("does not offer it on another donor's listing", async () => {

@@ -1,3 +1,4 @@
+import { pickupAreaValue } from '@/constants/listingOptions'
 import type {
   BackendFoodRequest,
   BackendListingResponse,
@@ -31,7 +32,8 @@ export function mapBackendListing(dto: BackendListingResponse): Listing {
     category: asString(dto.category),
     quantity: Number(dto.quantity ?? 0),
     unit: asString(dto.unit),
-    pickupArea: asString(dto.pickupArea),
+    // "Surulere, Lagos - …" becomes surulere, so it shows, filters and edits as Surulere.
+    pickupArea: pickupAreaValue(asString(dto.pickupArea)),
     deadline: asString(dto.collectionDeadline),
     photoUrl: dto.imageReference ?? null,
     status,
