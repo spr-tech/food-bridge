@@ -67,6 +67,18 @@ export const baseQueryWithSessionEnd: BaseQueryFn<
   return result
 }
 
+// The service sleeps when idle (Render's free tier) and takes up to about a minute to
+// wake. Sign in calls this as it opens, so the service is waking while the user types: a
+// cheap public read whose answer is ignored. Once per page load.
+let wakeSent = false
+export function wakeService() {
+  if (env.useMocks || wakeSent) return
+  wakeSent = true
+  fetch(`${env.apiUrl}/api/listings?limit=1`).catch(() => {
+    // Only a nudge; sign-in reports its own failure.
+  })
+}
+
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithSessionEnd,

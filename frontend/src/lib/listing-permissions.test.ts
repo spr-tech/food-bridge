@@ -53,6 +53,12 @@ describe('deleteBlockedReason', () => {
     )
   })
 
+  it('disables Delete on a Reversed listing, which the service refuses too', () => {
+    expect(deleteBlockedReason({ status: 'REVERSED' })).toBe(
+      "Listings whose handover was reversed can't be deleted. They're kept as a record of the handover.",
+    )
+  })
+
   it.each(['AVAILABLE', 'RESERVED', 'EXPIRED'] as const)('leaves it enabled on a %s listing', (status) => {
     expect(deleteBlockedReason({ status })).toBeNull()
   })
@@ -63,6 +69,7 @@ describe('isListingEditable', () => {
     ['AVAILABLE', true],
     ['RESERVED', false],
     ['COLLECTED', false],
+    ['REVERSED', false],
     ['EXPIRED', false],
     ['DELETED', false],
   ] as const)('%s: %s', (status, expected) => {

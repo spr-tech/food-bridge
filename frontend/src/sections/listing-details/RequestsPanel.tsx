@@ -82,7 +82,8 @@ function effectiveStatus(
 
   const listingIsNoLongerAvailable =
     listing.status === 'RESERVED' ||
-    listing.status === 'COLLECTED'
+    listing.status === 'COLLECTED' ||
+    listing.status === 'REVERSED'
 
   if (anotherRequestWasApproved || listingIsNoLongerAvailable) {
     return 'DECLINED'

@@ -63,7 +63,9 @@ const pending =
           ? 'Expired'
           : listing.status === 'COLLECTED'
             ? 'Collected'
-            : null
+            : listing.status === 'REVERSED'
+              ? 'Not collected'
+              : null
     second = disabledLabel ? (
       <Button
         variant="secondary"

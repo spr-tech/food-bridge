@@ -4,7 +4,7 @@
 import * as db from '@/mocks/db'
 import { simulate, simulateWrite } from '@/mocks/simulate'
 import { matchesListingSearch, matchesPickupArea } from '@/lib/listing-search'
-import { shrinkPhoto } from '@/lib/photo'
+import { compressPhoto, shrinkPhoto } from '@/lib/photo'
 import { api, LIST_QUERY_OPTIONS } from '@/services/api'
 import { env } from '@/config/env'
 import {
@@ -264,8 +264,11 @@ const listingsApi = api.injectEndpoints({
           }
         }
 
+        // The service accepts 1 MB; people may choose photos up to 5 MB. If the browser
+        // can't redraw the photo, send it as chosen and let the service decide.
+        const upload = await compressPhoto(file).catch(() => file)
         const form = new FormData()
-        form.append('file', file)
+        form.append('file', upload)
 
         const result = await baseQuery({
           url: '/api/listings/images',
@@ -342,7 +345,7 @@ const listingsApi = api.injectEndpoints({
 
     // -----------------------------------------------------------------------
     // GET /api/listings?mine=true
-    // Get the authenticated donor's own listings.
+    // Get every one of the authenticated donor's own listings.
     // -----------------------------------------------------------------------
     getMyListings: build.query<Listing[], void>({
       queryFn: async (
@@ -358,19 +361,18 @@ const listingsApi = api.injectEndpoints({
           )
         }
 
-        const result = await baseQuery({
-          url: '/api/listings',
-          params: { offset: 0, limit: 50, mine: true },
-        })
+        // Every page, so a donor with more than one page of listings (history included)
+        // sees them all.
+        const result = await readAllPages<BackendListingResponse>(
+          baseQuery,
+          '/api/listings',
+          { mine: true },
+        )
 
-        if (result.error) return { error: result.error }
-
-        const rows = Array.isArray(result.data)
-          ? (result.data as BackendListingResponse[])
-          : []
+        if ('error' in result) return { error: result.error }
 
         return {
-          data: rows.map(mapBackendListing),
+          data: result.data.map(mapBackendListing),
         }
       },
 

@@ -36,6 +36,9 @@ function editUnavailableMessage(status: Listing['status']): string {
     case 'EXPIRED':
       return 'This listing has expired and can no longer be edited.'
 
+    case 'REVERSED':
+      return "This listing's handover was reversed, so it can no longer be edited or deleted."
+
     case 'DELETED':
       return 'This listing has been deleted.'
 

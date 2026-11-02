@@ -145,8 +145,8 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-const REQUEST_STATUSES: RequestStatus[] = ['PENDING', 'APPROVED', 'DECLINED', 'EXPIRED', 'CANCELLED']
-const LISTING_STATUSES: ListingStatus[] = ['AVAILABLE', 'RESERVED', 'COLLECTED', 'EXPIRED', 'DELETED']
+const REQUEST_STATUSES: RequestStatus[] = ['PENDING', 'APPROVED', 'DECLINED', 'EXPIRED', 'CANCELLED', 'REVERSED']
+const LISTING_STATUSES: ListingStatus[] = ['AVAILABLE', 'RESERVED', 'COLLECTED', 'REVERSED', 'EXPIRED', 'DELETED']
 
 function wait(ms: number) {
   return new Promise<void>((resolve) => window.setTimeout(resolve, ms))

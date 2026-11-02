@@ -7,6 +7,8 @@ import { env } from '@/config/env'
 import type { Account, BackendLoginResponse, BackendMeResponse, Session } from '@/types/api'
 import type { Role } from '@/types/role'
 
+export const SIGN_IN_TIMEOUT_MS = 90_000
+
 function mapRole(role: string): Role | null {
   const normalized = role.toUpperCase()
   if (normalized === 'DONOR') return 'donor'
@@ -25,6 +27,8 @@ const authApi = api.injectEndpoints({
           url: '/api/auth/login',
           method: 'POST',
           body: { email, password },
+          // Longer than other calls: a sleeping service can take up to a minute to wake.
+          timeout: SIGN_IN_TIMEOUT_MS,
         })
         if (result.error) return { error: result.error }
 
