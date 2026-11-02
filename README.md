@@ -53,11 +53,11 @@ What the frontend implements on `main` (merge commit `c857ea6`, PR #24), checked
 | Donor | Your listings (`/your-listings`) | Two tabs: **Your listings** (Available and Reserved) and **Listing history** (Collected and Expired), kept in the address (`?view=history`). |
 | Donor, administrator | Delete listing | Behind a confirmation, from Your listings and listing details. Disabled, with the reason, on Collected listings. The backend refuses Reserved listings; the dialog then says why. |
 | Donor | Listing details with requests panel | Approve (optimistic, rolled back on failure), Decline, and **Mark as collected** on the approved request of a Reserved listing. Approve and Decline only show while the listing is Available with no approved request. A refusal under the backend's daily fairness rule is explained. |
-| Donor | Requests (`/requests`) | Temporary layout: the donor's listings that still have pending requests, each with the same requests panel. |
+| Donor | Requests (`/requests`) | Temporary layout: the donor's Available listings that have requests waiting, each with the same requests panel. |
 | Recipient | Find food (`/listings`) | Search (food name, description, donor, area and category), category, pickup area and status filters; request from the card or the details page. |
 | Recipient | Listing details | Request this food, cancel a genuinely pending request, see the request's status. |
-| Recipient | Your requests (`/your-requests`) | **Open requests** (Pending, Approved) and **Request history** (Collected, Declined, Cancelled, Expired). |
-| Administrator | Dashboard (`/admin`) | Summary counts from `GET /api/admin/dashboard`. "Expired" and "Food saved (estimate)" show "—": the backend now documents `expiredListings` and `estimatedPortionsSaved`, but the dashboard doesn't use them yet. |
+| Recipient | Your requests (`/your-requests`) | **Open requests** (Pending, Approved) and **Request history** (Collected, Declined, Cancelled, Expired, Not collected). |
+| Administrator | Dashboard (`/admin`) | Summary counts from `GET /api/admin/dashboard`, including Expired and Food saved (estimate, in portions). |
 | Administrator | All listings (`/listings`) | Browse with the same filters, and Delete listing on listing details. |
 
 Not implemented: reversing a completed handover, administrator handover or edit controls in the interface, and the S8 tabbed Requests screen. See [Known limitations and remaining work](#known-limitations-and-remaining-work).
@@ -179,18 +179,19 @@ Record the hosting providers, plans, resource limits, usage allowances and verif
 ## Known limitations and remaining work
 
 - Verify live role permissions for listing edits, deletion and handover updates.
-- Connect reversal of completed handovers. The backend documents `PATCH /api/handovers/{handoverId}/reverse`, but no response exposes a `handoverId` yet.
-- Show the dashboard's Expired and estimated portions-saved figures (now in the documented dashboard response) and a recent activity list (`GET /api/activity` is documented but not used).
+- Connect reversal of completed handovers. `PATCH /api/handovers/{handoverId}/reverse` is live, but only the Mark collected reply carries a `handoverId`; request responses don't yet.
 - Confirm the actual image upload response structure. The frontend currently accepts the first `http(s)` URL it finds in the response (see `frontend/README.md`).
 - Complete end-to-end tests against the deployed service.
 - Add measured performance and load-test results.
-- **Competing requests after an approval (backend).** The deployed backend does **not** decline the other pending requests when one is approved: they stay `PENDING` in the database and in the API (observed on 2 November 2026). The frontend *displays* them as Declined, to the recipient and in the donor's panel, and leaves them out of the navigation counts, but it does not change the stored status. The backend should store them as `DECLINED`. A second approval on a reserved listing is refused by the backend (409 `LISTING_ALREADY_RESERVED`).
+- **Competing requests after an approval.** Since backend PR #40 (deployed 2 November 2026), approving a request stores the listing's other pending requests as `DECLINED`. Older requests can still be stored as `PENDING`, so the frontend keeps *displaying* them as Declined, to the recipient and in the donor's panel, and leaves them out of the navigation counts; the donor's panel also marks them Declined as soon as the approval is confirmed. A second approval on a reserved listing is refused by the backend (409 `LISTING_ALREADY_RESERVED`).
 - **Duplicate requests (backend).** The deployed backend accepts a second request from the same recipient on the same listing.
-- **Listing deletion rules (backend).** The backend deletes only Available and Expired listings (409 `LISTING_NOT_DELETABLE` otherwise) and keeps a deleted listing as a record (a soft delete). It leaves deleted listings out of a donor's list, so they don't appear in Listing history. Requests on a deleted listing keep their stored status.
+- **Listing deletion rules (backend).** The backend deletes only Available and Expired listings (409 `LISTING_NOT_DELETABLE` otherwise) and keeps a deleted listing as a record (a soft delete). It leaves deleted listings out of a donor's list, so they don't appear in Listing history. A pending request on a deleted listing stays stored as `PENDING`; the recipient sees it as Expired, in Request history.
 - **Pickup areas and search (backend).** Some listings store the pickup area as longer text ("Surulere, Lagos - …"); the backend's area filter matches the exact text only, and its keyword search covers only the food name and description. When an area or search is set, the frontend reads every page and matches area and search itself. A backend fix (clean area values, or a prefix match, and a wider keyword search) would let the server do this again.
 - **Daily fairness rule (backend).** The backend refuses a second approval for a recipient on the same Lagos day while another recipient has none (409 `DAILY_DISTRIBUTION_PRIORITY`). Donors can't see which recipients have been served, so the frontend can't tell beforehand; it explains the refusal afterwards.
 - **Administrator actions.** The `/listings/:id/edit` route is open to donors only, and the administrator sees no requests panel, so administrators cannot edit listings or record handovers from the interface yet. Administrators can delete listings.
-- **Simulated label.** `DATA_IS_SIMULATED` in `frontend/src/services/api.ts` is hard-coded to `true`, so the demonstration line says "(simulated)" even when the app is connected to the live backend.
+- **Sessions (backend).** Sign-in tokens last 30 minutes and are lost when the backend restarts; people are then sent back to sign in with "Your session ended" and return to the same page afterwards.
+- **Photo size (backend).** The backend accepts uploads of 1 MB (no larger limit is configured), so the frontend compresses photos below 900 KB before uploading; people can still choose photos up to 5 MB.
+- **Live updates.** The backend has no way to push changes (no SSE or WebSocket endpoint), so other people's changes appear when a screen refetches, not instantly.
 
 Only mark a feature complete after implementation and verification.
 
