@@ -8,10 +8,10 @@ import { Form, Formik } from 'formik'
 import { saveSession } from '@/app/session'
 import { FocusFirstError, FormInput, FormPasswordInput } from '@/components/form'
 import { Button } from '@/components/ui/button'
-import { DEMO_PASSWORD, type DemoAccount } from '@/constants/demoAccounts'
+import type { DemoAccount } from '@/constants/demoAccounts'
 import { useAppDispatch } from '@/hooks/useAppStore'
 import { signInSchema, type SignInValues } from '@/schema/signInSchema'
-import { DemoAccountChips, DemoAccountsBox } from '@/sections/sign-in/DemoAccounts'
+import { DemoAccountsBox } from '@/sections/sign-in/DemoAccounts'
 import { api } from '@/services/api'
 import { useSignIn } from '@/services/auth'
 import { errorStatus } from '@/services/errors'
@@ -82,9 +82,9 @@ export function SignInForm({ sessionEnded }: { sessionEnded: boolean }) {
         validationSchema={signInSchema}
         onSubmit={handleSubmit}
       >
-               {({ isSubmitting, setValues }) => {
+        {({ isSubmitting, setValues }) => {
           function pick(account: DemoAccount) {
-            void setValues({ email: account.email, password: account.password ?? DEMO_PASSWORD })
+            void setValues({ email: account.email, password: account.password })
             signInButton.current?.focus()
           }
           return (
@@ -109,12 +109,7 @@ export function SignInForm({ sessionEnded }: { sessionEnded: boolean }) {
                 Sign in
               </Button>
 
-              <div className="lg:hidden">
-                <DemoAccountChips onPick={pick} />
-              </div>
-              <div className="hidden lg:block">
-                <DemoAccountsBox onPick={pick} />
-              </div>
+              <DemoAccountsBox onPick={pick} />
             </Form>
           )
         }}
@@ -125,6 +120,6 @@ export function SignInForm({ sessionEnded }: { sessionEnded: boolean }) {
 
 // ---------------------------------------------------------------------------
 // Explanation
-// - One change from the original: picking a demo account fills in that account's own
-//   password (account.password), falling back to the shared mock password.
+// - Picking a demo account fills in that account's own password (account.password).
+//   The demo accounts are grouped Admin | Donor | Recipient, on phone and desktop alike.
 // - The login contract now uses email, so the field keeps its email label and type.
