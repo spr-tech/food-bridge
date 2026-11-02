@@ -19,9 +19,11 @@ export function RequestsPage() {
   useDocumentTitle(TITLE)
   const listings = useMyListings()
 
-  // Only listings with requests waiting, newest first.
+  // Only Available listings with requests waiting, newest first. Once a request is approved
+  // the service still counts the listing's other requests as pending (it doesn't decline
+  // them); they show as Declined, so the listing has nothing left to decide.
   const waiting = [...(listings.data ?? [])]
-    .filter((listing) => listing.pendingRequestCount > 0)
+    .filter((listing) => listing.status === 'AVAILABLE' && listing.pendingRequestCount > 0)
     .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
 
   let body

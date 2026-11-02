@@ -640,10 +640,11 @@ export function createRequest(
     )
   }
 
+  // The service's code for any listing that isn't Available (DefaultListingOperations).
   if (status !== 'AVAILABLE') {
     throw new MockApiError(
       409,
-      'LISTING_NOT_AVAILABLE',
+      'LISTING_ALREADY_RESERVED',
       'This listing is no longer available.',
     )
   }

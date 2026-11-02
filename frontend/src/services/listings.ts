@@ -11,6 +11,7 @@ import {
   extractImageReference,
   mapBackendListing,
 } from '@/services/backend-mappers'
+import { readAllPages, readPages } from '@/services/pages'
 
 import type {
   BackendCreateListingRequest,
@@ -21,17 +22,9 @@ import type {
   ListingPage,
 } from '@/types/api'
 
-// The most listings the service returns in one call (it answers 400 INVALID_PAGE above).
-const SERVICE_PAGE_LIMIT = 100
-
-function queryParams(
-  filters: ListingFilters,
-  mine = false,
-) {
-  const params: Record<string, string | number | boolean> = {
-    offset: 0,
-    limit: filters.limit ?? 50,
-  }
+// The filters the service applies itself; readPages adds offset and limit.
+function queryParams(filters: ListingFilters) {
+  const params: Record<string, string> = {}
 
   if (filters.q?.trim()) params.keyword = filters.q.trim()
   if (filters.category) params.category = filters.category
@@ -40,8 +33,6 @@ function queryParams(
   if (filters.status && filters.status !== 'all') {
     params.availability = filters.status.toUpperCase()
   }
-
-  if (mine) params.mine = true
 
   return params
 }
@@ -88,43 +79,20 @@ const listingsApi = api.injectEndpoints({
         // search or an area, ask it for status and category only, load every page, and
         // match the search and area here.
         if (filters.q?.trim() || filters.area) {
-          const listings: Listing[] = []
-
-          for (let offset = 0; ; offset += SERVICE_PAGE_LIMIT) {
-            const page = await baseQuery({
-              url: '/api/listings',
-              params: {
-                ...queryParams({ ...filters, q: undefined, area: undefined }),
-                offset,
-                limit: SERVICE_PAGE_LIMIT,
-              },
-            })
-
-            if (page.error) return { error: page.error }
-
-            const rows = Array.isArray(page.data)
-              ? (page.data as BackendListingResponse[])
-              : []
-
-            listings.push(...rows.map(mapBackendListing))
-
-            const pageTotal = Number(
-              page.meta?.response?.headers.get('x-total-count'),
-            )
-
-            if (
-              rows.length < SERVICE_PAGE_LIMIT ||
-              (Number.isFinite(pageTotal) && listings.length >= pageTotal)
-            ) {
-              break
-            }
-          }
-
-          const matches = listings.filter(
-            (listing) =>
-              matchesPickupArea(listing, filters.area) &&
-              matchesListingSearch(listing, filters.q ?? ''),
+          const all = await readAllPages<BackendListingResponse>(
+            baseQuery,
+            '/api/listings',
+            queryParams({ ...filters, q: undefined, area: undefined }),
           )
+          if ('error' in all) return { error: all.error }
+
+          const matches = all.data
+            .map(mapBackendListing)
+            .filter(
+              (listing) =>
+                matchesPickupArea(listing, filters.area) &&
+                matchesListingSearch(listing, filters.q ?? ''),
+            )
 
           return {
             data: {
@@ -134,33 +102,20 @@ const listingsApi = api.injectEndpoints({
           }
         }
 
-        const result = await baseQuery({
-          url: '/api/listings',
-          params: queryParams(filters),
-        })
-
-        if (result.error) return { error: result.error }
-
-        const rows = Array.isArray(result.data)
-          ? (result.data as BackendListingResponse[])
-          : []
-
-        const items = rows.map(mapBackendListing)
-
-        const headerTotal =
-          result.meta?.response?.headers.get('x-total-count')
-
-        const total =
-          headerTotal !== null &&
-          headerTotal !== undefined &&
-          Number.isFinite(Number(headerTotal))
-            ? Number(headerTotal)
-            : items.length
+        // "Load more" grows the limit past 100, which the service refuses in one call, so
+        // the rows are read in pages of at most 100.
+        const page = await readPages<BackendListingResponse>(
+          baseQuery,
+          '/api/listings',
+          queryParams(filters),
+          filters.limit ?? 50,
+        )
+        if ('error' in page) return { error: page.error }
 
         return {
           data: {
-            items,
-            total,
+            items: page.data.rows.map(mapBackendListing),
+            total: page.data.total,
           },
         }
       },
@@ -405,7 +360,7 @@ const listingsApi = api.injectEndpoints({
 
         const result = await baseQuery({
           url: '/api/listings',
-          params: queryParams({}, true),
+          params: { offset: 0, limit: 50, mine: true },
         })
 
         if (result.error) return { error: result.error }

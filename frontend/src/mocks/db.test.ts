@@ -113,8 +113,8 @@ describe('making a request', () => {
     expectError(() => db.createRequest(signInAs('recipient'), { listingId: 'lst-14' }, 'key-1'), 409, 'LISTING_EXPIRED')
   })
 
-  it('refuses a request on a reserved listing with 409 LISTING_NOT_AVAILABLE', () => {
-    expectError(() => db.createRequest(signInAs('recipient'), { listingId: 'lst-07' }, 'key-1'), 409, 'LISTING_NOT_AVAILABLE')
+  it('refuses a request on a reserved listing with 409 LISTING_ALREADY_RESERVED', () => {
+    expectError(() => db.createRequest(signInAs('recipient'), { listingId: 'lst-07' }, 'key-1'), 409, 'LISTING_ALREADY_RESERVED')
   })
 
   it('refuses the same recipient requesting twice with 409 ALREADY_REQUESTED', () => {
