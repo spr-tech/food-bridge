@@ -6,19 +6,20 @@ import type { Listing } from '@/types/api'
 
 const OWNER = '6b1f6c1e-3c43-4a59-9d1e-0d6c8a1f2b11'
 const OTHER = '0f3a9e52-7d1b-4f0e-8a2c-5b9d4e6f7a88'
-const LIVE: Listing['status'][] = ['AVAILABLE', 'EXPIRED', 'RESERVED', 'COLLECTED']
-const STATUSES: Listing['status'][] = [...LIVE, 'DELETED']
+// Offered (Collected is offered disabled; see deleteBlockedReason).
+const LIVE: Listing['status'][] = ['AVAILABLE', 'EXPIRED', 'COLLECTED']
+const STATUSES: Listing['status'][] = [...LIVE, 'RESERVED', 'DELETED']
 
 const listing = (status: Listing['status']) => ({ donorId: OWNER, status })
 
 describe('canDeleteListing', () => {
-  // The service refuses Reserved and Collected (409); the button still shows and says why.
   it.each(LIVE)('the owning donor, %s listing: offered', (status) => {
     expect(canDeleteListing({ role: 'donor', accountId: OWNER }, listing(status))).toBe(true)
   })
 
-  it('the owning donor, DELETED listing: not offered', () => {
-    expect(canDeleteListing({ role: 'donor', accountId: OWNER }, listing('DELETED'))).toBe(false)
+  // The service refuses Reserved (409), so it isn't offered; nor is a listing already deleted.
+  it.each(['RESERVED', 'DELETED'] as const)('the owning donor, %s listing: not offered', (status) => {
+    expect(canDeleteListing({ role: 'donor', accountId: OWNER }, listing(status))).toBe(false)
   })
 
   it.each(STATUSES)("another donor, %s listing: never", (status) => {
@@ -29,8 +30,8 @@ describe('canDeleteListing', () => {
     expect(canDeleteListing({ role: 'admin', accountId: OTHER }, listing(status))).toBe(true)
   })
 
-  it('an administrator, DELETED listing: not offered', () => {
-    expect(canDeleteListing({ role: 'admin', accountId: OTHER }, listing('DELETED'))).toBe(false)
+  it.each(['RESERVED', 'DELETED'] as const)('an administrator, %s listing: not offered', (status) => {
+    expect(canDeleteListing({ role: 'admin', accountId: OTHER }, listing(status))).toBe(false)
   })
 
   it.each(STATUSES)('a recipient, %s listing: never', (status) => {

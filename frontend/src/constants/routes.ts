@@ -13,6 +13,7 @@ export const ROUTES = {
   requests: '/requests',
   admin: '/admin',
   completedHandovers: '/admin/handovers',
+  adminRequests: '/admin/requests',
   devForms: '/dev/forms',
 } as const
 

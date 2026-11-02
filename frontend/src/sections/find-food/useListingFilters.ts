@@ -2,13 +2,14 @@
 // refresh and can be shared: ?q=rice&category=bakery&area=yaba&status=reserved.
 // Status starts on Available, which is left out of the address; "All statuses" is
 // status=all. Values that aren't real options are ignored. Other parameters (such as the
-// dev-only ?simulate=) are left alone.
+// dev-only ?simulate=) are left alone. Deleted is an option for administrators only
+// (allowDeleted), the only accounts the service shows deleted listings to.
 import { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router'
 import { CATEGORIES, PICKUP_AREAS } from '@/constants/listingOptions'
 import type { ListingStatus } from '@/types/status'
 
-export type StatusFilter = 'available' | 'reserved' | 'collected' | 'expired' | 'all'
+export type StatusFilter = 'available' | 'reserved' | 'collected' | 'expired' | 'deleted' | 'all'
 
 export const DEFAULT_STATUS: StatusFilter = 'available'
 
@@ -19,7 +20,7 @@ type FilterKey = 'q' | 'category' | 'area' | 'status'
 const isOption = (options: { value: string }[], value: string | null) =>
   value !== null && options.some((option) => option.value === value)
 
-export function useListingFilters() {
+export function useListingFilters({ allowDeleted = false }: { allowDeleted?: boolean } = {}) {
   const [params, setParams] = useSearchParams()
 
   const raw = {
@@ -31,7 +32,8 @@ export function useListingFilters() {
   const q = raw.q?.trim() ?? ''
   const category = isOption(CATEGORIES, raw.category) ? (raw.category ?? undefined) : undefined
   const area = isOption(PICKUP_AREAS, raw.area) ? (raw.area ?? undefined) : undefined
-  const status = STATUSES.includes(raw.status as StatusFilter) ? (raw.status as StatusFilter) : DEFAULT_STATUS
+  const statuses: StatusFilter[] = allowDeleted ? [...STATUSES, 'deleted'] : STATUSES
+  const status = statuses.includes(raw.status as StatusFilter) ? (raw.status as StatusFilter) : DEFAULT_STATUS
 
   const update = useCallback(
     (changes: Partial<Record<FilterKey, string | undefined>>) => {

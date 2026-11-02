@@ -177,6 +177,86 @@ describe('Listing details (donor): rules on screen', () => {
   })
 })
 
+describe("Listing details: the listing's own actions", () => {
+  const editLink = (foodName: string) => screen.queryByRole('link', { name: `Edit listing: ${foodName}` })
+  const deleteButton = (foodName: string) => screen.queryByRole('button', { name: `Delete listing: ${foodName}` })
+
+  async function open(id: string, foodName: string) {
+    const view = renderRoutes(
+      [...ROUTES_UNDER_TEST, { path: ROUTES.editListing, element: <h1>Edit listing page</h1> }],
+      { initialEntries: [listingDetailPath(id)] },
+    )
+    await screen.findByRole('heading', { level: 1, name: foodName })
+    return view
+  }
+
+  it('gives the owner Edit and Delete together, inside the listing card, on a listing just created', async () => {
+    const donor = signInAs('donor')
+    const created = db.createListing(
+      donor,
+      {
+        foodName: 'Fresh agege loaves',
+        description: 'Baked this morning.',
+        category: 'bakery',
+        quantity: 12,
+        unit: 'loaves',
+        pickupArea: 'yaba',
+        deadline: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(),
+        photoUrl: null,
+      },
+      'key-new-listing',
+    )
+    const { router } = await open(created.id, 'Fresh agege loaves')
+
+    const edit = editLink('Fresh agege loaves')!
+    const remove = deleteButton('Fresh agege loaves')!
+    const card = screen.getByRole('article')
+    expect(card).toContainElement(edit)
+    expect(card).toContainElement(remove)
+    // One action row: both share the same parent.
+    expect(edit.parentElement).toBe(remove.parentElement)
+
+    await userEvent.setup().click(edit)
+    expect(await screen.findByRole('heading', { name: 'Edit listing page' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe(`/listings/${created.id}/edit`)
+  })
+
+  it('offers neither Edit nor Delete on a Reserved listing', async () => {
+    signInAs('donor')
+    await open('lst-02', 'Assorted pastries')
+    expect(editLink('Assorted pastries')).not.toBeInTheDocument()
+    expect(deleteButton('Assorted pastries')).not.toBeInTheDocument()
+  })
+
+  it('offers Delete but not Edit on an Expired listing', async () => {
+    signInAs('donor')
+    await open('lst-04', 'Agege bread')
+    expect(editLink('Agege bread')).not.toBeInTheDocument()
+    expect(screen.getByRole('article')).toContainElement(deleteButton('Agege bread'))
+    expect(deleteButton('Agege bread')).toBeEnabled()
+  })
+
+  it('keeps Delete disabled with the reason, and no Edit, on a Collected listing', async () => {
+    signInAs('donor')
+    await open('lst-03', 'Meat pies')
+    expect(editLink('Meat pies')).not.toBeInTheDocument()
+    expect(deleteButton('Meat pies')).toBeDisabled()
+  })
+
+  it.each(['recipient', 'admin'] as const)('never offers Edit to %s', async (who) => {
+    signInAs(who)
+    await open('lst-05', 'Sausage rolls')
+    expect(editLink('Sausage rolls')).not.toBeInTheDocument()
+  })
+
+  it("offers nothing on another donor's listing", async () => {
+    signInAs('donor')
+    await open('lst-06', 'Jollof rice and chicken')
+    expect(editLink('Jollof rice and chicken')).not.toBeInTheDocument()
+    expect(deleteButton('Jollof rice and chicken')).not.toBeInTheDocument()
+  })
+})
+
 describe('Listing details (donor): approving', () => {
   it('asks first, naming who gets the food and how many others are declined', async () => {
     const user = userEvent.setup()

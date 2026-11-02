@@ -4,7 +4,11 @@ import { StatusBadge } from '@/components/common/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useRequestFood } from '@/hooks/useRequestFood'
-import { getRecipientRequestStatus } from '@/lib/request-status'
+import {
+  REQUEST_NOT_APPROVED,
+  getRecipientRequestStatus,
+  wasNotApprovedAndListingClosed,
+} from '@/lib/request-status'
 import { useMyRequests } from '@/services/requests'
 import type { Listing, ListingRequest } from '@/types/api'
 
@@ -75,9 +79,10 @@ export function RecipientAction({ listing }: { listing: Listing }) {
       listing.status,
     )
 
-    const wasDeclinedBecauseReserved =
-      myRequest.status === 'PENDING' &&
-      listing.status === 'RESERVED'
+    const notApproved = wasNotApprovedAndListingClosed(
+      myRequest.status,
+      listing.status,
+    )
 
     const isApprovedAndReserved =
       myRequest.status === 'APPROVED' &&
@@ -106,10 +111,8 @@ export function RecipientAction({ listing }: { listing: Listing }) {
           </p>
         )}
 
-        {wasDeclinedBecauseReserved && (
-          <p className={NOTE}>
-            Another organisation's request was approved, so this listing is no longer available.
-          </p>
+        {notApproved && (
+          <p className={NOTE}>{REQUEST_NOT_APPROVED}</p>
         )}
 
         {listing.status === 'DELETED' && (

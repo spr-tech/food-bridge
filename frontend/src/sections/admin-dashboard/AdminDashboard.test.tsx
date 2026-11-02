@@ -1,9 +1,9 @@
 // The administrator's dashboard over the simulated store: the summary, today's
 // distribution (the daily fairness rule's progress) and recent activity, each loading on
-// its own.
+// its own. The Requests waiting and Expired cards open the views they count.
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { ROUTES } from '@/constants/routes'
 import * as db from '@/mocks/db'
 import { DashboardPage } from '@/pages/DashboardPage'
@@ -15,9 +15,47 @@ function renderDashboard() {
   })
 }
 
+vi.setConfig({ testTimeout: 15_000 })
+
 const section = (name: string) => screen.getByRole('region', { name })
 
 describe('Admin dashboard', () => {
+  it('opens the requests waiting from the Requests waiting card', async () => {
+    signInAs('admin')
+    const { router } = renderRoutes(
+      [
+        { path: ROUTES.admin, element: <DashboardPage /> },
+        { path: ROUTES.adminRequests, element: <h1>Requests waiting page</h1> },
+      ],
+      { initialEntries: [ROUTES.admin] },
+    )
+
+    const card = await screen.findByRole('link', { name: /Requests waiting/ }, { timeout: 5000 })
+    await userEvent.setup().click(card)
+
+    expect(await screen.findByRole('heading', { name: 'Requests waiting page' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe(ROUTES.adminRequests)
+  })
+
+  it('opens the Expired listings from the Expired card, by keyboard too', async () => {
+    signInAs('admin')
+    const { router } = renderRoutes(
+      [
+        { path: ROUTES.admin, element: <DashboardPage /> },
+        { path: ROUTES.listings, element: <h1>All listings page</h1> },
+      ],
+      { initialEntries: [ROUTES.admin] },
+    )
+
+    const card = await screen.findByRole('link', { name: /^Expired/ }, { timeout: 5000 })
+    card.focus()
+    await userEvent.setup().keyboard('{Enter}')
+
+    expect(await screen.findByRole('heading', { name: 'All listings page' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe(ROUTES.listings)
+    expect(router.state.location.search).toBe('?status=expired')
+  })
+
   it("shows today's distribution: nobody served yet, so the first round is in progress", async () => {
     signInAs('admin')
     renderDashboard()

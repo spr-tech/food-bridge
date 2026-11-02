@@ -97,6 +97,13 @@ export function formatListingQuantity({ quantity, unit }: { quantity: number; un
   return option ? formatQuantity(quantity, option) : `${numberFormat.format(quantity)} ${unit}`
 }
 
+// The unit word alone, for a quantity shown apart from it: "portions", "kg", "loaf".
+export function formatUnit({ quantity, unit }: { quantity: number; unit: string }): string {
+  const option = UNITS.find((item) => item.value === unit)
+  if (!option) return unit
+  return quantity === 1 ? option.singular : option.label
+}
+
 // Up to two initials for an avatar, from the first two words of a name:
 // "Mama's Oven" gives "MO", "Hope Community Kitchen" gives "HC".
 export function initials(name: string): string {

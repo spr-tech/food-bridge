@@ -128,7 +128,7 @@ npm run build
 1. Sign in with a donor account. Donors land on Your listings (`/your-listings`).
 2. Publish a surplus-food listing (`/listings/new`).
 3. View and manage the donor's listings. Your listings has two tabs: **Your listings** (Available and Reserved) and **Listing history** (Collected and Expired), kept in the address as `?view=history`. A listing can be edited (`/listings/:id/edit`) only while it is **Available**: the Edit button only appears then, and the edit page explains why if opened directly.
-4. Delete a listing (with confirmation) from its row or its details page. Delete is disabled, with the reason, on Collected listings; the backend refuses Reserved ones and the dialog says why.
+4. Edit and delete a listing from its row, or from the action row at the foot of its details card, where Edit and Delete sit together. Edit shows only on an Available listing. Delete (with confirmation) shows on Available and Expired listings, is disabled with the reason on Collected ones, and isn't offered on Reserved ones, which the backend refuses.
 5. Review recipient requests on the listing's details page, or on Requests (`/requests`), which lists every **Available** listing with requests waiting, each with its requests panel. A listing leaves Requests once a request on it is approved.
 6. Approve or decline a request. Approving asks for confirmation, updates the panel straight away (optimistic update) and rolls back if the service refuses. Approve and Decline show only while the listing is Available with no approved request.
 7. Record the handover with **Mark as collected** on the approved request of a Reserved listing (`PATCH /api/requests/{requestId}/collected`). The listing then shows Collected and moves to Listing history.
@@ -142,7 +142,7 @@ npm run build
 6. Track requests on Your requests (`/your-requests`), split into **Open requests** and **Request history**, and cancel a request while it is genuinely pending.
 
 ### Administrator
-Administrators land on the Dashboard (`/admin`): summary counts from the backend, the listing pipeline, the share of listings collected, today's distribution and recent activity. The **Completed handovers** card opens Completed handovers (`/admin/handovers`, also in the menu as Handovers), which lists every Collected listing with its donor, recipient, quantity and, when recorded, its collection time. Administrators can also browse All listings (`/listings`) without request buttons, and delete a listing from its details page (disabled on Collected listings). Under the capstone brief administrators monitor activity and may edit listings and update handover status; the interface does not offer those administrator actions yet. Donors make the decision to approve or decline recipient requests.
+Administrators land on the Dashboard (`/admin`): summary counts from the backend, the listing pipeline, the share of listings collected, today's distribution, recent activity, the expired count and the food saved per unit. The **Requests waiting** card opens Requests waiting (`/admin/requests`), the **Expired** card opens All listings filtered to Expired, and the **Completed handovers** card opens Completed handovers (`/admin/handovers`, also in the menu as Handovers), which lists every Collected listing with its donor, recipient, quantity and, when recorded, its collection time. Administrators can also browse All listings (`/listings`) without request buttons, including a **Deleted** status only they are offered, and delete a listing from its details page (disabled on Collected listings, not offered on Reserved ones). Under the capstone brief administrators monitor activity and may edit listings and update handover status; the interface does not offer those administrator actions yet. Donors make the decision to approve or decline recipient requests.
 
 ## Business rules shown in the interface
 
@@ -150,8 +150,9 @@ Administrators land on the Dashboard (`/admin`): summary counts from the backend
 - Listing form: food name 3–80 characters; **description required**, up to 500 characters; category, quantity (whole number, 1 or more), unit, pickup area, collection date and time required; the combined deadline must be later than now; optional JPG or PNG photo up to 5 MB.
 - A listing has at most one approved request. The donor's panel shows the approved request first.
 - A recipient can cancel only their own request, and only while it is genuinely pending (see the status table below).
-- Expired listings accept no requests.
-- Delete: owning donor or administrator; disabled on Collected listings and on listings whose handover was reversed (`deleteBlockedReason` in `src/lib/listing-permissions.ts`). The backend deletes only Available and Expired listings (409 `LISTING_NOT_DELETABLE` otherwise) and keeps them as a record, so the dialog says "taken off FoodBridge", not "deleted for good".
+- Expired listings accept no requests, and Find food shows them only under the Expired status, with a disabled Expired button.
+- A listing the service marks `deleted: true` is Deleted, never Expired, even when its deadline has passed (`mapBackendListing`).
+- Delete: owning donor or administrator; not offered on Reserved listings, disabled on Collected listings and on listings whose handover was reversed (`canDeleteListing` and `deleteBlockedReason` in `src/lib/listing-permissions.ts`). The backend deletes only Available and Expired listings (409 `LISTING_NOT_DELETABLE` otherwise) and keeps them as a record, so the dialog says "taken off FoodBridge", not "deleted for good".
 - Daily fairness rule (backend): a recipient who already has an approval today (Lagos time) can't be approved again while another recipient has none (409 `DAILY_DISTRIBUTION_PRIORITY`). The donor's panel explains the refusal and disables Approve for that organisation for the rest of the visit; Decline stays available.
 
 The backend is the authority for every rule. The frontend checks are for clarity and speed, not security.
@@ -163,8 +164,8 @@ The backend stores a status on each request (`PENDING`, `APPROVED`, `DECLINED`, 
 | Stored request | Listing | Recipient sees | Where on Your requests | Can cancel? |
 |---|---|---|---|---|
 | Pending | Available | Pending | Open requests | Yes |
-| Pending | Reserved | Declined ("Another organisation's request was approved…" on listing details) | Request history | No |
-| Pending | Collected | Declined | Request history | No |
+| Pending | Reserved | Declined, with "This request was not approved…" | Request history | No |
+| Pending | Collected | Declined, with the same explanation | Request history | No |
 | Pending | Expired, Deleted or Reversed | Expired | Request history | No |
 | Approved | Reserved | Approved, with pickup details | Open requests | No |
 | Approved | Collected | Collected (listing badge) | Request history | No |
@@ -173,6 +174,8 @@ The backend stores a status on each request (`PENDING`, `APPROVED`, `DECLINED`, 
 | Declined, Cancelled, Expired | any | As stored | Request history | No |
 
 The helper itself returns the request status (`APPROVED`); the Collected badge for an approved request on a collected listing is chosen by the components.
+
+The message "This request was not approved. The food listing is no longer available for requests." shows on the request in Your requests and on listing details whenever the listing is Reserved or Collected and the request is Pending or Declined (`wasNotApprovedAndListingClosed`). It comes from the data on every render, so it stays after a refetch, a refresh or a later visit. It gives no reason, and never says another organisation was approved, because the backend sends no decline reason (see Known limitations).
 
 **This is a display fallback only.** It does not change the stored status of the losing request. Since backend PR #40 (deployed 2 November 2026), approving a request stores the listing's other pending requests as `DECLINED`. Requests approved before that change, and requests left on a listing that was deleted or expired, can still be stored as `PENDING`, so the fallback stays. The simulated data layer (`src/mocks/db.ts`) also stores them as `DECLINED`.
 
@@ -237,6 +240,7 @@ Every endpoint checks `env.useMocks` first and calls the simulated store in `src
 | Cancel | `POST /api/requests/{requestId}/cancel` | `useCancelRequest` |
 | Mark collected | `PATCH /api/requests/{requestId}/collected` (reply, including `handoverId`, ignored; data refetched) | `useMarkCollected` |
 | Admin dashboard | `GET /api/admin/dashboard` | `useAdminDashboard` |
+| Requests waiting | `GET /api/admin/requests?status=PENDING` (every page), then `GET /api/listings/{listingId}` for each listing | `usePendingRequests` |
 | Today's distribution | `GET /api/admin/distribution/today` | `useDistributionToday` |
 | Recent activity | `GET /api/activity?limit=10` | `useRecentActivity` |
 | Completed handovers | `GET /api/listings?availability=COLLECTED` (every page), `GET /api/admin/requests` (every page) and `GET /api/activity?limit=100`, joined in `joinCompletedHandovers` | `useCompletedHandovers` |
@@ -311,6 +315,10 @@ Last local run (2 November 2026, `fix/frontend-integration-audit` at `50e00bf`):
 - Sign-in tokens last 30 minutes and are lost when the backend restarts, so people are signed out then (and sent back to sign in with "Your session ended").
 - Other people's changes appear only when a screen refetches (on revisit after 30 seconds, on reconnect, or on refresh). The backend has no way to push updates (no SSE or WebSocket endpoint).
 - The deployed backend accepts a second request from the same recipient on the same listing.
+- **Backend defect: the Expired filter returns deleted listings.** On 2 November 2026 `GET /api/listings?availability=EXPIRED` (as administrator) returned 24 rows: 1 with status `EXPIRED` and 23 with status `DELETED` (`deleted: true`). `availability=DELETED` is refused with 400 `INVALID_LISTING`. The dashboard's `expiredListings` (1) is correct. The interface keeps each row by the status it carries: the Expired status shows the expired listing and says how many deleted ones the service also returned, and administrators get a Deleted status read from the unfiltered list (`getListings`). Backend fix needed: `availability=EXPIRED` should return only listings with status `EXPIRED` and `deleted = false`, and `availability=DELETED` should be accepted for administrators. Once fixed, drop the browser-side status matching.
+- **Backend defect: `pendingRequests` counts requests no one can decide.** On 2 November 2026 the dashboard said 16 requests waiting, but every one of the 16 `PENDING` requests sat on a Collected (9) or Deleted (7) listing; Available listings had none (`pendingRequestCount` 0). The card shows the service's figure unchanged. Requests waiting (`/admin/requests`) counts only Pending requests on Available listings as waiting. It counts the rest as "No decision due" and lists them apart, without actions, each with its listing's status. A note explains why the dashboard's figure is higher. Every count comes from the rows `GET /api/admin/requests?status=PENDING` returns. Backend fix needed: decline (or expire) pending requests when a listing is collected or deleted, and count only those on Available listings.
+- **No decline reason.** Request responses have only `status`, so the interface can't tell a request a donor declined by hand from one declined because another request was approved. Recipients see the neutral "This request was not approved…" message; the interface never says another organisation was approved. Backend fix needed: a decline reason on the request response (for example `declineReason`: `ANOTHER_REQUEST_APPROVED`, `DECLINED_BY_DONOR`). The interface spec (`docs/spec/foodbridge-interface.md`, S4 and the status table) still has the earlier "Another organisation's request was approved" wording.
+- **Food saved is shown per unit from the listed quantity, not the service's estimate.** The dashboard's food saved totals the quantity listed on each Collected listing, one figure per unit, never converted or added together; a reversed handover's listing is no longer Collected, so it drops out. The service's `estimatedPortionsSaved` (78 on 2 November 2026) isn't shown: it counts portions from 13 `completedHandovers` against 12 Collected listings holding 58 portions, and the response doesn't say which handovers or recorded estimates make up the difference. Backend fix needed: document how the estimate is calculated, or return totals per unit from handovers.
 - The backend refuses to delete Reserved and Collected listings, and leaves deleted listings out of a donor's list, so Listing history can't show them. A pending request on a deleted listing stays stored as `PENDING`; it shows as Expired, in Request history.
 - Area and search filtering run in the browser when set (see "Find food filtering"); a backend fix to the area filter and keyword search would move this back to the server.
 - Administrators cannot open `/listings/:id/edit` (the route is donor-only in `src/app/routes.tsx`) and see no requests panel, so they cannot edit listings or record handovers in the interface.

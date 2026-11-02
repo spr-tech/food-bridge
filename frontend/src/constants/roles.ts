@@ -48,7 +48,7 @@ export const ROLE_CONFIG: Record<Role, RoleConfig> = {
     homePath: ROUTES.admin,
     roleLabel: 'Administrator',
     nav: [
-      { label: 'Dashboard', to: ROUTES.admin, icon: 'home' },
+      { label: 'Dashboard', to: ROUTES.admin, icon: 'home', includes: [ROUTES.adminRequests] },
       { label: 'All listings', to: ROUTES.listings, icon: 'search', includes: [ROUTES.listingDetail] },
       { label: 'Handovers', to: ROUTES.completedHandovers, icon: 'handover' },
     ],

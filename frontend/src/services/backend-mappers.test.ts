@@ -54,6 +54,33 @@ describe('backend response adapters', () => {
     },
   )
 
+  it.each(['EXPIRED', 'AVAILABLE', 'DELETED'])(
+    'reads a listing marked deleted as DELETED, never Expired, whatever its status says (%s)',
+    (status) => {
+      const listing = mapBackendListing({
+        id: 'listing-1',
+        foodName: 'Fresh bread',
+        description: 'Unsold loaves',
+        category: 'BAKERY',
+        quantity: 12,
+        unit: 'ITEMS',
+        imageReference: null,
+        pickupArea: 'yaba',
+        // Its deadline has passed too.
+        collectionDeadline: '2026-01-01T16:00:00+01:00',
+        status,
+        donorId: 'donor-1',
+        donorName: "Mama's Oven",
+        createdAt: '2025-12-30T10:00:00Z',
+        pendingRequestCount: 0,
+        deleted: true,
+        deletedAt: '2026-01-01T17:00:00Z',
+      })
+
+      expect(listing.status).toBe('DELETED')
+    },
+  )
+
   it.each(['PENDING', 'APPROVED', 'DECLINED', 'CANCELLED', 'EXPIRED', 'REVERSED'] as const)(
     'keeps the service request status %s',
     (status) => {

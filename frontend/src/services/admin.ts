@@ -20,6 +20,7 @@ import type {
   CompletedHandover,
   DailyDistribution,
   Listing,
+  ListingPage,
   ListingRequest,
   RequestPage,
 } from '@/types/api'
@@ -115,7 +116,7 @@ const adminApi = api.injectEndpoints({
                 status: 'all',
                 limit: 1000,
               }),
-            () => ({ items: [], total: 0 }),
+            (): ListingPage => ({ items: [], total: 0 }),
           )
 
           if ('error' in result) return { error: result.error }
@@ -227,6 +228,56 @@ const adminApi = api.injectEndpoints({
     }),
 
     // -----------------------------------------------------------------------
+    // Every PENDING request with its listing: GET /api/admin/requests?status=PENDING,
+    // every page, then GET /api/listings/{listingId} once per listing, since the rows
+    // carry no listing summary. The listing's status decides whether a decision is still
+    // due, so if any listing can't be read the whole list fails (and offers Try again)
+    // rather than guess it.
+    // -----------------------------------------------------------------------
+    getPendingRequests: build.query<ListingRequest[], void>({
+      queryFn: async (_arg, _api, _extraOptions, baseQuery) => {
+        if (env.useMocks) {
+          return simulate((actor) => {
+            const requests: ListingRequest[] = []
+            for (let offset = 0; ; offset += SERVICE_PAGE_LIMIT) {
+              const page = db.listAllRequests(actor, { status: 'PENDING', offset, limit: SERVICE_PAGE_LIMIT })
+              requests.push(...page.items)
+              if (requests.length >= page.total || page.items.length === 0) break
+            }
+            return requests
+          }, () => [])
+        }
+
+        const rows = await readAllPages<BackendFoodRequest>(baseQuery, '/api/admin/requests', {
+          status: 'PENDING',
+        })
+        if ('error' in rows) return { error: rows.error }
+
+        const listingIds = [...new Set(rows.data.map((request) => request.listingId))]
+        const details = await Promise.all(
+          listingIds.map((listingId) => baseQuery({ url: `/api/listings/${encodeURIComponent(listingId)}` })),
+        )
+        const failed = details.find((detail) => detail.error)
+        if (failed?.error) return { error: failed.error }
+
+        const listings = new Map<string, Listing>(
+          details.map((detail, index) => [
+            listingIds[index],
+            mapBackendListing(detail.data as BackendListingResponse),
+          ]),
+        )
+
+        return {
+          data: rows.data.map((request) => mapBackendRequest(request, listings.get(request.listingId))),
+        }
+      },
+      providesTags: [
+        { type: 'Listing', id: 'LIST' },
+        { type: 'Request', id: 'LIST' },
+      ],
+    }),
+
+    // -----------------------------------------------------------------------
     // GET /api/activity?limit=20
     // The latest platform activity, newest first (limit 1 to 100). The service
     // allows administrators only.
@@ -311,6 +362,10 @@ export function useDistributionToday() {
 
 export function useAdminRequests(filters: AdminRequestFilters = {}) {
   return adminApi.useGetAdminRequestsQuery(filters, LIST_QUERY_OPTIONS)
+}
+
+export function usePendingRequests() {
+  return adminApi.useGetPendingRequestsQuery(undefined, LIST_QUERY_OPTIONS)
 }
 
 export function useRecentActivity(limit = 20) {

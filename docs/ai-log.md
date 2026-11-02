@@ -139,3 +139,20 @@ Checked and found wrong, and how:
 Rejected: predicting the daily fairness rule in the browser, because a donor's data can't show it reliably (see `decisions.md`, 2026-11-02).
 
 Still unverified: whether the Qocent backup deployment is current or updates from GitHub.
+
+### 2026-11-02 · Claude Code · listing status and dashboard fixes
+
+Asked: fix the Expired filter showing deleted listings, donor and recipient handling of expired listings, Edit and Delete placement on Listing details, the rejection message that disappeared, the dashboard's Requests waiting and Expired cards, and the Food saved figure. Report backend defects instead of hiding them.
+
+Accepted: the changes on `fix/foodbridge-listing-status-and-dashboard-bugs` (not committed), with typecheck and build passing and lint at 0 errors (1 existing warning in `src/components/ui/textarea.tsx`). The suite has 509 tests across 53 files. It has intermittent 5-second timeouts under load, also seen on `main`. The final full runs had 6 failures each, and 1 with `--maxWorkers=2`, all in tests this branch doesn't change. Each failing file passed when run alone, so they aren't fixed, only shown to depend on load. They were checked in a browser against the deployed backend at 1440, 820 and 390 px wide, using reads only (no listing, request or delete was changed).
+
+Checked and found wrong, and how:
+
+- Admin Expired filter: a live `GET /api/listings?availability=EXPIRED` returned 1 `EXPIRED` and 23 `DELETED` rows. Each row reported its status correctly, so the backend filter was wrong, not the frontend mapping.
+- Requests waiting: all 16 `PENDING` requests counted by the dashboard sat on Collected or Deleted listings. None was waiting for a decision.
+- Rejection message: it required the request to be `PENDING`. A refetch returning `DECLINED`, or the listing becoming Collected, removed it.
+- The first fix said "Another organisation was approved" whenever the listing was Reserved or Collected. Review showed that was a guess: the backend sends no decline reason, and a donor can decline by hand. It was replaced with a neutral message that gives no reason.
+- Edit on Listing details: the details page never rendered it.
+- Food saved: the frontend totals matched the 12 Collected listings exactly (no duplicates). The backend's 78 portions and 13 handovers couldn't be traced from what it returns.
+
+Rejected: removing deleted rows from the Expired view without saying so, and building the reversal action, because no response carries the `handoverId` it needs.

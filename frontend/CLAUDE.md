@@ -156,7 +156,7 @@ Do not assume demo credentials work unless they have been verified against the d
   - Updates a listing.
 - `DELETE /api/listings/{listingId}`
   - Deletes a listing. Documented success response: HTTP 204 No Content.
-  - Deployed behaviour: owning donor or administrator; only Available or Expired listings (409 `LISTING_NOT_DELETABLE` otherwise). It is a soft delete: the listing gets status `DELETED`, is left out of every list, and is still returned by id to its donor, an administrator and its requesters. Its requests keep their stored status.
+  - Deployed behaviour: owning donor or administrator; only Available or Expired listings (409 `LISTING_NOT_DELETABLE` otherwise). It is a soft delete: the listing gets status `DELETED` and `deleted: true`, is left out of donors' and recipients' lists (an administrator's unfiltered list includes it), and is still returned by id to its donor, an administrator and its requesters. Backend defect (2 November 2026): `availability=EXPIRED` also returns deleted listings, and `availability=DELETED` gives 400; see README, Known limitations. Its requests keep their stored status.
 - `POST /api/listings/images`
   - Uploads an image using `multipart/form-data` with the binary field named `file`.
 
@@ -256,7 +256,7 @@ Do not fake a successful reversal locally or invent a reverse endpoint. Record t
     - `totalRequests`
     - `pendingRequests`
     - `completedHandovers`
-    - `expiredListings` and `estimatedPortionsSaved` (added to the documented response by 2 November 2026; not yet shown by the dashboard)
+    - `expiredListings` (shown, linked to the Expired listings) and `estimatedPortionsSaved` (not shown: its calculation can't yet be traced; see README, Known limitations)
 
 The documented dashboard response does not include a recent activity list. Do not present invented or mock-derived numbers as live backend statistics, and label portions saved as an estimate.
 
@@ -264,7 +264,7 @@ The documented dashboard response does not include a recent activity list. Do no
 
 As of 2 November 2026, the deployed OpenAPI document:
 - Documents `PATCH /api/handovers/{handoverId}/reverse`, but no listing or request response exposes a `handoverId`, so the interface can't call it yet. Confirm with the backend engineer how a handover id is obtained.
-- Documents `expiredListings` and `estimatedPortionsSaved` in the dashboard response. The dashboard still shows "—" for both (hard-coded in `src/sections/admin-dashboard/AdminDashboard.tsx`); wire them in once their meaning is confirmed.
+- Documents `expiredListings` and `estimatedPortionsSaved` in the dashboard response. The dashboard shows `expiredListings`; for food saved it totals the listed quantity of Collected listings per unit instead of `estimatedPortionsSaved` (see README, Known limitations). `pendingRequests` also counts pending requests on Collected and Deleted listings; `/admin/requests` shows which are really waiting.
 - Documents a separate `GET /api/activity`, not called by the interface. The dashboard response itself has no recent-activity list.
 
 The image upload response schema is generic; the observed reply field is `imageUrl`.
@@ -318,7 +318,7 @@ The backend is the final authority for permissions. Frontend role checks only co
 
 - A listing requires a food name/title, category, quantity, pickup area, collection deadline and donor. The frontend form also requires a description (PR #18).
 - A listing can be edited only while it is `AVAILABLE` (`isListingEditable` in `src/lib/listing-permissions.ts`: Your listings shows Edit only then, and `src/pages/EditListingPage.tsx` explains otherwise; the form handles a backend `LISTING_NOT_EDITABLE` code). The simulated store does not enforce this rule.
-- Delete is offered to the owning donor and administrators on any listing not already deleted, and disabled with the reason on Collected listings (`deleteBlockedReason`). The backend refuses Reserved listings; the confirmation then says why. The simulated store follows the backend's delete rule.
+- Delete is offered to the owning donor and administrators on Available and Expired listings, disabled with the reason on Collected and Reversed listings (`deleteBlockedReason`), and not offered on Reserved or Deleted ones (`canDeleteListing`), since the backend refuses them. On Listing details, Edit and Delete sit together at the foot of the listing's card. The simulated store follows the backend's delete rule.
 - The backend's daily fairness rule refuses a second approval for a recipient on the same Lagos day while another recipient has none (409 `DAILY_DISTRIBUTION_PRIORITY`). Donors can't see who has been served, so the panel can only explain the refusal afterwards; don't invent a client-side eligibility rule.
 - An expired listing accepts no new requests.
 - An expired listing with an approved request must reach a defined final state rather than remaining open.

@@ -70,7 +70,7 @@ const listingsApi = api.injectEndpoints({
         if (env.useMocks) {
           return simulate(
             (actor) => db.listListings(actor, filters),
-            () => ({ items: [], total: 0 }),
+            (): ListingPage => ({ items: [], total: 0 }),
           )
         }
 
@@ -78,26 +78,47 @@ const listingsApi = api.injectEndpoints({
         // matches the exact stored text ("surulere", not "Surulere, Lagos - …"). With a
         // search or an area, ask it for status and category only, load every page, and
         // match the search and area here.
-        if (filters.q?.trim() || filters.area) {
+        // Expired and Deleted take the same path, keeping each row by the status it carries.
+        // Backend defect (2 November 2026): availability=EXPIRED also returns deleted
+        // listings (status DELETED, deleted true), and availability=DELETED is refused with
+        // 400 INVALID_LISTING. Deleted rows from the Expired filter are counted in
+        // deletedReturned so the page can say so, and Deleted reads the unfiltered list
+        // (only an administrator's includes deleted listings). Remove both once the service
+        // filters by status correctly.
+        const byStatus = filters.status === 'EXPIRED' || filters.status === 'DELETED'
+        if (filters.q?.trim() || filters.area || byStatus) {
           const all = await readAllPages<BackendListingResponse>(
             baseQuery,
             '/api/listings',
-            queryParams({ ...filters, q: undefined, area: undefined }),
+            queryParams({
+              ...filters,
+              q: undefined,
+              area: undefined,
+              status: filters.status === 'DELETED' ? 'all' : filters.status,
+            }),
           )
           if ('error' in all) return { error: all.error }
 
-          const matches = all.data
-            .map(mapBackendListing)
-            .filter(
-              (listing) =>
-                matchesPickupArea(listing, filters.area) &&
-                matchesListingSearch(listing, filters.q ?? ''),
-            )
+          const rows = all.data.map(mapBackendListing)
+          const inStatus = byStatus
+            ? rows.filter((listing) => listing.status === filters.status)
+            : rows
+          const deletedReturned =
+            filters.status === 'EXPIRED'
+              ? rows.filter((listing) => listing.status === 'DELETED').length
+              : 0
+
+          const matches = inStatus.filter(
+            (listing) =>
+              matchesPickupArea(listing, filters.area) &&
+              matchesListingSearch(listing, filters.q ?? ''),
+          )
 
           return {
             data: {
               items: matches.slice(0, filters.limit ?? 50),
               total: matches.length,
+              ...(deletedReturned > 0 ? { deletedReturned } : {}),
             },
           }
         }

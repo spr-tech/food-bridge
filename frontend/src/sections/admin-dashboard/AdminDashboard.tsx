@@ -1,5 +1,6 @@
 // The administrator's dashboard (brief journey 5): open listings, requests waiting,
-// reserved, completed handovers, expired, and an estimate of food saved.
+// reserved, completed handovers, expired, and food saved per unit. Requests waiting opens
+// /admin/requests and Expired opens the Expired listings.
 // Below them: the listing pipeline and the share collected (both from GET
 // /api/admin/dashboard), today's progress through the daily fairness rule (GET
 // /api/admin/distribution/today) and recent activity (GET /api/activity). Each part loads
@@ -18,8 +19,8 @@ import { listingDetailPath, ROUTES } from '@/constants/routes'
 import { useNow } from '@/hooks/useNow'
 import { useSessionEnded } from '@/hooks/useSessionEnded'
 import { cn } from '@/lib/cn'
-import { formatFoodSaved } from '@/lib/food-saved'
-import { formatDateTime, formatLongDay, formatUpdated, initials } from '@/lib/format'
+import { foodSavedByUnit } from '@/lib/food-saved'
+import { formatDateTime, formatLongDay, formatUnit, formatUpdated, initials } from '@/lib/format'
 import { errorStatus } from '@/services/errors'
 import {
   useAdminDashboard,
@@ -294,7 +295,8 @@ function DashboardStats() {
       {
         label: 'Requests waiting',
         value: summary.pendingRequests,
-        hint: 'Pending donor decisions; admin request view not connected yet',
+        hint: 'Requests the service marks as pending. View those due a donor decision.',
+        to: ROUTES.adminRequests,
         icon: <ListChecks size={20} />,
       },
       {
@@ -437,36 +439,79 @@ function ShareRing({ summary }: { summary: AdminDashboardSummary }) {
   )
 }
 
-// Expired listings and the estimate of food saved, both from GET /api/admin/dashboard.
+// The expired count (GET /api/admin/dashboard), linked to the Expired listings, and the
+// food saved: the quantity listed on each completed handover, one total per unit. The
+// service's estimatedPortionsSaved isn't shown: its figure can't yet be traced to the
+// handovers it counts (see README, Known limitations).
 function MoreFigures() {
   const dashboard = useAdminDashboard()
   const handovers = useCompletedHandovers()
   useEndSessionOn401(handovers.error)
 
-  let foodSaved: string
-  if (handovers.isLoading) foodSaved = '…'
-  else if (handovers.isError || !handovers.data) foodSaved = 'Unavailable'
-  else foodSaved = formatFoodSaved(handovers.data) ?? 'None yet'
+  let foodSaved: ReactNode
+  if (handovers.isLoading) foodSaved = <p className="mt-2 font-display text-2xl text-text">…</p>
+  else if (handovers.isError || !handovers.data) {
+    foodSaved = <p className="mt-2 font-display text-2xl text-text">Unavailable</p>
+  } else {
+    const totals = foodSavedByUnit(handovers.data)
+    foodSaved =
+      totals.length > 0 ? (
+        <>
+          <ul aria-label="Food saved by unit" className="mt-3 grid grid-cols-2 gap-2">
+            {totals.map((total) => (
+              <li key={total.unit} className="rounded-xl bg-surface px-3 py-2">
+                <span className="block font-display text-2xl leading-tight text-text">
+                  {total.quantity.toLocaleString('en-GB')}
+                </span>
+                <span className="text-[13px] text-text-muted">{formatUnit(total)}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-[13px] leading-snug text-muted-on-cream">
+            From {handovers.data.length.toLocaleString('en-GB')} completed{' '}
+            {handovers.data.length === 1 ? 'handover' : 'handovers'}, using the quantity each donor listed.
+            Units are kept apart and never converted, so these figures can’t be added together.
+            Reversed handovers aren’t counted.
+          </p>
+        </>
+      ) : (
+        <p className="mt-2 font-display text-2xl text-text">None yet</p>
+      )
+  }
 
   return (
     <Panel eyebrow="Listings" title="More figures">
       {dashboard.data ? (
         <ul className="flex flex-col gap-3">
-          <li className="rounded-2xl bg-cream p-4">
-            <p className="text-sm font-semibold text-muted-on-cream">Expired</p>
-            <p className="mt-1 font-display text-3xl leading-none text-text">
-              {dashboard.data.expiredListings.toLocaleString('en-GB')}
-            </p>
-            <p className="mt-2 text-[13px] leading-snug text-muted-on-cream">
-              Listings whose collection deadline passed before anyone collected them
-            </p>
+          <li>
+            <Link
+              to={`${ROUTES.listings}?status=expired`}
+              className={cn(
+                'group block rounded-2xl border border-transparent bg-cream p-4 transition-colors hover:border-primary',
+                FOCUS,
+              )}
+            >
+              <span className="flex items-start justify-between gap-3">
+                <span className="text-sm font-semibold text-muted-on-cream">Expired</span>
+                <span
+                  aria-hidden="true"
+                  className="grid size-8 place-items-center rounded-full border border-cream-border text-text-muted transition-colors group-hover:border-primary group-hover:bg-primary group-hover:text-on-primary"
+                >
+                  <ArrowUpRight size={14} />
+                </span>
+              </span>
+              <span className="mt-1 block font-display text-3xl leading-none text-text">
+                {dashboard.data.expiredListings.toLocaleString('en-GB')}
+              </span>
+              <span className="mt-2 block text-[13px] leading-snug text-muted-on-cream">
+                Listings whose collection deadline passed before anyone collected them. Deleted
+                listings aren’t counted.
+              </span>
+            </Link>
           </li>
           <li className="rounded-2xl bg-cream p-4" aria-busy={handovers.isLoading || undefined}>
-            <p className="text-sm font-semibold text-muted-on-cream">Food saved (estimate)</p>
-            <p className="mt-1 font-display text-2xl leading-tight wrap-break-word text-text">{foodSaved}</p>
-            <p className="mt-2 text-[13px] leading-snug text-muted-on-cream">
-              Based on the quantity listed on each completed handover, totalled per unit.
-            </p>
+            <p className="text-sm font-semibold text-muted-on-cream">Food saved, by unit</p>
+            {foodSaved}
             {handovers.isError && (
               <button
                 type="button"

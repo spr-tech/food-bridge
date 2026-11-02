@@ -1,7 +1,9 @@
 # FoodBridge: interface spec
 
 Status: draft, 27 Oct 2026; backend integration recorded in section 13 (31 Oct 2026); implementation update in section 14 (1–2 Nov 2026, up to PR #24). Owner: Muizz Jamiu (interface).
+
 Reads with: `/docs/intent/foodbridge.md` (what and why), the backend's OpenAPI document (every endpoint, field and error shape; `/openapi.yaml` was planned in this repository but has not been added, so use `https://foodbridge-backend-rg9f.onrender.com/v3/api-docs`) and `/docs/design/foodbridge-final/` (how every screen looks, see section 12).
+
 This file covers only how the screens behave. If it ever disagrees with the OpenAPI document, the OpenAPI document wins and this file gets corrected.
 
 Items marked **TBC** need agreement with the service engineers (Adedayo, Esther) and a line in `/docs/decisions.md`.
@@ -47,7 +49,7 @@ One set of words, used on every screen and in every message.
 |---|---|---|---|
 | Pending | `PENDING` (**TBC**) | Warning | Waiting for the donor |
 | Approved | `APPROVED` (**TBC**) | Success | The donor chose this request |
-| Declined | `DECLINED` (**TBC**) | Neutral | The donor declined it, or another request was approved |
+| Declined | `DECLINED` (**TBC**) | Neutral | The request was not approved. The reason is not provided by the backend. |
 | Expired | `EXPIRED` (**TBC**) | Neutral | The listing passed its deadline before approval |
 | Cancelled | `CANCELLED` (**TBC**) | Neutral | The recipient cancelled it while it was still pending (rule **TBC** with the service engineers, see `/docs/decisions.md`) |
 
@@ -786,27 +788,33 @@ The photo is uploaded first (`POST /api/listings/images`, stored by the backend 
 
 ### 14.3 What the recipient sees (S4, S7)
 
-The status shown to a recipient comes from `frontend/src/lib/request-status.ts`, from both the request and the listing status:
+The status shown to a recipient comes from `frontend/src/lib/request-status.ts`, using both the request status and the listing status:
 
 | Request | Listing | Shown |
 |---|---|---|
 | Pending | Available | Pending (Cancel request available) |
-| Pending | Reserved | Declined; on S4 also "Another organisation's request was approved, so this listing is no longer available." |
-| Pending | Collected | Declined |
+| Pending or Declined | Reserved | Declined; show the neutral explanation below |
+| Pending or Declined | Collected | Declined; show the neutral explanation below |
 | Pending | Expired | Expired |
 | Approved | Reserved | Approved; on S4 also "This listing is reserved for your organisation. Your collection has been approved." |
 | Approved | Collected | The listing's Collected badge |
+
+When a request is shown as Declined because its listing is Reserved or Collected, S4 and S7 show:
+
+"This request was not approved. The food listing is no longer available for requests."
+
+This message deliberately does not say that another organisation was approved. The backend does not provide a decline reason, and a donor can also decline a request manually. The interface must not guess why a request was declined.
 
 - Cancel request is offered only when the shown status is Pending, so a recipient cannot cancel a request that is no longer genuinely pending.
 - On S4 the listing badge is labelled "List status", to tell it apart from "Your request".
 - S7 splits requests into Open requests and Request history (see S7).
 - On a listing its donor has deleted (status `DELETED`), the recipient sees the Deleted badge and "The donor has removed this listing, so it can't be collected." (or "… can't be requested." without a request).
-- **This is a display fallback.** The stored request stays `PENDING`. The S5 rule says the backend stores competing pending requests as `DECLINED` when one is approved; the deployed backend was **observed not doing this**, so the fallback stays until the backend is changed.
+- **This is a display fallback.** The stored request may remain `PENDING`. The S5 rule says the backend stores competing pending requests as `DECLINED` when one is approved; the deployed backend was **observed not doing this**, so the fallback stays until the backend is changed.
 
 ### 14.4 Donor requests panel (S5, S8) (PR #23)
 
 - Approve and Decline show only while the listing is Available and none of its requests is Approved. This keeps a donor from approving a second request on a reserved listing, even though the backend still returns a losing request as `PENDING`.
-- Pending requests are shown as Declined once another is approved or the listing is Reserved or Collected, and as Expired on an expired listing (display only, as in 14.3).
+- Pending requests are displayed as Declined when the listing is Reserved or Collected, using the display fallback in 14.3. The deployed backend may still return the stored request as PENDING; the frontend must not treat the display status as proof that another organisation was approved. Pending requests on expired listings are displayed as Expired.
 - The approve dialog's count of "other pending requests" includes only requests that can still be decided.
 - **Daily fairness rule (backend).** A recipient who already has an approved request today (Lagos time) can't be approved again while another recipient has none (409 `DAILY_DISTRIBUTION_PRIORITY`). The donor can't see other listings' approvals, so the panel can't tell beforehand. On refusal it shows "This request can't be approved yet." with "[Organisation] has already received food today. Every organisation must get its first food today before anyone gets a second, so this approval was not saved. You can approve another organisation's request or decline this one." That organisation's Approve is then disabled for the rest of the visit, with "Can't be approved yet: this organisation has already received food today and others are still waiting for their first."; Decline stays.
 
@@ -854,5 +862,4 @@ The menu link of the section a page belongs to stays highlighted on its sub-page
 - Competing requests and duplicate requests: the deployed backend keeps losing requests `PENDING` and accepts a second request from the same recipient on the same listing (observed).
 - Administrators can't edit listings or record handovers in the interface (the edit route is donor-only; no requests panel for administrators).
 - The tabbed S8 Requests screen and reversing a handover wait on the backend (14.5, 14.6).
-
----
+- The backend does not provide a decline reason. The frontend must use neutral wording for declined requests and must not assume that another organisation was approved.

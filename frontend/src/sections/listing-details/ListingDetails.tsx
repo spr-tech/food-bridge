@@ -2,8 +2,9 @@
 // - the owning donor: the listing and its requests panel (S5)
 // - everyone else: the listing and, for recipients, their one action (S4). Another
 //   donor sees the listing only; an administrator sees it with Delete listing.
-// Delete listing shows for the owning donor and any administrator until the listing is
-// deleted (canDeleteListing), and goes back to that role's list once it is.
+// Edit and Delete sit together inside the listing's card (ListingActions). Delete shows for
+// the owning donor and any administrator while canDeleteListing allows, and goes back to
+// that role's list once the listing is deleted.
 // A single column, as in 4-recipient-listing-details: the back link ("Back to Find food"
 // for recipients, "Back to Your listings" for donors, "Back to All listings" for
 // administrators, matching each role's menu), then the listing in a card up to 760px wide
@@ -13,21 +14,23 @@
 // each with a link home; a 401 goes to sign in.
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router'
+import { Pencil } from 'lucide-react'
 import { useSession } from '@/app/session'
 import { DeleteListingButton } from '@/components/common/DeleteListingButton'
 import { LoadingState } from '@/components/common/LoadingState'
 import { ErrorState } from '@/components/ui/error-state'
 import { Skeleton } from '@/components/ui/skeleton'
 import { homePathFor } from '@/constants/roles'
-import { ROUTES } from '@/constants/routes'
+import { editListingPath, ROUTES } from '@/constants/routes'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useSessionEnded } from '@/hooks/useSessionEnded'
-import { canDeleteListing } from '@/lib/listing-permissions'
+import { canDeleteListing, isListingEditable } from '@/lib/listing-permissions'
 import { ListingSummary } from '@/sections/listing-details/ListingSummary'
 import { RecipientAction } from '@/sections/listing-details/RecipientAction'
 import { RequestsPanel } from '@/sections/listing-details/RequestsPanel'
 import { errorStatus } from '@/services/errors'
 import { useListing } from '@/services/listings'
+import type { Listing } from '@/types/api'
 import type { Role } from '@/types/role'
 
 const CARD = 'md:max-w-190 md:rounded-3xl md:border md:border-border md:bg-surface md:p-6 md:shadow-card'
@@ -48,6 +51,40 @@ function BackLink({ to, label }: { to: string; label: string }) {
       </svg>
       {label}
     </Link>
+  )
+}
+
+// The listing's own actions, together at the foot of its card: Edit for the owning donor
+// while the listing is Available, and Delete for the accounts canDeleteListing allows
+// (the owning donor's and an administrator's). Nothing when neither applies, so a
+// Reserved listing shows neither.
+function ListingActions({
+  listing,
+  canEdit,
+  canDelete,
+  onDeleted,
+}: {
+  listing: Listing
+  canEdit: boolean
+  canDelete: boolean
+  onDeleted: () => void
+}) {
+  if (!canEdit && !canDelete) return null
+
+  return (
+    <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4 sm:flex-row sm:items-start sm:justify-end">
+      {canEdit && (
+        <Link
+          to={editListingPath(listing.id)}
+          aria-label={`Edit listing: ${listing.foodName}`}
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-border-input bg-bg px-4 text-sm font-medium text-text transition-colors hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+        >
+          <Pencil size={16} aria-hidden="true" />
+          Edit listing
+        </Link>
+      )}
+      {canDelete && <DeleteListingButton listing={listing} onDeleted={onDeleted} />}
+    </div>
   )
 }
 
@@ -115,15 +152,12 @@ export function ListingDetails({ listingId }: { listingId: string }) {
         <article className={CARD}>
           <ListingSummary listing={listing.data} />
           {role === 'recipient' && <RecipientAction listing={listing.data} />}
-          {/* The owning donor's and an administrator's, so not inside isOwner. */}
-          {canDeleteListing(session, listing.data) && (
-            <div className="mt-4 flex justify-end border-t border-border pt-4">
-              <DeleteListingButton
-                listing={listing.data}
-                onDeleted={() => void navigate(listPage.to, { replace: true })}
-              />
-            </div>
-          )}
+          <ListingActions
+            listing={listing.data}
+            canEdit={isOwner && isListingEditable(listing.data)}
+            canDelete={canDeleteListing(session, listing.data)}
+            onDeleted={() => void navigate(listPage.to, { replace: true })}
+          />
         </article>
         {isOwner && <RequestsPanel listing={listing.data} />}
       </>
