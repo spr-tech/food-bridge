@@ -1,7 +1,8 @@
 // Sign in (spec S1): validation, wrong details, an unreachable service, the session it
 // saves, where each role lands, ?next= (followed only to a page the role may open), the
-// demo accounts filling in the form, and show password.
-import { act, screen, waitFor } from '@testing-library/react'
+// demo accounts (grouped Admin | Donor | Recipient) filling in the form without signing
+// in, and show password.
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { getSession, SESSION_STORAGE_KEY } from '@/app/session'
@@ -142,21 +143,22 @@ describe('Sign in', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Your session ended. Sign in again.')
   })
 
-  it('fills in the email and password from a phone chip, then moves focus to Sign in', async () => {
+  it('fills in the email and password from the Admin section, then moves focus to Sign in', async () => {
     const user = userEvent.setup()
     renderSignIn()
+    const admin = within(screen.getByRole('region', { name: 'Admin' }))
 
-    await user.click(screen.getByRole('button', { name: 'Administrator' }))
+    await user.click(admin.getByRole('button', { name: 'Administrator' }))
 
     expect(emailField()).toHaveValue('admin@foodbridge.test')
     expect(passwordField()).toHaveValue(DEMO_PASSWORD)
     expect(screen.getByRole('button', { name: 'Sign in' })).toHaveFocus()
   })
 
-  it("fills in both from an account in the desktop box, which shows the role and email", async () => {
+  it('fills in both from an account, which shows only its name', async () => {
     const user = userEvent.setup()
     renderSignIn()
-    const recipient = screen.getByRole('button', { name: 'Recipient, recipient@foodbridge.test' })
+    const recipient = screen.getByRole('button', { name: 'Recipient' })
 
     await user.click(recipient)
 
@@ -165,7 +167,7 @@ describe('Sign in', () => {
     expect(screen.getByRole('button', { name: 'Sign in' })).toHaveFocus()
   })
 
-    it('leaves no field errors after filling in from a demo account', async () => {
+  it('leaves no field errors after filling in from a demo account', async () => {
     const user = userEvent.setup()
     renderSignIn()
 
@@ -185,7 +187,7 @@ describe('Sign in', () => {
     const user = userEvent.setup()
     renderSignIn()
 
-    screen.getByRole('button', { name: 'Donor, donor@foodbridge.test' }).focus()
+    screen.getByRole('button', { name: 'Donor' }).focus()
     await user.keyboard('{Enter}')
     expect(screen.getByRole('button', { name: 'Sign in' })).toHaveFocus()
     await user.keyboard('{Enter}')
@@ -193,11 +195,23 @@ describe('Sign in', () => {
     expect(await screen.findByRole('heading', { name: 'Donor home' })).toBeInTheDocument()
   })
 
-  it('says where the password comes from', () => {
+  it('shows no demo emails or passwords', () => {
+    renderSignIn()
+    const demo = within(screen.getByRole('region', { name: 'Demo accounts' }))
+
+    expect(demo.queryByText(/@foodbridge\.test/)).not.toBeInTheDocument()
+    expect(demo.queryByText(DEMO_PASSWORD)).not.toBeInTheDocument()
+  })
+
+  it('does not sign in when an account is chosen', async () => {
+    const user = userEvent.setup()
     renderSignIn()
 
-    expect(screen.getByText(/Choose one to fill in the email and password\. Password in the README\.$/)).toBeInTheDocument()
-    expect(screen.getByText('Tap one to fill in the email and password. Password in the README.')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Donor' }))
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)))
+
+    expect(screen.getByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
+    expect(getSession()).toBeNull()
   })
 
   it('shows and hides the password', async () => {
@@ -213,13 +227,13 @@ describe('Sign in', () => {
     expect(passwordField()).toHaveAttribute('type', 'password')
   })
 
-  it('lists one demo account per role, with its email', () => {
+  it('groups the demo accounts Admin | Donor | Recipient, one button per account', () => {
     renderSignIn()
 
-    for (const email of ['donor@', 'recipient@', 'admin@']) {
-      expect(screen.getByText(`${email}foodbridge.test`)).toBeInTheDocument()
+    expect(screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual(['Admin', 'Donor', 'Recipient'])
+    for (const [role, label] of [['Admin', 'Administrator'], ['Donor', 'Donor'], ['Recipient', 'Recipient']]) {
+      const buttons = within(screen.getByRole('region', { name: role })).getAllByRole('button')
+      expect(buttons.map((b) => b.textContent)).toEqual([label])
     }
-    expect(screen.queryByText(/recipient\d@foodbridge\.test/)).not.toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: /^(Donor|Recipient|Administrator)$/ })).toHaveLength(3)
   })
 })
