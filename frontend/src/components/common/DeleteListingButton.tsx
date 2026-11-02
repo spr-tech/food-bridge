@@ -1,12 +1,13 @@
 // "Delete listing" on the donor's Your listings rows (an icon button) and on Listing
 // details (a full button), for the accounts canDeleteListing allows; nothing for anyone
 // else. A danger-tone confirmation first: "Delete this listing?", with Cancel focused.
-// Then:
+// The service keeps a deleted listing as a record (a soft delete), so the wording says it
+// is taken off FoodBridge, not that it is erased. Then:
 // - success (204): the toast "Listing deleted"; the listing, the lists and the donor's
 //   listings refresh, so the listing leaves the screen only once the service has said so
 // - 401: the session ends (sign in again, then back here)
 // - 403, 404, 409, 500 or no connection: the dialog stays open with what went wrong, and
-//   nothing is removed
+//   nothing is removed. A 409 on a Reserved or Collected listing says that is why.
 // The service decides who may delete; this button is not the safeguard.
 import { useState } from 'react'
 import { useSession } from '@/app/session'
@@ -22,13 +23,19 @@ import type { Listing } from '@/types/api'
 // Thrown to keep the dialog open after a refusal; the message is already on screen.
 class NotDeleted extends Error {}
 
-function failureMessage(status: number | string | undefined): string {
+function failureMessage(status: number | string | undefined, listingStatus: Listing['status']): string {
   switch (status) {
     case 403:
       return "You don't have permission to delete this listing."
     case 404:
       return 'This listing no longer exists.'
     case 409:
+      if (listingStatus === 'RESERVED') {
+        return "A reserved listing can't be deleted, because a recipient is due to collect it. Mark it as collected instead."
+      }
+      if (listingStatus === 'COLLECTED') {
+        return "A collected listing can't be deleted. It stays in your listing history as a record of the handover."
+      }
       return 'This listing can no longer be deleted. It may have just been reserved.'
     default:
       return "The listing wasn't deleted. Check your connection and try again."
@@ -73,7 +80,7 @@ export function DeleteListingButton({ listing, variant = 'button', onDeleted }: 
         void sessionEnded()
         return
       }
-      setFailure(failureMessage(status))
+      setFailure(failureMessage(status, listing.status))
       throw new NotDeleted()
     }
     toast({ variant: 'success', title: 'Listing deleted' })
@@ -102,7 +109,7 @@ export function DeleteListingButton({ listing, variant = 'button', onDeleted }: 
     <ConfirmDialog
       trigger={trigger}
       title="Delete this listing?"
-      description={`${listing.foodName} will be removed for good, with any requests made for it. You can't undo this.`}
+      description={`${listing.foodName} will be taken off FoodBridge: it leaves your listings and recipients can no longer find or request it. You can't undo this.`}
       confirmLabel="Delete listing"
       tone="danger"
       onConfirm={confirmDelete}

@@ -2,8 +2,8 @@
 // - the owning donor: the listing and its requests panel (S5)
 // - everyone else: the listing and, for recipients, their one action (S4). Another
 //   donor sees the listing only; an administrator sees it with Delete listing.
-// Delete listing shows for the owning donor (Available or Expired) and any administrator,
-// and goes back to that role's list once the listing is deleted.
+// Delete listing shows for the owning donor and any administrator until the listing is
+// deleted (canDeleteListing), and goes back to that role's list once it is.
 // A single column, as in 4-recipient-listing-details: the back link ("Back to Find food"
 // for recipients, "Back to Your listings" for donors, "Back to All listings" for
 // administrators, matching each role's menu), then the listing in a card up to 760px wide

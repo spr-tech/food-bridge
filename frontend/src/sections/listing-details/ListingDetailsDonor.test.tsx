@@ -18,16 +18,34 @@ import { ListingDetailPage } from '@/pages/ListingDetailPage'
 import { moveDeadline } from '@/test/mockDb'
 import { findToastAction, renderRoutes, signInAs } from '@/test/render'
 
-// When set, the store refuses to list a listing's requests with this status.
-const refusal = vi.hoisted(() => ({ requests: null as null | number }))
+// When set, the store refuses to list a listing's requests with this status; refuses
+// every approval with this 409 code; or, like the live service, still returns the
+// declined request on the reserved pastries (req-05) as PENDING. requestLists counts
+// the times a listing's requests were asked for.
+const refusal = vi.hoisted(() => ({
+  requests: null as null | number,
+  approve: null as null | string,
+  stalePending: false,
+  requestLists: 0,
+}))
 
 vi.mock('@/mocks/db', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/mocks/db')>()
   return {
     ...actual,
     listListingRequests: (...args: Parameters<typeof actual.listListingRequests>) => {
+      refusal.requestLists += 1
       if (refusal.requests) throw new actual.MockApiError(refusal.requests, 'SERVER_ERROR', 'Refused for the test.')
-      return actual.listListingRequests(...args)
+      const rows = actual.listListingRequests(...args)
+      return refusal.stalePending
+        ? rows.map((row) => (row.id === 'req-05' ? { ...row, status: 'PENDING' as const } : row))
+        : rows
+    },
+    decideRequest: (...args: Parameters<typeof actual.decideRequest>) => {
+      if (refusal.approve && args[1].decision === 'APPROVED') {
+        throw new actual.MockApiError(409, refusal.approve, 'Refused for the test.')
+      }
+      return actual.decideRequest(...args)
     },
   }
 })
@@ -79,6 +97,9 @@ async function approve(user: UserEvent, name: string) {
 
 beforeEach(() => {
   refusal.requests = null
+  refusal.approve = null
+  refusal.stalePending = false
+  refusal.requestLists = 0
   signInAs('donor')
 })
 
@@ -304,5 +325,70 @@ describe('Listing details (donor): declining', () => {
     expect(await findToastAction("Your decline wasn't saved. Try again.", 'Try again')).toBeInTheDocument()
     expect(statusOf(AJEGUNLE)).toBe('Pending')
     expect(storedStatus('req-02')).toBe('PENDING')
+  })
+})
+
+describe('Listing details (donor): the daily fairness rule', () => {
+  it('says why the service refused the approval, rolls back and refreshes the requests', async () => {
+    refusal.approve = 'DAILY_DISTRIBUTION_PRIORITY'
+    const user = userEvent.setup()
+    await openLoaves()
+    const listsBefore = refusal.requestLists
+
+    await approve(user, AJEGUNLE)
+
+    expect(await screen.findByText("This request can't be approved yet.")).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        `${AJEGUNLE} has already received food today. Every organisation must get its first food today before anyone gets a second, so this approval was not saved. You can approve another organisation's request or decline this one.`,
+      ),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('Request approved')).not.toBeInTheDocument()
+    expect(screen.queryByText("Your approval wasn't saved. Try again.")).not.toBeInTheDocument()
+    await waitFor(() => expect(statusOf(AJEGUNLE)).toBe('Pending'))
+    expect(statusOf(HOPE)).toBe('Pending')
+    expect(storedStatus('req-02')).toBe('PENDING')
+    await waitFor(() => expect(refusal.requestLists).toBeGreaterThan(listsBefore))
+  })
+
+  it("then shows that organisation's Approve disabled with the reason, keeps Decline, and leaves the others' Approve on", async () => {
+    refusal.approve = 'DAILY_DISTRIBUTION_PRIORITY'
+    const user = userEvent.setup()
+    await openLoaves()
+
+    await approve(user, AJEGUNLE)
+    await screen.findByText("This request can't be approved yet.")
+
+    const held = within(rowFor(AJEGUNLE)).getByRole('button', { name: `Approve: ${AJEGUNLE}` })
+    await waitFor(() => expect(held).toBeDisabled())
+    expect(held).toHaveAccessibleDescription(
+      "Can't be approved yet: this organisation has already received food today and others are still waiting for their first.",
+    )
+    expect(within(rowFor(AJEGUNLE)).getByRole('button', { name: `Decline: ${AJEGUNLE}` })).toBeEnabled()
+    expect(within(rowFor(HOPE)).getByRole('button', { name: `Approve: ${HOPE}` })).toBeEnabled()
+    await waitFor(() => expect(rowFor(AJEGUNLE)).toHaveFocus())
+  })
+
+  it('still approves an eligible request', async () => {
+    const user = userEvent.setup()
+    await openLoaves()
+
+    await approve(user, HOPE)
+
+    expect(await screen.findByText('Request approved')).toBeInTheDocument()
+    expect(storedStatus('req-01')).toBe('APPROVED')
+  })
+})
+
+describe('Listing details (donor): a request the service still stores as Pending on a reserved listing', () => {
+  it('shows it Declined, with no Approve or Decline', async () => {
+    refusal.stalePending = true
+    renderDetails('lst-02')
+    await screen.findByRole('heading', { level: 3, name: AJEGUNLE })
+
+    expect(statusOf(AJEGUNLE)).toBe('Declined')
+    expect(screen.queryByRole('button', { name: /^Approve/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^Decline/ })).not.toBeInTheDocument()
+    expect(within(rowFor(HOPE)).getByRole('button', { name: `Mark as collected: ${HOPE}` })).toBeEnabled()
   })
 })

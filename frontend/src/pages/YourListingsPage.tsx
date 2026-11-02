@@ -1,5 +1,5 @@
 // /your-listings: the donor's own listings, newest first (spec S6), with a button to
-// share more food.
+// share more food. /your-listings?view=history shows the listing history.
 import { useNavigate } from 'react-router'
 import { PageContainer } from '@/components/common/PageContainer'
 import { PageHeader } from '@/components/common/PageHeader'
@@ -17,7 +17,7 @@ export function YourListingsPage() {
   return (
     <PageContainer>
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <PageHeader title={TITLE} description="Food you've shared, newest first. Open one to see its requests." />
+        <PageHeader title={TITLE} description="Food you've shared, newest first. Open one to see its requests; finished listings move to Listing history." />
         <Button onClick={() => void navigate(ROUTES.createListing)}>List surplus food</Button>
       </div>
       <YourListings />

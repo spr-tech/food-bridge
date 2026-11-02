@@ -1,7 +1,8 @@
 // Delete listing on the donor's Your listings rows and on Listing details: who is offered
 // it, the confirmation (Cancel deletes nothing), a confirmed delete (the listing leaves the
 // screen and the store, and the page goes back to that role's list), a refused one (the
-// dialog says so and the listing stays) and a 401 (the session ends).
+// dialog says so and the listing stays; a Reserved or Collected listing says why) and a
+// 401 (the session ends).
 // Seed, signed in as Mama's Oven: the wholewheat loaves (lst-01) and sausage rolls (lst-05)
 // are Available, the pastries (lst-02) Reserved, the meat pies (lst-03) Collected and the
 // Agege bread (lst-04) Expired; the jollof rice (lst-06) is Eko Caterers'.
@@ -72,15 +73,33 @@ describe('Your listings rows', () => {
     await screen.findByRole('link', { name: 'Sausage rolls' })
   })
 
-  it("offers delete on the donor's Available and Expired listings", () => {
+  it("offers delete on every one of the donor's current listings, Reserved included", () => {
     expect(deleteButton('Wholewheat bread loaves')).toBeInTheDocument()
     expect(deleteButton('Sausage rolls')).toBeInTheDocument()
+    expect(deleteButton('Assorted pastries')).toBeInTheDocument()
+  })
+
+  it('offers it on Collected and Expired listings in Listing history', async () => {
+    await userEvent.setup().click(screen.getByRole('tab', { name: /Listing history/ }))
+    expect(deleteButton('Meat pies')).toBeInTheDocument()
     expect(deleteButton('Agege bread')).toBeInTheDocument()
   })
 
-  it('does not offer it on Reserved or Collected listings', () => {
-    expect(deleteButton('Assorted pastries')).not.toBeInTheDocument()
-    expect(deleteButton('Meat pies')).not.toBeInTheDocument()
+  it("explains the service's refusal of a Reserved listing and keeps it", async () => {
+    const user = userEvent.setup()
+    const dialog = await confirmDelete(user, 'Assorted pastries')
+
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+      "A reserved listing can't be deleted, because a recipient is due to collect it.",
+    )
+    expect(stored()).toContain('lst-02')
+  })
+
+  it('does not say the listing is erased for good', async () => {
+    await userEvent.setup().click(deleteButton('Sausage rolls')!)
+    const dialog = await screen.findByRole('dialog', { name: 'Delete this listing?' })
+    expect(dialog).toHaveTextContent('Sausage rolls will be taken off FoodBridge')
+    expect(dialog).not.toHaveTextContent(/for good/)
   })
 
   it('asks first, with Cancel focused, and Cancel deletes nothing', async () => {
@@ -160,11 +179,15 @@ describe('Listing details', () => {
   })
 
   it.each([
-    ['lst-02', 'Assorted pastries'],
-    ['lst-03', 'Meat pies'],
-  ])("does not offer it on the donor's Reserved or Collected listing (%s)", async (id, foodName) => {
-    await openDetails('donor', id, foodName)
-    expect(deleteButton(foodName)).not.toBeInTheDocument()
+    ['lst-02', 'Assorted pastries', "A reserved listing can't be deleted"],
+    ['lst-03', 'Meat pies', "A collected listing can't be deleted"],
+  ])("offers it on the donor's Reserved or Collected listing (%s) and explains the refusal", async (id, foodName, why) => {
+    const { router } = await openDetails('donor', id, foodName)
+    const dialog = await confirmDelete(userEvent.setup(), foodName)
+
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent(why)
+    expect(router.state.location.pathname).toBe(listingDetailPath(id))
+    expect(db.getListing(ADMIN, id).id).toBe(id)
   })
 
   it("does not offer it on another donor's listing", async () => {

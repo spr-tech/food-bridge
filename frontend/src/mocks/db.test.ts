@@ -264,12 +264,14 @@ describe('deleting a listing', () => {
     expect(ADMIN_VIEW()).toEqual(expect.arrayContaining(['lst-05', 'lst-06']))
   })
 
-  it('lets an administrator delete any listing, whatever its status', () => {
+  it("lets an administrator delete any donor's listing, under the same status rule", () => {
     const admin = signInAs('admin')
-    db.deleteListing(admin, 'lst-02') // Reserved
     db.deleteListing(admin, 'lst-06') // another donor's
-    expect(ADMIN_VIEW()).not.toContain('lst-02')
     expect(ADMIN_VIEW()).not.toContain('lst-06')
+    // As the service: Reserved and Collected can't be deleted, by anyone.
+    expectError(() => db.deleteListing(admin, 'lst-02'), 409, 'LISTING_NOT_DELETABLE')
+    expectError(() => db.deleteListing(admin, 'lst-03'), 409, 'LISTING_NOT_DELETABLE')
+    expect(ADMIN_VIEW()).toContain('lst-02')
   })
 
   it('answers 404 for a listing that has already gone', () => {

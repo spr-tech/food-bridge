@@ -112,6 +112,12 @@ export function RecipientAction({ listing }: { listing: Listing }) {
           </p>
         )}
 
+        {listing.status === 'DELETED' && (
+          <p className={NOTE}>
+            The donor has removed this listing, so it can't be collected.
+          </p>
+        )}
+
         {displayStatus === 'PENDING' && (
           <CancelRequestButton
             requestId={myRequest.id}
@@ -157,6 +163,14 @@ export function RecipientAction({ listing }: { listing: Listing }) {
     return (
       <p className={NOTE}>
         The collection deadline has passed, so this listing can't be requested.
+      </p>
+    )
+  }
+
+  if (listing.status === 'DELETED') {
+    return (
+      <p className={NOTE}>
+        The donor has removed this listing, so it can't be requested.
       </p>
     )
   }

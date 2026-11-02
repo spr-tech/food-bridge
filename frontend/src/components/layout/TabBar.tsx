@@ -1,9 +1,10 @@
 // The mobile bottom navigation: permanently dark green,
-// with white links and a lighter green active tab.
-import { NavLink } from 'react-router'
+// with white links and a lighter green active tab. Like the sidebar, the current tab
+// (activeNavItem) also covers the pages opened from it.
+import { Link, useLocation } from 'react-router'
 import { NavIcon } from '@/components/layout/NavIcons'
 import type { NavCounts } from '@/components/layout/Sidebar'
-import type { NavItem } from '@/constants/roles'
+import { activeNavItem, type NavItem } from '@/constants/roles'
 
 type TabBarProps = {
   items: NavItem[]
@@ -11,6 +12,8 @@ type TabBarProps = {
 }
 
 export function TabBar({ items, counts }: TabBarProps) {
+  const active = activeNavItem(items, useLocation().pathname)
+
   return (
     <nav aria-label="Main">
       <ul className="fb-tabbar">
@@ -19,13 +22,17 @@ export function TabBar({ items, counts }: TabBarProps) {
 
           return (
             <li key={item.to}>
-              <NavLink to={item.to} end className="fb-tab">
+              <Link
+                to={item.to}
+                aria-current={item === active ? 'page' : undefined}
+                className="fb-tab"
+              >
                 <NavIcon name={item.icon} size={22} />
                 <span>
                   {item.label}
                   {count !== undefined && ` · ${count}`}
                 </span>
-              </NavLink>
+              </Link>
             </li>
           )
         })}

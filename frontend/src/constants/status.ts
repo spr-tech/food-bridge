@@ -20,4 +20,5 @@ export const LISTING_STATUS: Record<ListingStatus, StatusDisplay> = {
   RESERVED: { label: 'Reserved', tone: 'info' },
   COLLECTED: { label: 'Collected', tone: 'neutral' },
   EXPIRED: { label: 'Expired', tone: 'neutral' },
+  DELETED: { label: 'Deleted', tone: 'neutral' },
 }

@@ -45,6 +45,7 @@ const COLOURS: Record<string, BadgeColours> = {
   'listing:RESERVED': 'reserved',
   'listing:COLLECTED': 'expired',
   'listing:EXPIRED': 'expired',
+  'listing:DELETED': 'expired',
 }
 
 export function StatusBadge(props: StatusBadgeProps) {

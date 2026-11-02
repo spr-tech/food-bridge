@@ -19,7 +19,8 @@ export function mapBackendListing(dto: BackendListingResponse): Listing {
       ? 'AVAILABLE'
       : rawState === 'RESERVED' ||
           rawState === 'COLLECTED' ||
-          rawState === 'EXPIRED'
+          rawState === 'EXPIRED' ||
+          rawState === 'DELETED'
         ? rawState
         : 'AVAILABLE'
 
