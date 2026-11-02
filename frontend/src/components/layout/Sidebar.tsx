@@ -1,11 +1,12 @@
 // The desktop sidebar (768px and up, spec section 12).
 // It remains dark green permanently, with white navigation text.
 // There is no flood animation or theme transition when navigating.
+// The current link (activeNavItem) also covers the pages opened from it, such as a listing.
 import { useId } from 'react'
-import { NavLink } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { Logo } from '@/components/layout/Logo'
 import { ArchMark, NavIcon } from '@/components/layout/NavIcons'
-import { COMING_SOON, type NavItem } from '@/constants/roles'
+import { activeNavItem, COMING_SOON, type NavItem } from '@/constants/roles'
 
 export type NavCounts = Partial<Record<string, number>>
 
@@ -16,6 +17,7 @@ type SidebarProps = {
 
 export function Sidebar({ items, counts }: SidebarProps) {
   const comingSoonId = useId()
+  const active = activeNavItem(items, useLocation().pathname)
 
   return (
     <aside className="fb-side">
@@ -28,7 +30,11 @@ export function Sidebar({ items, counts }: SidebarProps) {
 
             return (
               <li key={item.to}>
-                <NavLink to={item.to} end className="fb-link">
+                <Link
+                  to={item.to}
+                  aria-current={item === active ? 'page' : undefined}
+                  className="fb-link"
+                >
                   <NavIcon name={item.icon} />
                   {item.label}
 
@@ -38,7 +44,7 @@ export function Sidebar({ items, counts }: SidebarProps) {
                       <span className="sr-only">, {count} pending</span>
                     </span>
                   )}
-                </NavLink>
+                </Link>
               </li>
             )
           })}

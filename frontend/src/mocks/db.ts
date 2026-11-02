@@ -489,8 +489,9 @@ export function updateListing(
   return toListing(db, listing, now)
 }
 
-// The owning donor while it is Available or Expired, or an administrator. Its requests
-// go with it.
+// The owning donor or an administrator, as the service: only while it is Available or
+// Expired (409 LISTING_NOT_DELETABLE once Reserved or Collected). Its requests go with
+// it here; the service keeps both (a soft delete).
 export function deleteListing(
   actor: Session | null,
   id: string,
@@ -500,7 +501,10 @@ export function deleteListing(
   const listing = findListing(db, id)
   const status = listingStatus(db, listing, new Date())
 
-  if (!canDeleteListing(deleter, { donorId: listing.donorId, status })) {
+  if (
+    !canDeleteListing(deleter, { donorId: listing.donorId, status }) ||
+    (status !== 'AVAILABLE' && status !== 'EXPIRED')
+  ) {
     if (deleter.role === 'admin' || listing.donorId === deleter.accountId) {
       throw new MockApiError(
         409,

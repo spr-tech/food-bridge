@@ -1,30 +1,36 @@
-// Who is offered Delete listing, for every role and listing status.
+// Who is offered Delete listing, and when a listing can be edited, for every role and
+// listing status.
 import { describe, expect, it } from 'vitest'
-import { canDeleteListing } from '@/lib/listing-permissions'
+import { canDeleteListing, isListingEditable } from '@/lib/listing-permissions'
 import type { Listing } from '@/types/api'
 
 const OWNER = '6b1f6c1e-3c43-4a59-9d1e-0d6c8a1f2b11'
 const OTHER = '0f3a9e52-7d1b-4f0e-8a2c-5b9d4e6f7a88'
-const STATUSES: Listing['status'][] = ['AVAILABLE', 'EXPIRED', 'RESERVED', 'COLLECTED']
+const LIVE: Listing['status'][] = ['AVAILABLE', 'EXPIRED', 'RESERVED', 'COLLECTED']
+const STATUSES: Listing['status'][] = [...LIVE, 'DELETED']
 
 const listing = (status: Listing['status']) => ({ donorId: OWNER, status })
 
 describe('canDeleteListing', () => {
-  it.each([
-    ['AVAILABLE', true],
-    ['EXPIRED', true],
-    ['RESERVED', false],
-    ['COLLECTED', false],
-  ] as const)('the owning donor, %s listing: %s', (status, expected) => {
-    expect(canDeleteListing({ role: 'donor', accountId: OWNER }, listing(status))).toBe(expected)
+  // The service refuses Reserved and Collected (409); the button still shows and says why.
+  it.each(LIVE)('the owning donor, %s listing: offered', (status) => {
+    expect(canDeleteListing({ role: 'donor', accountId: OWNER }, listing(status))).toBe(true)
+  })
+
+  it('the owning donor, DELETED listing: not offered', () => {
+    expect(canDeleteListing({ role: 'donor', accountId: OWNER }, listing('DELETED'))).toBe(false)
   })
 
   it.each(STATUSES)("another donor, %s listing: never", (status) => {
     expect(canDeleteListing({ role: 'donor', accountId: OTHER }, listing(status))).toBe(false)
   })
 
-  it.each(STATUSES)('an administrator, %s listing: always', (status) => {
+  it.each(LIVE)('an administrator, %s listing: offered', (status) => {
     expect(canDeleteListing({ role: 'admin', accountId: OTHER }, listing(status))).toBe(true)
+  })
+
+  it('an administrator, DELETED listing: not offered', () => {
+    expect(canDeleteListing({ role: 'admin', accountId: OTHER }, listing('DELETED'))).toBe(false)
   })
 
   it.each(STATUSES)('a recipient, %s listing: never', (status) => {
@@ -37,5 +43,17 @@ describe('canDeleteListing', () => {
 
   it('a listing with no donorId never matches a donor', () => {
     expect(canDeleteListing({ role: 'donor', accountId: '' }, { donorId: '', status: 'AVAILABLE' })).toBe(false)
+  })
+})
+
+describe('isListingEditable', () => {
+  it.each([
+    ['AVAILABLE', true],
+    ['RESERVED', false],
+    ['COLLECTED', false],
+    ['EXPIRED', false],
+    ['DELETED', false],
+  ] as const)('%s: %s', (status, expected) => {
+    expect(isListingEditable({ status })).toBe(expected)
   })
 })

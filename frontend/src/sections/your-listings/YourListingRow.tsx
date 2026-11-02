@@ -14,6 +14,7 @@ import {
 } from '@/constants/listingOptions'
 import { listingDetailPath } from '@/constants/routes'
 import { formatListingQuantity, formatPickup } from '@/lib/format'
+import { isListingEditable } from '@/lib/listing-permissions'
 import type { Listing } from '@/types/api'
 
 function waitingText(count: number): string | null {
@@ -34,6 +35,9 @@ function editUnavailableMessage(status: Listing['status']): string {
 
     case 'EXPIRED':
       return 'This listing has expired and can no longer be edited.'
+
+    case 'DELETED':
+      return 'This listing has been deleted.'
 
     default:
       return 'Only available listings can be edited.'
@@ -61,12 +65,14 @@ function EditIcon() {
 }
 
 export function YourListingRow({ listing }: { listing: Listing }) {
-  const waiting = waitingText(listing.pendingRequestCount)
+  // Requests only wait for a decision while the listing is Available; the service can
+  // still count leftover Pending ones on a reserved or finished listing.
+  const waiting = listing.status === 'AVAILABLE' ? waitingText(listing.pendingRequestCount) : null
   const detailPath = listingDetailPath(listing.id)
   const editPath = `${detailPath}/edit`
 
-  const canEdit =
-    String(listing.status).toUpperCase() === 'AVAILABLE'
+  // Edit only while it can be edited; otherwise the line under the details says why.
+  const canEdit = isListingEditable(listing)
 
   const unavailableMessage = canEdit
     ? null
@@ -91,7 +97,7 @@ export function YourListingRow({ listing }: { listing: Listing }) {
           </h2>
 
           <div className="relative z-10 flex shrink-0 items-center gap-2">
-            {canEdit ? (
+            {canEdit && (
               <Link
                 to={editPath}
                 aria-label={`Edit ${listing.foodName}`}
@@ -100,16 +106,6 @@ export function YourListingRow({ listing }: { listing: Listing }) {
               >
                 <EditIcon />
               </Link>
-            ) : (
-              <button
-                type="button"
-                disabled
-                aria-label={`Editing unavailable for ${listing.foodName}`}
-                title={unavailableMessage ?? 'Editing unavailable'}
-                className="inline-flex size-8 cursor-not-allowed items-center justify-center rounded-lg border border-border bg-surface text-text-muted opacity-50"
-              >
-                <EditIcon />
-              </button>
             )}
 
             <DeleteListingButton listing={listing} variant="icon" />

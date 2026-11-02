@@ -18,6 +18,7 @@ export type BackendListingState =
   | 'COLLECTED'
   | 'REVERSED'
   | 'EXPIRED'
+  | 'DELETED'
 
 export type BackendRequestState =
   | 'PENDING'
