@@ -26,6 +26,7 @@ export type BackendRequestState =
   | 'DECLINED'
   | 'CANCELLED'
   | 'EXPIRED'
+  | 'REVERSED'
 
 export type BackendFoodCategory =
   | 'PREPARED_MEALS'

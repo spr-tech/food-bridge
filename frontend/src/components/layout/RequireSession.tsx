@@ -1,12 +1,13 @@
 // Route guards (spec section 2).
 // RequireSession: a signed-out user is sent to /sign-in, with the page they wanted in
 // ?next=, so signing in brings them back (sign-in follows it only if the role may open
-// that page). After Sign out there is no ?next=. Signed in, it renders the app frame
+// that page). After Sign out there is no ?next=. When the service refused the token
+// (services/api.ts), sign in also says "Your session ended". Signed in, it renders the app frame
 // while useSessionCheck confirms the stored session with the service.
 // RequireRole: a page for another role shows the spec's 403 message (section 4) inside
 // the frame. Hiding pages is convenience only; the service decides who can do what.
 import { Link, Navigate, Outlet, useLocation } from 'react-router'
-import { useSession, wasSignedOut } from '@/app/session'
+import { useSession, wasExpired, wasSignedOut } from '@/app/session'
 import { PageHeader } from '@/components/common/PageHeader'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { homePathFor } from '@/constants/roles'
@@ -24,7 +25,8 @@ export function RequireSession() {
     // Signed out on purpose: no ?next=, so the next person starts on their own home page.
     if (wasSignedOut()) return <Navigate to={ROUTES.signIn} replace />
     const next = encodeURIComponent(`${location.pathname}${location.search}`)
-    return <Navigate to={`${ROUTES.signIn}?next=${next}`} replace />
+    const reason = wasExpired() ? 'reason=session-ended&' : ''
+    return <Navigate to={`${ROUTES.signIn}?${reason}next=${next}`} replace />
   }
   return <AppLayout session={session} />
 }

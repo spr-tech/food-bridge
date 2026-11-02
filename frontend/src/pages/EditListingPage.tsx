@@ -26,6 +26,9 @@ function unavailableMessage(status: string): string {
     case 'EXPIRED':
       return 'The collection deadline has passed. This listing can no longer be edited.'
 
+    case 'REVERSED':
+      return "This listing's handover was reversed. The listing can no longer be edited."
+
     default:
       return 'Only available listings can be edited.'
   }

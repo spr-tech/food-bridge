@@ -13,12 +13,14 @@ export const REQUEST_STATUS: Record<RequestStatus, StatusDisplay> = {
   DECLINED: { label: 'Declined', tone: 'neutral' },
   EXPIRED: { label: 'Expired', tone: 'neutral' },
   CANCELLED: { label: 'Cancelled', tone: 'neutral' },
+  REVERSED: { label: 'Not collected', tone: 'neutral' },
 }
 
 export const LISTING_STATUS: Record<ListingStatus, StatusDisplay> = {
   AVAILABLE: { label: 'Available', tone: 'success' },
   RESERVED: { label: 'Reserved', tone: 'info' },
   COLLECTED: { label: 'Collected', tone: 'neutral' },
+  REVERSED: { label: 'Not collected', tone: 'neutral' },
   EXPIRED: { label: 'Expired', tone: 'neutral' },
   DELETED: { label: 'Deleted', tone: 'neutral' },
 }

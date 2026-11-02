@@ -175,5 +175,13 @@ export function RecipientAction({ listing }: { listing: Listing }) {
     )
   }
 
+  if (listing.status === 'REVERSED') {
+    return (
+      <p className={NOTE}>
+        This listing's handover was reversed, so it can't be requested.
+      </p>
+    )
+  }
+
   return null
 }

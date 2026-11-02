@@ -9,7 +9,7 @@ import { Provider } from 'react-redux'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { makeStore } from '@/app/store'
 import { pickupAreaValue } from '@/constants/listingOptions'
-import { useListings } from '@/services/listings'
+import { useListings, useMyListings } from '@/services/listings'
 import { signInAs } from '@/test/render'
 import type { ListingFilters } from '@/types/api'
 
@@ -150,5 +150,45 @@ describe('Find food filters (live service)', () => {
     expect(result.current.data!.total).toBe(119)
     expect(urls()).toHaveLength(1)
     expect(urls()[0].searchParams.get('limit')).toBe('12')
+  })
+
+  it('reads "Load more" past 100 listings in pages, never asking for more than 100', async () => {
+    // The ninth "Load more" (12 at a time) asks for 108.
+    const { result } = load({ status: 'AVAILABLE', limit: 108 })
+
+    await waitFor(() => expect(result.current.data).toBeDefined())
+    expect(result.current.isError).toBe(false)
+    expect(result.current.data!.items).toHaveLength(108)
+    expect(result.current.data!.total).toBe(119)
+    expect(urls().map((url) => Object.fromEntries(url.searchParams))).toEqual([
+      { availability: 'AVAILABLE', offset: '0', limit: '100' },
+      { availability: 'AVAILABLE', offset: '100', limit: '8' },
+    ])
+  })
+
+  it('shows everything when "Load more" asks for more than there is', async () => {
+    const { result } = load({ status: 'all', limit: 132 })
+
+    await waitFor(() => expect(result.current.data).toBeDefined())
+    expect(result.current.data!.items).toHaveLength(120)
+    expect(result.current.data!.total).toBe(120)
+    expect(urls().every((url) => Number(url.searchParams.get('limit')) <= 100)).toBe(true)
+  })
+})
+
+describe("a donor's own listings (live service)", () => {
+  it('reads every page, so more than 100 listings all show', async () => {
+    signInAs('donor')
+    const store = makeStore()
+    const { result } = renderHook(() => useMyListings(), {
+      wrapper: ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>,
+    })
+
+    await waitFor(() => expect(result.current.data).toBeDefined())
+    expect(result.current.data).toHaveLength(120)
+    expect(urls().map((url) => Object.fromEntries(url.searchParams))).toEqual([
+      { mine: 'true', offset: '0', limit: '100' },
+      { mine: 'true', offset: '100', limit: '100' },
+    ])
   })
 })

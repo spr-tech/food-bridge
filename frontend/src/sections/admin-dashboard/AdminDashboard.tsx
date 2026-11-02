@@ -1,6 +1,5 @@
 // The administrator's dashboard (brief journey 5): open listings, requests waiting,
 // reserved, completed handovers, expired, and an estimate of food saved.
-// Some figures and destinations remain unavailable until the backend contract is updated.
 // Below them: the listing pipeline and the share collected (both from GET
 // /api/admin/dashboard), today's progress through the daily fairness rule (GET
 // /api/admin/distribution/today) and recent activity (GET /api/activity). Each part loads
@@ -439,32 +438,39 @@ function ShareRing({ summary }: { summary: AdminDashboardSummary }) {
   )
 }
 
-// The figures the backend doesn't yet supply in a confirmed form.
+// Expired listings and the estimate of food saved, both from GET /api/admin/dashboard.
 function MoreFigures() {
-  const figures = [
+  const dashboard = useAdminDashboard()
+  const summary = dashboard.data
+
+  const figures = summary && [
     {
       label: 'Expired',
-      value: '—',
-      hint: 'Waiting for an explicit expired-listings count from the backend',
+      value: summary.expiredListings.toLocaleString('en-GB'),
+      hint: 'Listings whose collection deadline passed before anyone collected them',
     },
     {
       label: 'Food saved (estimate)',
-      value: '—',
-      hint: 'Waiting for a complete portions-saved estimate from the backend',
+      value: `${summary.estimatedPortionsSaved.toLocaleString('en-GB')} portions`,
+      hint: "Portions in completed handovers. Food listed in kg, litres, items or boxes isn't counted.",
     },
   ]
 
   return (
-    <Panel eyebrow="Awaiting the backend" title="More figures">
-      <ul className="flex flex-col gap-3">
-        {figures.map((figure) => (
-          <li key={figure.label} className="rounded-2xl bg-cream p-4">
-            <p className="text-sm font-semibold text-muted-on-cream">{figure.label}</p>
-            <p className="mt-1 font-display text-3xl leading-none text-text">{figure.value}</p>
-            <p className="mt-2 text-[13px] leading-snug text-muted-on-cream">{figure.hint}</p>
-          </li>
-        ))}
-      </ul>
+    <Panel eyebrow="Listings" title="More figures">
+      {figures ? (
+        <ul className="flex flex-col gap-3">
+          {figures.map((figure) => (
+            <li key={figure.label} className="rounded-2xl bg-cream p-4">
+              <p className="text-sm font-semibold text-muted-on-cream">{figure.label}</p>
+              <p className="mt-1 font-display text-3xl leading-none text-text">{figure.value}</p>
+              <p className="mt-2 text-[13px] leading-snug text-muted-on-cream">{figure.hint}</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <SummaryPending loading={dashboard.isLoading} />
+      )}
     </Panel>
   )
 }

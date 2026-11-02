@@ -30,6 +30,46 @@ describe('backend response adapters', () => {
     })
   })
 
+  it.each(['AVAILABLE', 'RESERVED', 'COLLECTED', 'REVERSED', 'EXPIRED', 'DELETED'])(
+    'keeps the service listing status %s',
+    (status) => {
+      const listing = mapBackendListing({
+        id: 'listing-1',
+        foodName: 'Fresh bread',
+        description: 'Unsold loaves',
+        category: 'BAKERY',
+        quantity: 12,
+        unit: 'ITEMS',
+        imageReference: null,
+        pickupArea: 'yaba',
+        collectionDeadline: '2026-10-31T16:00:00+01:00',
+        status,
+        donorId: 'donor-1',
+        donorName: "Mama's Oven",
+        createdAt: '2026-10-30T10:00:00Z',
+        pendingRequestCount: 0,
+      })
+
+      expect(listing.status).toBe(status)
+    },
+  )
+
+  it.each(['PENDING', 'APPROVED', 'DECLINED', 'CANCELLED', 'EXPIRED', 'REVERSED'] as const)(
+    'keeps the service request status %s',
+    (status) => {
+      const request = mapBackendRequest({
+        id: 'request-1',
+        listingId: 'listing-1',
+        recipientId: 'recipient-1',
+        recipientName: 'Hope Shelter',
+        status,
+        createdAt: '2026-10-30T10:00:00Z',
+      })
+
+      expect(request.status).toBe(status)
+    },
+  )
+
   it('extracts a Cloudinary URL from common upload response fields', () => {
     expect(extractImageReference({ secure_url: 'https://res.cloudinary.com/demo/food.jpg' }))
       .toBe('https://res.cloudinary.com/demo/food.jpg')

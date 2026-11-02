@@ -6,6 +6,7 @@
 // 1024px up, the welcome panel fills the left half; below that, only the logo shows.
 // On short windows (laptops with Windows display scaling) the spacing tightens, so the
 // whole page fits at 100% zoom.
+import { useEffect } from 'react'
 import { Navigate, useSearchParams } from 'react-router'
 import { canOpen } from '@/app/routes'
 import { useSession } from '@/app/session'
@@ -13,6 +14,7 @@ import { DemoBanner } from '@/components/layout/DemoBanner'
 import { homePathFor } from '@/constants/roles'
 import { ROUTES } from '@/constants/routes'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { wakeService } from '@/services/api'
 import { SignInForm } from '@/sections/sign-in/SignInForm'
 import { SignInPanelDesktop, SignInPanelPhone } from '@/sections/sign-in/SignInPanel'
 import type { Role } from '@/types/role'
@@ -28,6 +30,9 @@ export function SignInPage() {
   useDocumentTitle('Sign in')
   const session = useSession()
   const [params] = useSearchParams()
+
+  // Start waking the service while the user types (services/api.ts).
+  useEffect(() => wakeService(), [])
 
   if (session) {
     return <Navigate to={safeNext(params.get('next'), session.role) ?? homePathFor(session.role)} replace />

@@ -17,6 +17,10 @@ let cachedSession: Session | null = null
 // can still render once without a session; this tells RequireSession not to add ?next=.
 let signedOut = false
 
+// Set when the service refuses the stored token (a 401 from any call but sign-in), until
+// the next sign-in. RequireSession then sends the user to sign in with "Your session ended".
+let expired = false
+
 function readRaw(): string | null {
   try {
     return sessionStorage.getItem(SESSION_STORAGE_KEY)
@@ -44,6 +48,7 @@ function notify() {
 
 export function saveSession(session: Session) {
   signedOut = false
+  expired = false
   try {
     sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session))
   } catch {
@@ -52,8 +57,9 @@ export function saveSession(session: Session) {
   notify()
 }
 
-function endSession(onPurpose: boolean) {
+function endSession(onPurpose: boolean, refused = false) {
   signedOut = onPurpose
+  expired = refused
   try {
     sessionStorage.removeItem(SESSION_STORAGE_KEY)
   } catch {
@@ -67,6 +73,12 @@ export function clearSession() {
   endSession(false)
 }
 
+// The service refused the stored token (services/api.ts): the session ends as for a 401
+// a screen handles, wherever it happened.
+export function expireSession() {
+  endSession(false, true)
+}
+
 // The user signed out.
 export function signOutSession() {
   endSession(true)
@@ -74,6 +86,10 @@ export function signOutSession() {
 
 export function wasSignedOut(): boolean {
   return signedOut
+}
+
+export function wasExpired(): boolean {
+  return expired
 }
 
 function subscribe(listener: () => void) {

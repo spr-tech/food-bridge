@@ -37,6 +37,9 @@ function failureMessage(status: number | string | undefined, listingStatus: List
       if (listingStatus === 'COLLECTED') {
         return "A collected listing can't be deleted. It stays in your listing history as a record of the handover."
       }
+      if (listingStatus === 'REVERSED') {
+        return "A listing whose handover was reversed can't be deleted. It stays in your listing history as a record of the handover."
+      }
       return 'This listing can no longer be deleted. It may have just been reserved.'
     default:
       return "The listing wasn't deleted. Check your connection and try again."

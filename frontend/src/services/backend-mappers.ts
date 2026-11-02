@@ -31,15 +31,15 @@ export function mapBackendActivity(dto: BackendActivityResponse): ActivityEntry 
 export function mapBackendListing(dto: BackendListingResponse): Listing {
   const rawState = asString(dto.status, 'AVAILABLE').toUpperCase()
 
+  // REVERSED stays REVERSED: the service won't let it be requested, edited or deleted.
   const status: Listing['status'] =
-    rawState === 'REVERSED'
-      ? 'AVAILABLE'
-      : rawState === 'RESERVED' ||
-          rawState === 'COLLECTED' ||
-          rawState === 'EXPIRED' ||
-          rawState === 'DELETED'
-        ? rawState
-        : 'AVAILABLE'
+    rawState === 'RESERVED' ||
+    rawState === 'COLLECTED' ||
+    rawState === 'REVERSED' ||
+    rawState === 'EXPIRED' ||
+    rawState === 'DELETED'
+      ? rawState
+      : 'AVAILABLE'
 
   return {
     id: asString(dto.id),
@@ -126,6 +126,7 @@ export function mapBackendRequest(
     'DECLINED',
     'CANCELLED',
     'EXPIRED',
+    'REVERSED',
   ].includes(rawState)
     ? rawState as ListingRequest['status']
     : rawState === 'COLLECTED' || rawState === 'COMPLETED'

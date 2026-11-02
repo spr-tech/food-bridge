@@ -28,6 +28,14 @@ function isSuccessfullyCollected(request: ListingRequest): boolean {
   )
 }
 
+// An approval whose handover was later reversed: nothing more will happen to it.
+function wasReversed(request: ListingRequest): boolean {
+  return (
+    request.status === 'APPROVED' &&
+    request.listing.status === 'REVERSED'
+  )
+}
+
 function isOpenRequest(request: ListingRequest): boolean {
   const status = getRecipientRequestStatus(
     request.status,
@@ -36,20 +44,13 @@ function isOpenRequest(request: ListingRequest): boolean {
 
   return (
     !isSuccessfullyCollected(request) &&
+    !wasReversed(request) &&
     (status === 'PENDING' || status === 'APPROVED')
   )
 }
 
 function isHistoryRequest(request: ListingRequest): boolean {
-  const status = getRecipientRequestStatus(
-    request.status,
-    request.listing.status,
-  )
-
-  return (
-    isSuccessfullyCollected(request) ||
-    (status !== 'PENDING' && status !== 'APPROVED')
-  )
+  return !isOpenRequest(request)
 }
 
 function RequestList({ requests }: { requests: ListingRequest[] }) {

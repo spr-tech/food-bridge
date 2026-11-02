@@ -129,7 +129,7 @@ npm run build
 2. Publish a surplus-food listing (`/listings/new`).
 3. View and manage the donor's listings. Your listings has two tabs: **Your listings** (Available and Reserved) and **Listing history** (Collected and Expired), kept in the address as `?view=history`. A listing can be edited (`/listings/:id/edit`) only while it is **Available**: the Edit button only appears then, and the edit page explains why if opened directly.
 4. Delete a listing (with confirmation) from its row or its details page. Delete is disabled, with the reason, on Collected listings; the backend refuses Reserved ones and the dialog says why.
-5. Review recipient requests on the listing's details page, or on Requests (`/requests`), which currently lists every listing with pending requests and its requests panel.
+5. Review recipient requests on the listing's details page, or on Requests (`/requests`), which lists every **Available** listing with requests waiting, each with its requests panel. A listing leaves Requests once a request on it is approved.
 6. Approve or decline a request. Approving asks for confirmation, updates the panel straight away (optimistic update) and rolls back if the service refuses. Approve and Decline show only while the listing is Available with no approved request.
 7. Record the handover with **Mark as collected** on the approved request of a Reserved listing (`PATCH /api/requests/{requestId}/collected`). The listing then shows Collected and moves to Listing history.
 
@@ -142,7 +142,7 @@ npm run build
 6. Track requests on Your requests (`/your-requests`), split into **Open requests** and **Request history**, and cancel a request while it is genuinely pending.
 
 ### Administrator
-Administrators land on the Dashboard (`/admin`), which shows summary counts from the backend, and can browse All listings (`/listings`) without request buttons, and delete a listing from its details page (disabled on Collected listings). Under the capstone brief administrators monitor activity and may edit listings and update handover status; the interface does not offer those administrator actions yet. Donors make the decision to approve or decline recipient requests.
+Administrators land on the Dashboard (`/admin`): summary counts from the backend, the listing pipeline, the share of listings collected, today's distribution and recent activity. The **Completed handovers** card opens Completed handovers (`/admin/handovers`, also in the menu as Handovers), which lists every Collected listing with its donor, recipient, quantity and, when recorded, its collection time. Administrators can also browse All listings (`/listings`) without request buttons, and delete a listing from its details page (disabled on Collected listings). Under the capstone brief administrators monitor activity and may edit listings and update handover status; the interface does not offer those administrator actions yet. Donors make the decision to approve or decline recipient requests.
 
 ## Business rules shown in the interface
 
@@ -151,28 +151,30 @@ Administrators land on the Dashboard (`/admin`), which shows summary counts from
 - A listing has at most one approved request. The donor's panel shows the approved request first.
 - A recipient can cancel only their own request, and only while it is genuinely pending (see the status table below).
 - Expired listings accept no requests.
-- Delete: owning donor or administrator; disabled on Collected listings (`deleteBlockedReason` in `src/lib/listing-permissions.ts`). The backend deletes only Available and Expired listings (409 `LISTING_NOT_DELETABLE` otherwise) and keeps them as a record, so the dialog says "taken off FoodBridge", not "deleted for good".
+- Delete: owning donor or administrator; disabled on Collected listings and on listings whose handover was reversed (`deleteBlockedReason` in `src/lib/listing-permissions.ts`). The backend deletes only Available and Expired listings (409 `LISTING_NOT_DELETABLE` otherwise) and keeps them as a record, so the dialog says "taken off FoodBridge", not "deleted for good".
 - Daily fairness rule (backend): a recipient who already has an approval today (Lagos time) can't be approved again while another recipient has none (409 `DAILY_DISTRIBUTION_PRIORITY`). The donor's panel explains the refusal and disables Approve for that organisation for the rest of the visit; Decline stays available.
 
 The backend is the authority for every rule. The frontend checks are for clarity and speed, not security.
 
 ## Request status display
 
-The backend stores a status on each request (`PENDING`, `APPROVED`, `DECLINED`, `CANCELLED`, `EXPIRED`) and on each listing (`AVAILABLE`, `RESERVED`, `COLLECTED`, `EXPIRED`, `DELETED`; `REVERSED` is read as Available). What a recipient sees is derived from both by `getRecipientRequestStatus` in `src/lib/request-status.ts`, used by `src/sections/listing-details/RecipientAction.tsx`, `src/sections/your-requests/RequestItem.tsx` and `src/sections/your-requests/YourRequests.tsx`.
+The backend stores a status on each request (`PENDING`, `APPROVED`, `DECLINED`, `CANCELLED`, `EXPIRED`, `REVERSED`) and on each listing (`AVAILABLE`, `RESERVED`, `COLLECTED`, `REVERSED`, `EXPIRED`, `DELETED`). Reversing a handover now sets the request to `REVERSED` and reopens the listing as `AVAILABLE`; a listing stored as `REVERSED` comes only from reversals made before that change. Both `REVERSED` statuses show as "Not collected". What a recipient sees is derived from both by `getRecipientRequestStatus` in `src/lib/request-status.ts`, used by `src/sections/listing-details/RecipientAction.tsx`, `src/sections/your-requests/RequestItem.tsx` and `src/sections/your-requests/YourRequests.tsx`.
 
 | Stored request | Listing | Recipient sees | Where on Your requests | Can cancel? |
 |---|---|---|---|---|
 | Pending | Available | Pending | Open requests | Yes |
 | Pending | Reserved | Declined ("Another organisation's request was approved…" on listing details) | Request history | No |
 | Pending | Collected | Declined | Request history | No |
-| Pending | Expired | Expired | Request history | No |
+| Pending | Expired, Deleted or Reversed | Expired | Request history | No |
 | Approved | Reserved | Approved, with pickup details | Open requests | No |
 | Approved | Collected | Collected (listing badge) | Request history | No |
+| Approved | Reversed | Approved | Request history | No |
+| Reversed | any | Not collected | Request history | No |
 | Declined, Cancelled, Expired | any | As stored | Request history | No |
 
 The helper itself returns the request status (`APPROVED`); the Collected badge for an approved request on a collected listing is chosen by the components.
 
-**This is a display fallback only.** It does not change the stored status of the losing request. The deployed backend leaves competing requests `PENDING` after another is approved (observed 2 November 2026); it should store them as `DECLINED`. The simulated data layer (`src/mocks/db.ts`) does store them as `DECLINED`.
+**This is a display fallback only.** It does not change the stored status of the losing request. Since backend PR #40 (deployed 2 November 2026), approving a request stores the listing's other pending requests as `DECLINED`. Requests approved before that change, and requests left on a listing that was deleted or expired, can still be stored as `PENDING`, so the fallback stays. The simulated data layer (`src/mocks/db.ts`) also stores them as `DECLINED`.
 
 A listing deleted by its donor shows "Deleted" and the note "The donor has removed this listing…" to a recipient who had requested it.
 
@@ -181,7 +183,7 @@ A listing deleted by its donor shows "Deleted" and the note "The donor has remov
 In `src/sections/listing-details/RequestsPanel.tsx` and `RequestRow.tsx`:
 
 - Approve and Decline are shown only while the listing is Available **and** no request on it is Approved.
-- A pending request is displayed as Declined when another request is approved or the listing is Reserved or Collected, and as Expired when the listing is Expired. Again this is display only.
+- A pending request is displayed as Declined when another request is approved or the listing is Reserved, Collected or Reversed, and as Expired when the listing is Expired. Again this is display only. Approving still updates the panel straight away, marking the other pending requests Declined, without waiting for the service.
 - The approve dialog's "The other [n] pending requests will be declined." counts only requests that can still be decided.
 - After a `DAILY_DISTRIBUTION_PRIORITY` refusal, that organisation's Approve is shown disabled with the reason; Decline stays.
 
@@ -219,31 +221,39 @@ Every endpoint checks `env.useMocks` first and calls the simulated store in `src
 
 | Purpose | Endpoint | Hook |
 |---|---|---|
-| Sign in | `POST /api/auth/login` | `useSignIn` |
-| Browse listings | `GET /api/listings` (`category`, `availability`, `offset`, `limit` up to 100); see "Find food filtering" below | `useListings` |
-| Donor's own listings | `GET /api/listings?mine=true` | `useMyListings` |
+| Sign in | `POST /api/auth/login` (90-second timeout) | `useSignIn` |
+| Wake the service | `GET /api/listings?limit=1`, once, when sign in opens; the reply is ignored | `wakeService` |
+| Browse listings | `GET /api/listings` (`category`, `availability`, `offset`, `limit` up to 100; "Load more" past 100 is read in pages); see "Find food filtering" below | `useListings` |
+| Donor's own listings | `GET /api/listings?mine=true`, every page | `useMyListings` |
 | Listing details | `GET /api/listings/{listingId}` | `useListing` |
 | Create listing | `POST /api/listings` (sends an `Idempotency-Key` header) | `useCreateListing` |
 | Edit listing | `PUT /api/listings/{listingId}` | `useUpdateListing` |
 | Delete listing | `DELETE /api/listings/{listingId}` (204 No Content) | `useDeleteListing` |
-| Upload photo | `POST /api/listings/images` (multipart field `file`) | `useUploadListingImage` |
+| Upload photo | `POST /api/listings/images` (multipart field `file`, compressed first; see below) | `useUploadListingImage` |
 | Request food | `POST /api/listings/{listingId}/requests` (`Idempotency-Key`, no body) | `useCreateRequest` |
 | Requests on a listing | `GET /api/listings/{listingId}/requests` | `useListingRequests` |
 | Recipient's requests | `GET /api/requests?mine=true`, then `GET /api/listings/{listingId}` for each request | `useMyRequests` |
 | Approve / decline | `PATCH /api/requests/{requestId}/approve` / `decline` | `useDecideRequest` |
 | Cancel | `POST /api/requests/{requestId}/cancel` | `useCancelRequest` |
-| Mark collected | `PATCH /api/requests/{requestId}/collected` (reply ignored; data refetched) | `useMarkCollected` |
+| Mark collected | `PATCH /api/requests/{requestId}/collected` (reply, including `handoverId`, ignored; data refetched) | `useMarkCollected` |
 | Admin dashboard | `GET /api/admin/dashboard` | `useAdminDashboard` |
+| Today's distribution | `GET /api/admin/distribution/today` | `useDistributionToday` |
+| Recent activity | `GET /api/activity?limit=10` | `useRecentActivity` |
+| Completed handovers | `GET /api/listings?availability=COLLECTED` (every page), `GET /api/admin/requests` (every page) and `GET /api/activity?limit=100`, joined in `joinCompletedHandovers` | `useCompletedHandovers` |
 
-Documented by the backend but **not called** by the frontend: `GET /api/auth/me`, `GET /api/requests/{requestId}`, `GET /api/admin/requests`, `GET /api/admin/distribution/today`, `GET /api/activity` and `PATCH /api/handovers/{handoverId}/reverse`.
+Documented by the backend but **not called** by the frontend: `GET /api/requests/{requestId}` and `PATCH /api/handovers/{handoverId}/reverse`.
 
 **Find food filtering** (`src/services/listings.ts`, `src/lib/listing-search.ts`). The backend's `pickupArea` filter matches only the exact stored text, and its `keyword` search covers only the food name and description. So with no search and no area, the frontend sends the filters and lets the backend page the results. With a search or an area, it sends only `availability` and `category`, reads every page (100 at a time, using `X-Total-Count`), and matches the area and the search (food name, description, donor, area and category) itself.
 
-Headers: every request sends `Authorization: Bearer <token>` when signed in, and an `X-Request-Id` UUID (see the contradiction noted in `../docs/decisions.md`, 2026-10-31). Requests time out after 45 seconds.
+Headers: every request sends `Authorization: Bearer <token>` when signed in, and an `X-Request-Id` UUID (see the contradiction noted in `../docs/decisions.md`, 2026-10-31). Requests time out after 45 seconds, sign-in after 90, because a sleeping service can take up to a minute to wake. While signing in, the form shows "Hang tight, we're getting things ready for you." and, after five seconds, explains that FoodBridge is waking up.
+
+**Ending a session.** The backend's tokens last 30 minutes and are lost whenever the service restarts. Any 401 (except a refused sign-in) goes through the base query in `src/services/api.ts`, which ends the session; `RequireSession` then sends the user to sign in with "Your session ended. Sign in again." and `?next=` back to the page. A late 401 for an earlier account never ends a newer session.
+
+**Request errors.** Screens choose their own plain wording from the status and code, never the backend's message. Requesting food handles `409 LISTING_ALREADY_RESERVED`, `404 LISTING_NOT_FOUND`, `403 FORBIDDEN` and `409 LISTING_EXPIRED` with a message and no Try again, since retrying can't change them; only an unreachable service offers Try again. `ALREADY_REQUESTED` is handled for when the backend adds it.
 
 **Request enrichment.** `GET /api/requests?mine=true` returns request fields only. To show the food, donor, area, photo and listing status on Your requests, `getMyRequests` fetches each request's listing and passes it to `mapBackendRequest`. If a listing can't be fetched, the request falls back to placeholder text ("Food listing", "Food donor") and listing status Available. These extra calls can be removed once the backend returns an enriched response.
 
-**Status mapping** (`src/services/backend-mappers.ts`): listing `REVERSED` and unknown values become `AVAILABLE`, and `DELETED` is kept; request `COLLECTED` or `COMPLETED` become `APPROVED` (the listing carries Collected); unknown request values become `PENDING`.
+**Status mapping** (`src/services/backend-mappers.ts`): known listing statuses, `REVERSED` and `DELETED` included, are kept and unknown ones become `AVAILABLE`; known request statuses, `REVERSED` included, are kept, `COLLECTED` or `COMPLETED` become `APPROVED` (the listing carries Collected), and unknown ones become `PENDING`.
 
 **Pickup area mapping.** `pickupAreaValue` (`src/constants/listingOptions.ts`) turns a stored area that starts with a known area into that option, so "Surulere, Lagos - …" shows, filters and edits as Surulere. Text that starts with no known area is kept as it is.
 
@@ -252,7 +262,7 @@ Headers: every request sends `Authorization: Bearer <token>` when signed in, and
 ### Listing photos and Cloudinary
 
 1. The donor chooses a JPG or PNG of 5 MB or less (validated by `src/schema/listingSchema.ts`).
-2. On submit, the photo is uploaded first with `POST /api/listings/images`. The backend stores it in Cloudinary.
+2. On submit, the photo is compressed and uploaded with `POST /api/listings/images`. The backend accepts at most 1 MB (Spring's default; no larger limit is configured), so `compressPhoto` (`src/lib/photo.ts`) sends a photo already under 900 KB unchanged, and otherwise redraws it as a JPEG of at most 1600 px, lowering the quality and then the size until it is under 900 KB. If the browser can't redraw it, the photo is sent as chosen. The backend stores it in Cloudinary.
 3. `extractImageReference` takes the image URL from the reply: a plain URL string, or the first `http(s)` URL found under `imageReference`, `imageUrl`, `url`, `secure_url`, `secureUrl` or `location`, then any other property (nested objects included). The deployed backend was observed replying `{ "imageUrl": "https://res.cloudinary.com/…" }` (2 November 2026).
 4. The listing is created or updated with that URL as `imageReference`. When editing without choosing a new photo, the existing URL is kept.
 5. If the upload fails, the form shows "Your photo couldn't be uploaded. Please try again." and the listing is not saved.
@@ -286,24 +296,24 @@ Do not commit secrets or local `.env` files.
 
 Tests sit next to the code they test (`*.test.ts` / `*.test.tsx`) and run with `npm test` (Vitest, jsdom). Most use the simulated data layer. Files named `*.live.test.tsx` switch mocks off and stub `fetch` to imitate the backend, to test the live code paths; no test calls the deployed backend. Helpers live in `src/test/` (`render.tsx` renders a route signed in as a demo account; `mockDb.ts` changes the simulated data).
 
-Current coverage includes: sign-in and redirects, layout and session guards, the highlighted menu link on sub-pages, form components, the listing schema (including the required description), Share food and its service errors, Find food and its live filtering, both listing-details views (including the donor's optimistic approve, conflict and offline rollback, the fairness refusal and Mark as collected), Your listings and Listing history, deleting listings, navigation counts, the simulated store's rules, backend mappers, formatting and deadlines, and the landing page.
+Current coverage includes: sign-in and redirects (including the waiting message and the 90-second sign-in timeout), layout and session guards, ending the session on a 401, the donor's Requests page, request-creation errors, photo compression and upload, the highlighted menu link on sub-pages, form components, the listing schema (including the required description), Share food and its service errors, Find food and its live filtering, both listing-details views (including the donor's optimistic approve, conflict and offline rollback, the fairness refusal and Mark as collected), Your listings and Listing history, deleting listings, navigation counts, the simulated store's rules, backend mappers (including `REVERSED` and `DELETED`), recipient request status and the Open requests / Request history split, the administrator dashboard, formatting and deadlines, and the landing page.
 
-Not yet covered by dedicated tests: `src/lib/request-status.ts`, the Open requests / Request history split on Your requests, the Edit listing page and its status rules, and the administrator dashboard.
+Not yet covered by dedicated tests: the Edit listing page and its status rules.
 
-Last local run (2 November 2026, `main` at `c857ea6`): 354 tests passed across 34 test files; typecheck and build passed; lint 0 errors and 1 warning in `src/components/ui/textarea.tsx` line 71 (`react-hooks/exhaustive-deps`, a copied shared component).
+Last local run (2 November 2026, `fix/frontend-integration-audit` at `50e00bf`): 441 tests passed across 47 test files; typecheck and build passed; lint 0 errors and 1 warning in `src/components/ui/textarea.tsx` line 71 (`react-hooks/exhaustive-deps`, a copied shared component).
 
 ## Known limitations
 
-- The dashboard shows "—" for Expired and Food saved (estimate). The documented dashboard response now includes `expiredListings` and `estimatedPortionsSaved`, but the dashboard doesn't use them yet; it has no recent-activity list (`GET /api/activity` is documented but not called).
-- `PATCH /api/handovers/{handoverId}/reverse` is documented, but no response exposes a `handoverId`, so reversing a handover isn't available in the interface.
+- There is no handover endpoint to list completed handovers, so Completed handovers joins three reads (see the endpoint table). No response carries a collection time: it comes from the `COLLECTED` activity event, and only the 100 most recent events can be read, so older handovers show "Not recorded". The recipient comes from the listing's approved request; if none is returned it also shows "Not recorded". Every page of collected listings and of all requests is read, which grows with the platform; an enriched handover endpoint (listing, donor, recipient, quantity, `collectedAt`, `handoverId`) would replace this.
+- `PATCH /api/handovers/{handoverId}/reverse` is live, but only the Mark collected reply carries a `handoverId`; request responses don't, so reversing a handover isn't available in the interface.
 - The OpenAPI document describes the image-upload reply generically; the observed field is `imageUrl` (see above).
 - The Qocent backup deployment is unverified: whether it is current and whether it updates from GitHub are unknown.
-- Competing pending requests are only *displayed* as Declined after another request is approved; the deployed backend keeps them `PENDING`.
+- Sign-in tokens last 30 minutes and are lost when the backend restarts, so people are signed out then (and sent back to sign in with "Your session ended").
+- Other people's changes appear only when a screen refetches (on revisit after 30 seconds, on reconnect, or on refresh). The backend has no way to push updates (no SSE or WebSocket endpoint).
 - The deployed backend accepts a second request from the same recipient on the same listing.
-- The backend refuses to delete Reserved and Collected listings, and leaves deleted listings out of a donor's list, so Listing history can't show them. Requests on a deleted listing keep their stored status.
+- The backend refuses to delete Reserved and Collected listings, and leaves deleted listings out of a donor's list, so Listing history can't show them. A pending request on a deleted listing stays stored as `PENDING`; it shows as Expired, in Request history.
 - Area and search filtering run in the browser when set (see "Find food filtering"); a backend fix to the area filter and keyword search would move this back to the server.
 - Administrators cannot open `/listings/:id/edit` (the route is donor-only in `src/app/routes.tsx`) and see no requests panel, so they cannot edit listings or record handovers in the interface.
-- `DATA_IS_SIMULATED` in `src/services/api.ts` is hard-coded to `true`, so the demonstration line says "(simulated)" in live mode too.
 - `/requests` uses a temporary layout grouped by listing; the spec's tabbed S8 screen depends on an aggregate endpoint that isn't documented.
 
 For API behaviour and current endpoint details, refer to the live Swagger documentation.
@@ -314,9 +324,10 @@ For API behaviour and current endpoint details, refer to the live Swagger docume
 |---|---|
 | "VITE_API_URL is not set…" at start-up | No `.env` in `frontend/`, or the variable is missing. Copy `.env.example` and restart `npm run dev`. |
 | App shows mock data although you wanted the live backend | `VITE_USE_MOCKS` must be exactly `false`. Restart the dev server after changing `.env`. |
-| First live request is very slow or shows "FoodBridge is starting up…" | The Render free tier sleeps; the first request can take up to about a minute. |
+| First live request is very slow, or sign-in says "FoodBridge is waking up" | The Render free tier sleeps; the first request can take up to about a minute. Sign-in waits up to 90 seconds. |
+| Sent back to sign in with "Your session ended" | The token expired (after 30 minutes) or the backend restarted. Sign in again to return to the same page. |
 | Live sign-in fails with the `@foodbridge.test` accounts | Those are simulated accounts. Use the live seeded accounts shown on the sign-in page in live mode. |
-| Photo upload error | Check the file is JPG or PNG and 5 MB or less; otherwise the upload response may not contain a usable URL. |
+| Photo upload error | Check the file is JPG or PNG and 5 MB or less. The photo is compressed below 900 KB first; if the browser couldn't redraw it, the original may exceed the backend's 1 MB limit. |
 | Your requests shows "Food listing" / "Food donor" | The listing for that request couldn't be fetched during enrichment. |
 
 ## Related documentation

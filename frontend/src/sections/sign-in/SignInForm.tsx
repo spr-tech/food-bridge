@@ -3,7 +3,9 @@
 // Sign in, so the user still signs in themselves.
 // On success the session is saved and SignInPage sends the user on (to ?next= or their
 // home page). Wrong details keep the email filled in.
-import { useRef, useState } from 'react'
+// While signing in, a message asks the user to hang on; the service sleeps when idle and
+// can take up to a minute to wake, so after a few seconds it also says that.
+import { useEffect, useRef, useState } from 'react'
 import { Form, Formik } from 'formik'
 import { saveSession } from '@/app/session'
 import { FocusFirstError, FormInput, FormPasswordInput } from '@/components/form'
@@ -21,6 +23,27 @@ const UNREACHABLE = "We can't reach FoodBridge right now. Try again in a moment.
 const SESSION_ENDED = 'Your session ended. Sign in again.'
 
 const FIELD_ORDER = ['email', 'password']
+
+const SIGNING_IN = 'Hang tight, we’re getting things ready for you.'
+const WAKING_UP = 'FoodBridge is waking up, which can take up to a minute.'
+// How long a sign-in takes before the message explains the wait.
+const SLOW_SIGN_IN_MS = 5000
+
+function SigningInMessage() {
+  const [slow, setSlow] = useState(false)
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSlow(true), SLOW_SIGN_IN_MS)
+    return () => window.clearTimeout(timer)
+  }, [])
+
+  return (
+    <p role="status" className="text-center text-sm text-text-muted">
+      {SIGNING_IN}
+      {slow && <> {WAKING_UP}</>}
+    </p>
+  )
+}
 
 function MailIcon() {
   return (
@@ -105,7 +128,7 @@ export function SignInForm({ sessionEnded }: { sessionEnded: boolean }) {
                 autoComplete="current-password"
                 icon={<LockIcon />}
               />
-                   <Button
+              <Button
                 ref={signInButton}
                 type="submit"
                 size="lg"
@@ -114,6 +137,8 @@ export function SignInForm({ sessionEnded }: { sessionEnded: boolean }) {
               >
                 Sign in
               </Button>
+
+              {isSubmitting && <SigningInMessage />}
 
               <DemoAccountsBox onPick={pick} />
             </Form>

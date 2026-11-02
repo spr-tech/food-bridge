@@ -1,6 +1,5 @@
 // Admin dashboard statistics, today's distribution, every request, recent activity and
 // completed handovers. Screens use these hooks; the endpoints handle live and simulated data.
-import type { BaseQueryFn, FetchArgs, FetchBaseQueryError, FetchBaseQueryMeta } from '@reduxjs/toolkit/query'
 import * as db from '@/mocks/db'
 import { simulate } from '@/mocks/simulate'
 import { api, LIST_QUERY_OPTIONS } from '@/services/api'
@@ -10,6 +9,7 @@ import {
   mapBackendListing,
   mapBackendRequest,
 } from '@/services/backend-mappers'
+import { readAllPages, SERVICE_PAGE_LIMIT } from '@/services/pages'
 import type {
   ActivityEntry,
   AdminRequestFilters,
@@ -24,44 +24,8 @@ import type {
   RequestPage,
 } from '@/types/api'
 
-// The most rows the service returns in one call (it answers 400 INVALID_PAGE above), and
-// how far the activity log reaches back (GET /api/activity allows 1 to 100).
-const SERVICE_PAGE_LIMIT = 100
+// How far the activity log reaches back (GET /api/activity allows 1 to 100).
 const ACTIVITY_REACH = 100
-// A guard against a service that never reports its last page.
-const MAX_PAGES = 50
-
-// The baseQuery a queryFn receives.
-type BaseQuery = (
-  arg: string | FetchArgs,
-) => ReturnType<BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, object, FetchBaseQueryMeta>>
-
-// Every page of a list endpoint, 100 rows at a time, using X-Total-Count to stop.
-async function readAllPages<Row>(
-  baseQuery: BaseQuery,
-  url: string,
-  params: Record<string, string> = {},
-): Promise<{ data: Row[] } | { error: FetchBaseQueryError }> {
-  const rows: Row[] = []
-
-  for (let page = 0; page < MAX_PAGES; page += 1) {
-    const result = await baseQuery({
-      url,
-      params: { ...params, offset: page * SERVICE_PAGE_LIMIT, limit: SERVICE_PAGE_LIMIT },
-    })
-    if (result.error) return { error: result.error }
-
-    const pageRows = Array.isArray(result.data) ? (result.data as Row[]) : []
-    rows.push(...pageRows)
-
-    const total = Number(result.meta?.response?.headers.get('x-total-count') ?? NaN)
-    if (pageRows.length < SERVICE_PAGE_LIMIT || (Number.isFinite(total) && rows.length >= total)) {
-      break
-    }
-  }
-
-  return { data: rows }
-}
 
 // One row per Collected listing: its approved request names the recipient, and the latest
 // COLLECTED activity event on it gives the collection time. Newest collections first; rows
@@ -112,9 +76,15 @@ type BackendAdminDashboardResponse = {
   availableListings: number
   reservedListings: number
   collectedListings: number
+  // EXPIRED listings, and AVAILABLE ones whose deadline has passed but the minute's
+  // expiry job hasn't reached yet.
+  expiredListings: number
   totalRequests: number
   pendingRequests: number
   completedHandovers: number
+  // Portions in completed handovers: a handover's recorded estimate, else the listing's
+  // quantity when it is measured in portions. Other units count as 0.
+  estimatedPortionsSaved: number
 }
 
 // Only the fields currently displayed by the administrator's dashboard.
@@ -124,8 +94,10 @@ export type AdminDashboardSummary = Pick<
   | 'availableListings'
   | 'reservedListings'
   | 'collectedListings'
+  | 'expiredListings'
   | 'pendingRequests'
   | 'completedHandovers'
+  | 'estimatedPortionsSaved'
 >
 
 const adminApi = api.injectEndpoints({
@@ -163,11 +135,18 @@ const adminApi = api.injectEndpoints({
                 (listing) => listing.status === 'RESERVED',
               ).length,
               collectedListings: collected.length,
+              expiredListings: listings.filter(
+                (listing) => listing.status === 'EXPIRED',
+              ).length,
               pendingRequests: listings.reduce(
                 (total, listing) => total + listing.pendingRequestCount,
                 0,
               ),
               completedHandovers: collected.length,
+              // As the service estimates it, without recorded estimates.
+              estimatedPortionsSaved: collected
+                .filter((listing) => listing.unit.toUpperCase() === 'PORTIONS')
+                .reduce((total, listing) => total + Math.round(listing.quantity), 0),
             },
           }
         }
