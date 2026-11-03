@@ -156,3 +156,18 @@ Decision: when a search or a pickup area is set, Find food asks the backend for 
 Why: the deployed backend's area filter matches only the exact stored text, and its keyword search covers only the food name and description, so seeded listings were missing from area results and donor or area searches found nothing.
 
 Recorded from: Git history and a live check. Agreed by: Muizz Jamiu (interface), 2 November 2026. To revisit: once the backend normalises areas (or matches them by prefix) and widens the keyword search, move filtering back to the server.
+
+### 2026-11-02 · Listing status, listing actions and dashboard figures (branch `fix/foodbridge-listing-status-and-dashboard-bugs`)
+
+Decision:
+- Delete is no longer offered on **Reserved** listings, for donors and administrators alike, because the backend refuses them (409 `LISTING_NOT_DELETABLE`). This replaces the part of the 2026-11-02 "Listing deletion" entry that kept Delete enabled on Reserved listings. Collected and Reversed listings keep Delete disabled with the reason.
+- On Listing details, Edit (owning donor, Available only) and Delete sit together in one action row at the foot of the listing's card.
+- A listing with `deleted: true` is always Deleted, never Expired. Find food keeps each listing by the status it carries under Expired and Deleted, because the backend's `availability=EXPIRED` also returns deleted listings and `availability=DELETED` is refused. The Expired view says how many deleted listings came back. Administrators get a Deleted status, read from the unfiltered list.
+- The dashboard's Requests waiting card opens a new read-only `/admin/requests` page. It lists Pending requests on Available listings as waiting. Pending requests on listings that have moved on go in a separate list, counted as "No decision due", with no actions and with a note explaining the difference. The card keeps the backend's `pendingRequests` figure.
+- The Expired figure links to All listings filtered to Expired.
+- Food saved shows one total per unit from the listed quantity of Collected listings, with an explanation. `estimatedPortionsSaved` isn't shown until its calculation is documented.
+- When the listing is Reserved or Collected and the request is Pending or Declined, the recipient sees "This request was not approved. The food listing is no longer available for requests." It is derived from data, so it persists. It gives no reason: the backend sends no decline reason, and a donor may have declined the request by hand, so the interface never says another organisation was approved.
+
+Why: requested by Muizz Jamiu on 2 November 2026 after the live checks recorded in `frontend/README.md` (Known limitations), which describes the three backend defects and the fixes needed.
+
+Recorded from: a live check of the deployed backend (GET requests only) and the branch above. Agreed by: to confirm (Muizz Jamiu). Backend changes to confirm: Esther and Adedayo.

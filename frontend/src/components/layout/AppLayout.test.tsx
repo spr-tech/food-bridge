@@ -36,6 +36,7 @@ function renderLayout(path: string = ROUTES.yourListings) {
           { path: ROUTES.requests, element: <h1>Requests</h1> },
           { path: ROUTES.listings, element: <h1>Find food</h1> },
           { path: ROUTES.yourRequests, element: <h1>Your requests</h1> },
+          { path: ROUTES.adminRequests, element: <h1>Requests waiting</h1> },
         ],
       },
     ],
@@ -142,6 +143,14 @@ describe('AppLayout sidebar', () => {
       'href',
       ROUTES.completedHandovers,
     )
+  })
+
+  it('keeps Dashboard marked on Requests waiting, which the dashboard opens', () => {
+    signInAs('admin')
+    renderLayout(ROUTES.adminRequests)
+
+    const nav = screen.getByRole('navigation', { name: 'Main' })
+    expect(within(nav).getByRole('link', { name: 'Dashboard' })).toHaveAttribute('aria-current', 'page')
   })
 
   it('marks the current page link with aria-current="page"', () => {

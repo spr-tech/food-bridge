@@ -32,8 +32,10 @@ export function mapBackendListing(dto: BackendListingResponse): Listing {
   const rawState = asString(dto.status, 'AVAILABLE').toUpperCase()
 
   // REVERSED stays REVERSED: the service won't let it be requested, edited or deleted.
-  const status: Listing['status'] =
-    rawState === 'RESERVED' ||
+  // A deleted listing is DELETED whatever else is true of it, an expired deadline included.
+  const status: Listing['status'] = dto.deleted === true
+    ? 'DELETED'
+    : rawState === 'RESERVED' ||
     rawState === 'COLLECTED' ||
     rawState === 'REVERSED' ||
     rawState === 'EXPIRED' ||

@@ -166,6 +166,62 @@ describe('Listing details (recipient): the action by situation', () => {
   })
 })
 
+describe('Listing details (recipient): a request that was not approved', () => {
+  const MESSAGE = 'This request was not approved. The food listing is no longer available for requests.'
+
+  it('says so inside the request, giving no reason, and keeps saying so after a refresh and once collected', async () => {
+    // Ajegunle's request on the loaves is approved; Hope's is declined with it.
+    db.approveRival('req-01')
+    const first = renderDetails('lst-01')
+    await heading('Wholewheat bread loaves')
+
+    const block = await findYourRequest()
+    expect(within(block).getByText('Declined')).toBeInTheDocument()
+    expect(within(block).getByText(MESSAGE)).toBeInTheDocument()
+    expect(screen.queryByText(/another organisation/i)).not.toBeInTheDocument()
+
+    // Still there after the data is fetched again, and on a later visit.
+    await waitFor(() => expect(within(yourRequest()!).getByText(MESSAGE)).toBeInTheDocument())
+    first.unmount()
+
+    db.markCollected(signInAs('donor'), { requestId: 'req-02' })
+    signInAs('recipient')
+    renderDetails('lst-01')
+    await heading('Wholewheat bread loaves')
+    expect(within(await findYourRequest()).getByText(MESSAGE)).toBeInTheDocument()
+  })
+
+  it('gives the same message, and no reason, when the donor declined it by hand before approving another', async () => {
+    const donor = signInAs('donor')
+    db.decideRequest(donor, { requestId: 'req-01', decision: 'DECLINED' })
+    db.decideRequest(donor, { requestId: 'req-02', decision: 'APPROVED' })
+    signInAs('recipient')
+    renderDetails('lst-01')
+    await heading('Wholewheat bread loaves')
+
+    expect(within(await findYourRequest()).getByText(MESSAGE)).toBeInTheDocument()
+    expect(screen.queryByText(/another organisation/i)).not.toBeInTheDocument()
+  })
+
+  it('says nothing more on a decline when the listing is still open to requests', async () => {
+    db.decideRequest(signInAs('donor'), { requestId: 'req-01', decision: 'DECLINED' })
+    signInAs('recipient')
+    renderDetails('lst-01')
+    await heading('Wholewheat bread loaves')
+
+    expect(within(await findYourRequest()).getByText('Declined')).toBeInTheDocument()
+    expect(screen.queryByText(MESSAGE)).not.toBeInTheDocument()
+  })
+
+  it('shows an approved request as approved, with no such message', async () => {
+    renderDetails('lst-02')
+    await heading('Assorted pastries')
+
+    expect(within(await findYourRequest()).getByText('Approved')).toBeInTheDocument()
+    expect(screen.queryByText(MESSAGE)).not.toBeInTheDocument()
+  })
+})
+
 describe('Listing details (recipient): requesting', () => {
   it('sends the request: "Request sent", the Pending badge, and focus on it', async () => {
     const user = userEvent.setup()

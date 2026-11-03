@@ -1,7 +1,8 @@
 // Your listings against the live service (mocks off, fetch stubbed): each listing is
 // placed by the status the service sends. The service leaves deleted listings out of
 // GET /api/listings?mine=true today; if one came back, it would go to Listing history,
-// never the current listings, and offer neither Edit nor Delete.
+// never the current listings, and offer neither Edit nor Delete. An Expired listing, its
+// deadline past, stays in Listing history, marked Expired, with Delete and without Edit.
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -13,7 +14,7 @@ vi.mock('@/config/env', () => ({
   env: { apiUrl: 'https://api.test', useMocks: false },
 }))
 
-const listing = (id: string, foodName: string, status: string, hoursAgo: number) => ({
+const listing = (id: string, foodName: string, status: string, hoursAgo: number, deadline = '2030-01-01T12:00:00Z') => ({
   id,
   foodName,
   description: '',
@@ -22,7 +23,7 @@ const listing = (id: string, foodName: string, status: string, hoursAgo: number)
   unit: 'BOXES',
   imageReference: null,
   pickupArea: 'yaba',
-  collectionDeadline: '2030-01-01T12:00:00Z',
+  collectionDeadline: deadline,
   status,
   donorId: 'acc-donor',
   donorName: "Mama's Oven",
@@ -34,6 +35,7 @@ const MINE = [
   listing('11111111-1111-4111-8111-111111111111', 'Fresh loaves', 'AVAILABLE', 1),
   listing('22222222-2222-4222-8222-222222222222', 'Old cakes', 'DELETED', 2),
   listing('33333333-3333-4333-8333-333333333333', 'Spare yams', 'COLLECTED', 3),
+  listing('44444444-4444-4444-8444-444444444444', 'Leftover rice', 'EXPIRED', 4, '2026-01-01T12:00:00Z'),
 ]
 
 const fetchMock = vi.fn<typeof fetch>()
@@ -73,5 +75,20 @@ describe('Your listings (live service)', () => {
     expect(screen.queryByRole('button', { name: 'Delete listing: Old cakes' })).not.toBeInTheDocument()
     // A Collected one shows Delete disabled, with the reason.
     expect(screen.getByRole('button', { name: 'Delete listing: Spare yams' })).toBeDisabled()
+  })
+
+  it('keeps an Expired listing in Listing history, marked Expired, with Delete and without Edit', async () => {
+    renderRoutes([{ path: ROUTES.yourListings, element: <YourListingsPage /> }], {
+      initialEntries: [ROUTES.yourListings],
+    })
+    await screen.findByRole('link', { name: 'Fresh loaves' })
+    expect(screen.queryByRole('link', { name: 'Leftover rice' })).not.toBeInTheDocument()
+
+    await userEvent.setup().click(screen.getByRole('tab', { name: /Listing history/ }))
+
+    const expired = (await screen.findByRole('link', { name: 'Leftover rice' })).closest('article')!
+    expect(within(expired).getByText('Expired')).toBeInTheDocument()
+    expect(within(expired).queryByRole('link', { name: 'Edit Leftover rice' })).not.toBeInTheDocument()
+    expect(within(expired).getByRole('button', { name: 'Delete listing: Leftover rice' })).toBeEnabled()
   })
 })

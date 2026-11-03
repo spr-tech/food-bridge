@@ -18,7 +18,7 @@ const COPY = {
   admin: {
     title: 'All listings',
     eyebrow: 'Administrator · All listings',
-    long: 'Every listing on FoodBridge. Use Status to see reserved, collected and expired ones.',
+    long: 'Every listing on FoodBridge. Use Status to see reserved, collected, expired and deleted ones.',
     short: 'Every listing on FoodBridge.',
   },
 }

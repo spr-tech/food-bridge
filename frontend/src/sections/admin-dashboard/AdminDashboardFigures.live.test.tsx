@@ -1,7 +1,7 @@
 // The dashboard's More figures against the live service (mocks off, fetch stubbed): the
-// expired count comes from GET /api/admin/dashboard (expiredListings); the estimate of food
-// saved totals the quantity listed on each completed handover per unit, never adding units
-// together, and leaves out a handover that was reversed.
+// expired count comes from GET /api/admin/dashboard (expiredListings) and links to the
+// Expired listings; the food saved totals the quantity listed on each completed handover per
+// unit, never adding units together, and leaves out a handover that was reversed.
 import { screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AdminDashboard } from '@/sections/admin-dashboard/AdminDashboard'
@@ -82,17 +82,34 @@ afterEach(() => {
 })
 
 describe('dashboard More figures (live service)', () => {
-  it("shows the service's expired count and the food saved per unit", async () => {
+  it("shows the service's expired count, linked to the Expired listings", async () => {
     renderRoutes([{ path: '/', element: <AdminDashboard /> }])
 
     const panel = (await screen.findByRole('heading', { name: 'More figures' })).closest('section')!
-    const expired = (await within(panel).findByText('Expired')).closest('li')!
-    const saved = within(panel).getByText('Food saved (estimate)').closest('li')!
+    const expired = await within(panel).findByRole('link', { name: /Expired/ })
 
     expect(expired).toHaveTextContent('17')
-    expect(await within(saved).findByText('45 portions · 12 kg')).toBeInTheDocument()
-    expect(saved).toHaveTextContent('Based on the quantity listed')
+    expect(expired).toHaveAttribute('href', '/listings?status=expired')
+    expect(expired).toHaveTextContent('Deleted listings aren’t counted.')
+  })
+
+  it('shows the food saved as one total per unit, never added together, and explains them', async () => {
+    renderRoutes([{ path: '/', element: <AdminDashboard /> }])
+
+    const panel = (await screen.findByRole('heading', { name: 'More figures' })).closest('section')!
+    const saved = (await within(panel).findByText('Food saved, by unit')).closest('li')!
+    const totals = await within(saved).findByRole('list', { name: 'Food saved by unit' })
+
+    // 30 + 15 portions and 12 kg; the reversed 99 portions are left out.
+    expect(within(totals).getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+      '45portions',
+      '12kg',
+    ])
+    expect(saved).toHaveTextContent('From 3 completed handovers, using the quantity each donor listed.')
+    expect(saved).toHaveTextContent('Units are kept apart and never converted')
+    expect(saved).toHaveTextContent('Reversed handovers aren’t counted.')
+    // The service's portions estimate isn't shown until its calculation can be traced.
+    expect(saved).not.toHaveTextContent('1,240')
     expect(within(panel).queryByText('—')).not.toBeInTheDocument()
-    expect(within(panel).queryByText(/Awaiting the backend/)).not.toBeInTheDocument()
   })
 })

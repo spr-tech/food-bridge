@@ -91,6 +91,9 @@ export type BackendListingResponse = {
   donorName: string
   createdAt: string
   pendingRequestCount: number
+  // A soft-deleted listing: status DELETED, with deleted true and the time it was deleted.
+  deleted?: boolean
+  deletedAt?: string | null
 }
 
 export type BackendFoodRequest = {
@@ -231,6 +234,9 @@ export type ListingFilters = {
 export type ListingPage = {
   items: Listing[]
   total: number
+  // Deleted listings the service returned for the Expired filter, kept out of items
+  // (see getListings). Absent when there were none.
+  deletedReturned?: number
 }
 
 export type RequestPage = {

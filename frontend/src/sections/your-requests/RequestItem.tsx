@@ -6,7 +6,11 @@ import { StatusBadge } from '@/components/common/StatusBadge'
 import { optionLabel, PICKUP_AREAS } from '@/constants/listingOptions'
 import { listingDetailPath } from '@/constants/routes'
 import { formatDateTime, formatPickup } from '@/lib/format'
-import { getRecipientRequestStatus } from '@/lib/request-status'
+import {
+  REQUEST_NOT_APPROVED,
+  getRecipientRequestStatus,
+  wasNotApprovedAndListingClosed,
+} from '@/lib/request-status'
 import type { ListingRequest } from '@/types/api'
 
 export function RequestItem({ request }: { request: ListingRequest }) {
@@ -80,6 +84,12 @@ export function RequestItem({ request }: { request: ListingRequest }) {
               </span>
             </div>
           </div>
+        )}
+
+        {wasNotApprovedAndListingClosed(request.status, listing.status) && (
+          <p className="mt-2 text-xs leading-normal text-text-body">
+            {REQUEST_NOT_APPROVED}
+          </p>
         )}
 
         {displayStatus === 'PENDING' && (

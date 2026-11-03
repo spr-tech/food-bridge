@@ -34,15 +34,18 @@ const STATUS_OPTIONS = [
   { value: 'expired', label: 'Expired' },
 ]
 
+// Administrators also see deleted listings, kept by the service as a record.
+const ADMIN_STATUS_OPTIONS = [...STATUS_OPTIONS, { value: 'deleted', label: 'Deleted' }]
+
 function countMessage(total: number, availableOnly: boolean): string {
   const noun = total === 1 ? 'listing' : 'listings'
   return availableOnly ? `${total} ${noun} available` : `${total} ${noun}`
 }
 
 export function FindFood() {
-  const filters = useListingFilters()
-  const { update, clearAll } = filters
   const role = useSession()?.role
+  const filters = useListingFilters({ allowDeleted: role === 'admin' })
+  const { update, clearAll } = filters
   const sessionEnded = useSessionEnded()
   const now = useNow()
 
@@ -89,6 +92,7 @@ export function FindFood() {
   }
 
   const total = listings.data?.total ?? 0
+  const deletedReturned = listings.data?.deletedReturned ?? 0
   const loaded = listings.data !== undefined && !listings.isFetching
 
   let body
@@ -203,7 +207,7 @@ export function FindFood() {
           {(field) => (
             <Select
               {...field}
-              options={STATUS_OPTIONS}
+              options={role === 'admin' ? ADMIN_STATUS_OPTIONS : STATUS_OPTIONS}
               value={filters.status === 'all' ? undefined : filters.status}
               onValueChange={(value) => update({ status: value ?? 'all' })}
               allowAny
@@ -215,6 +219,24 @@ export function FindFood() {
 
       {listings.fulfilledTimeStamp && !listings.isError && (
         <p className="mb-4 text-[13px] text-text-muted">{formatUpdated(listings.fulfilledTimeStamp, now)}</p>
+      )}
+
+      {/* The service sends deleted listings for Expired too (see getListings); say so
+          rather than leave them out unmentioned. */}
+      {filters.status === 'expired' && !listings.isError && deletedReturned > 0 && (
+        <p className="mb-4 rounded-2xl border border-border bg-surface p-4 text-[13px] leading-relaxed text-text-muted">
+          The service also returned {deletedReturned} deleted {deletedReturned === 1 ? 'listing' : 'listings'} for
+          this filter. Deleted listings aren't expired, so they're not counted here.{' '}
+          {role === 'admin' && (
+            <button
+              type="button"
+              onClick={() => update({ status: 'deleted' })}
+              className="cursor-pointer font-semibold text-primary underline underline-offset-4"
+            >
+              Show deleted listings
+            </button>
+          )}
+        </p>
       )}
 
       {body}

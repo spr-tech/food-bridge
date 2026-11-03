@@ -7,8 +7,9 @@
 //   listings refresh, so the listing leaves the screen only once the service has said so
 // - 401: the session ends (sign in again, then back here)
 // - 403, 404, 409, 500 or no connection: the dialog stays open with what went wrong, and
-//   nothing is removed. A 409 on a Reserved listing says that is why.
-// On a Collected listing the button is disabled, with the reason (deleteBlockedReason).
+//   nothing is removed. A 409 says the listing may have just been reserved.
+// It isn't offered on a Reserved listing, which the service refuses (canDeleteListing). On
+// a Collected listing the button is disabled, with the reason (deleteBlockedReason).
 // The service decides who may delete; this button is not the safeguard.
 import { useId, useState } from 'react'
 import { useSession } from '@/app/session'
@@ -31,9 +32,6 @@ function failureMessage(status: number | string | undefined, listingStatus: List
     case 404:
       return 'This listing no longer exists.'
     case 409:
-      if (listingStatus === 'RESERVED') {
-        return "A reserved listing can't be deleted, because a recipient is due to collect it. Mark it as collected instead."
-      }
       if (listingStatus === 'COLLECTED') {
         return "A collected listing can't be deleted. It stays in your listing history as a record of the handover."
       }

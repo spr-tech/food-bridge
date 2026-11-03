@@ -1,6 +1,7 @@
 // The estimate of food saved: listed quantities of completed handovers, totalled per unit.
 import { describe, expect, it } from 'vitest'
-import { foodSavedByUnit, formatFoodSaved } from '@/lib/food-saved'
+import { foodSavedByUnit } from '@/lib/food-saved'
+import { formatUnit } from '@/lib/format'
 import type { CompletedHandover } from '@/types/api'
 
 const handover = (quantity: number, unit: string): CompletedHandover => ({
@@ -36,16 +37,16 @@ describe('foodSavedByUnit', () => {
   })
 })
 
-describe('formatFoodSaved', () => {
-  it('lists the largest total first, joined with a dot', () => {
-    expect(formatFoodSaved([handover(12, 'boxes'), handover(45, 'portions')])).toBe('45 portions · 12 boxes')
+describe('formatUnit', () => {
+  it('names the unit of a total shown apart from its number', () => {
+    expect(formatUnit({ quantity: 45, unit: 'portions' })).toBe('portions')
   })
 
   it('uses the singular for one', () => {
-    expect(formatFoodSaved([handover(1, 'boxes')])).toBe('1 box')
+    expect(formatUnit({ quantity: 1, unit: 'boxes' })).toBe('box')
   })
 
-  it('is null when nothing has been collected', () => {
-    expect(formatFoodSaved([])).toBeNull()
+  it('shows a unit it does not know as sent', () => {
+    expect(formatUnit({ quantity: 3, unit: 'crates' })).toBe('crates')
   })
 })

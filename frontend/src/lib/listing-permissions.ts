@@ -1,20 +1,21 @@
 // Who is offered "Delete listing". The service decides who may actually delete; this
-// only keeps the button off listings the account has no claim to.
-// - an administrator: any listing that isn't deleted already
-// - the donor who owns it: any of their listings that isn't deleted already, whatever its
-//   status. The service currently refuses Reserved listings (409 LISTING_NOT_DELETABLE);
-//   the confirmation then says why (DeleteListingButton).
+// only keeps the button off listings the account has no claim to, or that the service
+// would refuse outright.
+// - an administrator: any listing that isn't deleted or reserved
+// - the donor who owns it: any of their listings that isn't deleted or reserved
 // - anyone else: never
-// A Collected listing is a record of a finished handover, and a Reversed one of a handover
-// that was undone: each is offered but disabled (deleteBlockedReason), for the donor and
-// administrator alike. The service refuses both (409 LISTING_NOT_DELETABLE).
+// A Reserved listing is never offered: the service refuses it (409 LISTING_NOT_DELETABLE)
+// because a recipient is due to collect it. A Collected listing is a record of a finished
+// handover, and a Reversed one of a handover that was undone: each is offered but disabled
+// (deleteBlockedReason), for the donor and administrator alike. The service refuses both
+// (409 LISTING_NOT_DELETABLE). Available and Expired listings can be deleted.
 import type { Listing, Session } from '@/types/api'
 
 export function canDeleteListing(
   session: Pick<Session, 'role' | 'accountId'> | null,
   listing: Pick<Listing, 'donorId' | 'status'>,
 ): boolean {
-  if (!session || listing.status === 'DELETED') return false
+  if (!session || listing.status === 'DELETED' || listing.status === 'RESERVED') return false
   if (session.role === 'admin') return true
   return (
     session.role === 'donor' &&
