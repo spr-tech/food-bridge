@@ -13,7 +13,7 @@ import { ROUTES } from '@/utilities/constants/routes'
 import { BrowsePage } from '@/pages/BrowsePage'
 import { renderRoutes, signInAs } from '@/test/render'
 
-vi.mock('@/config/env', () => ({
+vi.mock('@/configs/env', () => ({
   env: { apiUrl: 'https://api.test', useMocks: false },
 }))
 

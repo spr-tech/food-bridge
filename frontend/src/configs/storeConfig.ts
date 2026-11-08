@@ -1,7 +1,7 @@
 // The Redux store. Server data lives in the RTK Query cache under api.reducerPath.
 import { configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
-import { api } from '@/services/api'
+import { api } from '@/configs/serviceConfig'
 
 // A fresh store; the app uses one, and each test makes its own so caches never leak.
 export function makeStore() {

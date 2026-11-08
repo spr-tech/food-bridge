@@ -1,7 +1,7 @@
 // The demo accounts shown on the sign-in page (spec S1), grouped Admin | Donor | Recipient.
 // Every organisation is fictional.
 
-import { env } from '@/config/env'
+import { env } from '@/configs/env'
 
 // Shared password for simulated demo accounts.
 export const DEMO_PASSWORD = 'FoodBridge-demo-2026'

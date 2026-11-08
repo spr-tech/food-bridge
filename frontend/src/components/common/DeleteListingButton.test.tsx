@@ -9,7 +9,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getSession } from '@/app/session'
+import { getSession } from '@/stores/sessionStore'
 import { listingDetailPath, ROUTES } from '@/utilities/constants/routes'
 import * as db from '@/mocks/db'
 import { ListingDetailPage } from '@/pages/ListingDetailPage'

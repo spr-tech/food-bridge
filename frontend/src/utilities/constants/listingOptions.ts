@@ -1,7 +1,7 @@
 // Choices for the listing form and filters.
 // Live mode uses the service's allowed category and unit values (Esther's contract);
 // mock mode keeps the original lists.
-import { env } from '@/config/env'
+import { env } from '@/configs/env'
 
 export type Option = {
   value: string

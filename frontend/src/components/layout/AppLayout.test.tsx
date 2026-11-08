@@ -3,7 +3,7 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { SESSION_STORAGE_KEY } from '@/app/session'
+import { SESSION_STORAGE_KEY } from '@/stores/sessionStore'
 import { RequireSession } from '@/components/layout/RequireSession'
 import { ROUTES } from '@/utilities/constants/routes'
 import { renderRoutes, signInAs } from '@/test/render'

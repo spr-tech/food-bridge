@@ -9,7 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { YourRequests } from '@/sections/your-requests/YourRequests'
 import { renderRoutes, signInAs } from '@/test/render'
 
-vi.mock('@/config/env', () => ({
+vi.mock('@/configs/env', () => ({
   env: { apiUrl: 'https://api.test', useMocks: false },
 }))
 

@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AdminDashboard } from '@/sections/admin-dashboard/AdminDashboard'
 import { renderRoutes, signInAs } from '@/test/render'
 
-vi.mock('@/config/env', () => ({
+vi.mock('@/configs/env', () => ({
   env: { apiUrl: 'https://api.test', useMocks: false },
 }))
 

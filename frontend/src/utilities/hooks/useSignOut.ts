@@ -2,10 +2,10 @@
 // so the next account never sees the previous account's data.
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router'
-import { signOutSession } from '@/app/session'
+import { signOutSession } from '@/stores/sessionStore'
 import { ROUTES } from '@/utilities/constants/routes'
 import { useAppDispatch } from '@/utilities/hooks/useAppStore'
-import { api } from '@/services/api'
+import { api } from '@/configs/serviceConfig'
 
 export function useSignOut() {
   const navigate = useNavigate()

@@ -15,7 +15,7 @@
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { Pencil } from 'lucide-react'
-import { useSession } from '@/app/session'
+import { useSession } from '@/stores/sessionStore'
 import { DeleteListingButton } from '@/components/common/DeleteListingButton'
 import { LoadingState } from '@/components/common/LoadingState'
 import { ErrorState } from '@/components/ui/error-state'

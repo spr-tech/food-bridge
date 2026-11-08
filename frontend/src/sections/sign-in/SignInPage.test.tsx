@@ -5,7 +5,7 @@
 import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
-import { getSession, SESSION_STORAGE_KEY } from '@/app/session'
+import { getSession, SESSION_STORAGE_KEY } from '@/stores/sessionStore'
 import { ROUTES } from '@/utilities/constants/routes'
 import { DEMO_PASSWORD } from '@/utilities/constants/demoAccounts'
 import { SignInPage } from '@/pages/SignInPage'

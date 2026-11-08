@@ -2,10 +2,10 @@
 // goes to sign in with "Your session ended. Sign in again.", coming back here afterwards.
 import { useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router'
-import { clearSession } from '@/app/session'
+import { clearSession } from '@/stores/sessionStore'
 import { ROUTES } from '@/utilities/constants/routes'
 import { useAppDispatch } from '@/utilities/hooks/useAppStore'
-import { api } from '@/services/api'
+import { api } from '@/configs/serviceConfig'
 
 export function useSessionEnded() {
   const navigate = useNavigate()

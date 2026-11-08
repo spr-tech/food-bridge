@@ -5,12 +5,12 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { Provider } from 'react-redux'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { makeStore } from '@/app/store'
+import { makeStore } from '@/configs/storeConfig'
 import { ROUTES } from '@/utilities/constants/routes'
 import { useNavCounts } from '@/utilities/hooks/useNavCounts'
 import { signInAs } from '@/test/render'
 
-vi.mock('@/config/env', () => ({
+vi.mock('@/configs/env', () => ({
   env: { apiUrl: 'https://api.test', useMocks: false },
 }))
 

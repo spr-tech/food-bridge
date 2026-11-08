@@ -7,14 +7,14 @@
 // can take up to a minute to wake, so after a few seconds it also says that.
 import { useEffect, useRef, useState } from 'react'
 import { Form, Formik } from 'formik'
-import { saveSession } from '@/app/session'
+import { saveSession } from '@/stores/sessionStore'
 import { FocusFirstError, FormInput, FormPasswordInput } from '@/components/form'
 import { Button } from '@/components/ui/button'
 import type { DemoAccount } from '@/utilities/constants/demoAccounts'
 import { useAppDispatch } from '@/utilities/hooks/useAppStore'
 import { signInSchema, type SignInValues } from '@/schema/signInSchema'
 import { DemoAccountsBox } from '@/sections/sign-in/DemoAccounts'
-import { api } from '@/services/api'
+import { api } from '@/configs/serviceConfig'
 import { useSignIn } from '@/services/auth'
 import { errorStatus } from '@/services/errors'
 

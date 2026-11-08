@@ -2,7 +2,7 @@
 // no requests on expired listings, one request per recipient, owner-only decisions and
 // recipient-only cancelling, repeat-safe writes, and sign-in.
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { clearSession } from '@/app/session'
+import { clearSession } from '@/stores/sessionStore'
 import * as db from '@/mocks/db'
 import { ACCOUNTS, DEMO_PASSWORD } from '@/mocks/seed'
 import { simulate, simulateRivalApproval, simulateWrite } from '@/mocks/simulate'

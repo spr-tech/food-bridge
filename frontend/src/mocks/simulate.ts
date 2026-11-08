@@ -12,7 +12,7 @@
 //                       another approval had landed first (once per page load; the listing
 //                       needs another pending request)
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
-import { getSession } from '@/app/session'
+import { getSession } from '@/stores/sessionStore'
 import { approveRival, MockApiError } from '@/mocks/db'
 import type { Session } from '@/types/api'
 

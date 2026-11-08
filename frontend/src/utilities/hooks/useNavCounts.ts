@@ -4,7 +4,7 @@
 // Only requests still awaiting a decision count: the donor's on Available listings, and
 // the recipient's that show as Pending (getRecipientRequestStatus). The service can still
 // store a request as PENDING once its listing is reserved, collected or expired.
-import { useSession } from '@/app/session'
+import { useSession } from '@/stores/sessionStore'
 import type { NavCounts } from '@/components/layout/Sidebar'
 import { ROUTES } from '@/utilities/constants/routes'
 import { getRecipientRequestStatus } from '@/utilities/helpers/request-status'

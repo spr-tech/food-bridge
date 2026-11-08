@@ -12,7 +12,7 @@
 // a Collected listing the button is disabled, with the reason (deleteBlockedReason).
 // The service decides who may delete; this button is not the safeguard.
 import { useId, useState } from 'react'
-import { useSession } from '@/app/session'
+import { useSession } from '@/stores/sessionStore'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/dialog'
 import { useToast } from '@/components/ui/toast'

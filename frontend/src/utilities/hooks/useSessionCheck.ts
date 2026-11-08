@@ -3,7 +3,7 @@
 // the session ends as for any other 401. Otherwise the stored account details follow the
 // service's, so a changed role or organisation name takes effect without signing in again.
 import { useEffect } from 'react'
-import { saveSession } from '@/app/session'
+import { saveSession } from '@/stores/sessionStore'
 import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { useCurrentAccount } from '@/services/auth'
 import { errorStatus } from '@/services/errors'

@@ -9,8 +9,8 @@ import { act, renderHook, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { Provider } from 'react-redux'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getSession, wasExpired } from '@/app/session'
-import { makeStore } from '@/app/store'
+import { getSession, wasExpired } from '@/stores/sessionStore'
+import { makeStore } from '@/configs/storeConfig'
 import { RequireRole, RequireSession } from '@/components/layout/RequireSession'
 import { ROUTES } from '@/utilities/constants/routes'
 import { RequestsPage } from '@/pages/RequestsPage'
@@ -18,7 +18,7 @@ import { useSignIn } from '@/services/auth'
 import { listingsApi } from '@/services/listings'
 import { renderRoutes, signInAs } from '@/test/render'
 
-vi.mock('@/config/env', () => ({
+vi.mock('@/configs/env', () => ({
   env: { apiUrl: 'https://api.test', useMocks: false },
 }))
 

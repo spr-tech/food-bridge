@@ -4,7 +4,7 @@
 // States: six skeleton cards while loading; "No food listed yet." on an empty start;
 // "No listings match your filters" with Clear filters; the error with Try again.
 import { useEffect, useRef, useState } from 'react'
-import { useSession } from '@/app/session'
+import { useSession } from '@/stores/sessionStore'
 import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'

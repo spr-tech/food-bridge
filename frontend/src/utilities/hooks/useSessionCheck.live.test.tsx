@@ -5,12 +5,12 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Link } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getSession } from '@/app/session'
+import { getSession } from '@/stores/sessionStore'
 import { RequireRole, RequireSession } from '@/components/layout/RequireSession'
 import { ROUTES } from '@/utilities/constants/routes'
 import { renderRoutes, signInAs } from '@/test/render'
 
-vi.mock('@/config/env', () => ({
+vi.mock('@/configs/env', () => ({
   env: { apiUrl: 'https://api.test', useMocks: false },
 }))
 

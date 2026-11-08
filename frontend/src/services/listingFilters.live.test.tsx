@@ -7,13 +7,13 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { Provider } from 'react-redux'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { makeStore } from '@/app/store'
+import { makeStore } from '@/configs/storeConfig'
 import { pickupAreaValue } from '@/utilities/constants/listingOptions'
 import { useListings, useMyListings } from '@/services/listings'
 import { signInAs } from '@/test/render'
 import type { ListingFilters } from '@/types/api'
 
-vi.mock('@/config/env', () => ({
+vi.mock('@/configs/env', () => ({
   env: { apiUrl: 'https://api.test', useMocks: false },
 }))
 

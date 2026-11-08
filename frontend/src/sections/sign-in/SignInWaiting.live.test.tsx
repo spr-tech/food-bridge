@@ -11,7 +11,7 @@ import { ROUTES } from '@/utilities/constants/routes'
 import { SignInPage } from '@/pages/SignInPage'
 import { renderRoutes } from '@/test/render'
 
-vi.mock('@/config/env', () => ({
+vi.mock('@/configs/env', () => ({
   env: { apiUrl: 'https://api.test', useMocks: false },
 }))
 

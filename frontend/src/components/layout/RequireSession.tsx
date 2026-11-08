@@ -7,7 +7,7 @@
 // RequireRole: a page for another role shows the spec's 403 message (section 4) inside
 // the frame. Hiding pages is convenience only; the service decides who can do what.
 import { Link, Navigate, Outlet, useLocation } from 'react-router'
-import { useSession, wasExpired, wasSignedOut } from '@/app/session'
+import { useSession, wasExpired, wasSignedOut } from '@/stores/sessionStore'
 import { PageHeader } from '@/components/common/PageHeader'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { homePathFor } from '@/utilities/constants/roles'

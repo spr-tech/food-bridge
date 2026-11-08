@@ -8,8 +8,8 @@ import {
   type FetchBaseQueryError,
   type FetchBaseQueryMeta,
 } from '@reduxjs/toolkit/query/react'
-import { expireSession, getSession } from '@/app/session'
-import { env } from '@/config/env'
+import { expireSession, getSession } from '@/stores/sessionStore'
+import { env } from '@/configs/env'
 
 // TEMPORARY: true while every endpoint is simulated (src/mocks/). The demo line says
 // "(simulated)" while it is. Set to false once the endpoints call the service.
