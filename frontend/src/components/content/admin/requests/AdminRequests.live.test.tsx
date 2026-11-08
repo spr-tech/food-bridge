@@ -9,7 +9,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { canOpen } from '@/app/routes'
 import { ROUTES } from '@/utilities/constants/routes'
-import { AdminRequestsPage } from '@/pages/AdminRequestsPage'
+import { AdminRequestsPage } from '@/app/pages/AdminRequestsPage'
 import { renderRoutes, signInAs } from '@/test/render'
 
 vi.mock('@/configs/env', () => ({

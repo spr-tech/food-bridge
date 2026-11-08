@@ -4,8 +4,8 @@
 import { screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { ROUTES } from '@/utilities/constants/routes'
-import { HomeRedirect } from '@/pages/HomeRedirect'
-import { LandingPage } from '@/pages/LandingPage'
+import { HomeRedirect } from '@/app/pages/HomeRedirect'
+import { LandingPage } from '@/app/pages/LandingPage'
 import { renderRoutes, signInAs } from '@/test/render'
 
 function renderHome() {

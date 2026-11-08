@@ -9,8 +9,8 @@ import { act, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { listingDetailPath, ROUTES } from '@/utilities/constants/routes'
-import { ListingDetailPage } from '@/pages/ListingDetailPage'
-import { YourListingsPage } from '@/pages/YourListingsPage'
+import { ListingDetailPage } from '@/app/pages/ListingDetailPage'
+import { YourListingsPage } from '@/app/pages/YourListingsPage'
 import { renderRoutes, signInAs } from '@/test/render'
 
 vi.setConfig({ testTimeout: 15_000 })

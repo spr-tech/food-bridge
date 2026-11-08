@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 import { RequireRole, RequireSession } from '@/components/layouts/RequireSession'
 import { ROUTES } from '@/utilities/constants/routes'
 import { DEMO_PASSWORD } from '@/mocks/seed'
-import { SignInPage } from '@/pages/SignInPage'
+import { SignInPage } from '@/app/pages/SignInPage'
 import { renderRoutes, signInAs } from '@/test/render'
 
 function renderApp(entry: string) {

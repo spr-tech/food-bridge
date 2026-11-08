@@ -13,7 +13,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { RequireSession } from '@/components/layouts/RequireSession'
 import { listingDetailPath, ROUTES } from '@/utilities/constants/routes'
 import * as db from '@/mocks/db'
-import { ListingDetailPage } from '@/pages/ListingDetailPage'
+import { ListingDetailPage } from '@/app/pages/ListingDetailPage'
 import { moveDeadline } from '@/test/mockDb'
 import { findToastAction, renderRoutes, signInAs } from '@/test/render'
 

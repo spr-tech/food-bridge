@@ -6,8 +6,8 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
 import { ROUTES } from '@/utilities/constants/routes'
 import * as db from '@/mocks/db'
-import { CompletedHandoversPage } from '@/pages/CompletedHandoversPage'
-import { DashboardPage } from '@/pages/DashboardPage'
+import { CompletedHandoversPage } from '@/app/pages/CompletedHandoversPage'
+import { DashboardPage } from '@/app/pages/DashboardPage'
 import { renderRoutes, signInAs } from '@/test/render'
 
 const originalMatchMedia = window.matchMedia

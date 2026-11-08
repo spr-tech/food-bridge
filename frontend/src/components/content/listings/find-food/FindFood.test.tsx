@@ -8,7 +8,7 @@ import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ROUTES } from '@/utilities/constants/routes'
 import * as db from '@/mocks/db'
-import { BrowsePage } from '@/pages/BrowsePage'
+import { BrowsePage } from '@/app/pages/BrowsePage'
 import { moveDeadline } from '@/test/mockDb'
 import { findToastAction, renderRoutes, signInAs } from '@/test/render'
 

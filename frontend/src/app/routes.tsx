@@ -8,8 +8,8 @@ import { matchRoutes, type RouteObject } from 'react-router'
 import { RequireRole, RequireSession } from '@/components/layouts/RequireSession'
 import { RootLayout } from '@/components/layouts/RootLayout'
 import { ROUTES } from '@/utilities/constants/routes'
-import { ErrorPage } from '@/pages/ErrorPage'
-import { HomeRedirect } from '@/pages/HomeRedirect'
+import { ErrorPage } from '@/app/pages/ErrorPage'
+import { HomeRedirect } from '@/app/pages/HomeRedirect'
 import type { Role } from '@/utilities/enums/role'
 
 type RoleHandle = { roles: Role[] }
@@ -26,7 +26,7 @@ const devRoutes: RouteObject[] = import.meta.env.DEV
       {
         path: ROUTES.devForms,
         lazy: () =>
-          import('@/pages/dev/FormPreviewPage').then((m) => ({ Component: m.FormPreviewPage })),
+          import('@/app/pages/dev/FormPreviewPage').then((m) => ({ Component: m.FormPreviewPage })),
       },
     ]
   : []
@@ -42,12 +42,12 @@ export const routes: RouteObject[] = [
   children: [
     {
       index: true,
-      lazy: () => import('@/pages/LandingPage').then((m) => ({ Component: m.LandingPage })),
+      lazy: () => import('@/app/pages/LandingPage').then((m) => ({ Component: m.LandingPage })),
     },
   ],
 },      {
         path: ROUTES.signIn,
-        lazy: () => import('@/pages/SignInPage').then((m) => ({ Component: m.SignInPage })),
+        lazy: () => import('@/app/pages/SignInPage').then((m) => ({ Component: m.SignInPage })),
       },
       {
         element: <RequireSession />,
@@ -57,7 +57,7 @@ export const routes: RouteObject[] = [
             [
               {
                 path: ROUTES.listings,
-                lazy: () => import('@/pages/BrowsePage').then((m) => ({ Component: m.BrowsePage })),
+                lazy: () => import('@/app/pages/BrowsePage').then((m) => ({ Component: m.BrowsePage })),
               },
             ],
           ),
@@ -67,21 +67,21 @@ export const routes: RouteObject[] = [
               {
                 path: ROUTES.createListing,
                 lazy: () =>
-                  import('@/pages/CreateListingPage').then((m) => ({ Component: m.CreateListingPage })),
+                  import('@/app/pages/CreateListingPage').then((m) => ({ Component: m.CreateListingPage })),
               },
               {
                 path: ROUTES.editListing,
                 lazy: () =>
-                  import('@/pages/EditListingPage').then((m) => ({ Component: m.EditListingPage })),
+                  import('@/app/pages/EditListingPage').then((m) => ({ Component: m.EditListingPage })),
               },
               {
                 path: ROUTES.yourListings,
                 lazy: () =>
-                  import('@/pages/YourListingsPage').then((m) => ({ Component: m.YourListingsPage })),
+                  import('@/app/pages/YourListingsPage').then((m) => ({ Component: m.YourListingsPage })),
               },
               {
                 path: ROUTES.requests,
-                lazy: () => import('@/pages/RequestsPage').then((m) => ({ Component: m.RequestsPage })),
+                lazy: () => import('@/app/pages/RequestsPage').then((m) => ({ Component: m.RequestsPage })),
               },
             ],
           ),
@@ -91,7 +91,7 @@ export const routes: RouteObject[] = [
               {
                 path: ROUTES.yourRequests,
                 lazy: () =>
-                  import('@/pages/YourRequestsPage').then((m) => ({ Component: m.YourRequestsPage })),
+                  import('@/app/pages/YourRequestsPage').then((m) => ({ Component: m.YourRequestsPage })),
               },
             ],
           ),
@@ -100,19 +100,19 @@ export const routes: RouteObject[] = [
             [
               {
                 path: ROUTES.admin,
-                lazy: () => import('@/pages/DashboardPage').then((m) => ({ Component: m.DashboardPage })),
+                lazy: () => import('@/app/pages/DashboardPage').then((m) => ({ Component: m.DashboardPage })),
               },
               {
                 path: ROUTES.completedHandovers,
                 lazy: () =>
-                  import('@/pages/CompletedHandoversPage').then((m) => ({
+                  import('@/app/pages/CompletedHandoversPage').then((m) => ({
                     Component: m.CompletedHandoversPage,
                   })),
               },
               {
                 path: ROUTES.adminRequests,
                 lazy: () =>
-                  import('@/pages/AdminRequestsPage').then((m) => ({ Component: m.AdminRequestsPage })),
+                  import('@/app/pages/AdminRequestsPage').then((m) => ({ Component: m.AdminRequestsPage })),
               },
             ],
           ),
@@ -123,12 +123,12 @@ export const routes: RouteObject[] = [
             // api.util.prefetch for the listing WITHOUT awaiting it, so
             // navigation never waits for data.
             lazy: () =>
-              import('@/pages/ListingDetailPage').then((m) => ({ Component: m.ListingDetailPage })),
+              import('@/app/pages/ListingDetailPage').then((m) => ({ Component: m.ListingDetailPage })),
           },
           ...devRoutes,
           {
             path: '*',
-            lazy: () => import('@/pages/NotFoundPage').then((m) => ({ Component: m.NotFoundPage })),
+            lazy: () => import('@/app/pages/NotFoundPage').then((m) => ({ Component: m.NotFoundPage })),
           },
         ],
       },

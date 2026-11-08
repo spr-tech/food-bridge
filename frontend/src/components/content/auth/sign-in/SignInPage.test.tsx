@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest'
 import { getSession, SESSION_STORAGE_KEY } from '@/stores/sessionStore'
 import { ROUTES } from '@/utilities/constants/routes'
 import { DEMO_PASSWORD } from '@/utilities/constants/demoAccounts'
-import { SignInPage } from '@/pages/SignInPage'
+import { SignInPage } from '@/app/pages/SignInPage'
 import { renderRoutes, signInAs } from '@/test/render'
 
 function renderSignIn(entry: string = ROUTES.signIn) {

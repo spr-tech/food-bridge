@@ -4,7 +4,7 @@ import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ROUTES } from '@/utilities/constants/routes'
 import { lagosToday } from '@/utilities/helpers/deadline'
-import { CreateListingPage } from '@/pages/CreateListingPage'
+import { CreateListingPage } from '@/app/pages/CreateListingPage'
 import { renderRoutes, signInAs } from '@/test/render'
 
 const refusal = vi.hoisted(() => ({

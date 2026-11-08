@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ROUTES } from '@/utilities/constants/routes'
 import { lagosToday } from '@/utilities/helpers/deadline'
 import * as db from '@/mocks/db'
-import { CreateListingPage } from '@/pages/CreateListingPage'
+import { CreateListingPage } from '@/app/pages/CreateListingPage'
 import { renderRoutes, signInAs } from '@/test/render'
 
 // Filling the whole form in jsdom takes a few seconds; allow for a busy test run.

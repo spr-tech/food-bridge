@@ -7,7 +7,7 @@ import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ROUTES } from '@/utilities/constants/routes'
-import { YourListingsPage } from '@/pages/YourListingsPage'
+import { YourListingsPage } from '@/app/pages/YourListingsPage'
 import { renderRoutes, signInAs } from '@/test/render'
 
 vi.mock('@/configs/env', () => ({
