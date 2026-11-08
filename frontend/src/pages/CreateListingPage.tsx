@@ -2,7 +2,7 @@
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { PageHeader } from '@/components/layouts/PageHeader'
 import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
-import { ShareFoodForm } from '@/sections/share-food/ShareFoodForm'
+import { ShareFoodForm } from '@/components/content/listings/share-food/forms/ShareFoodForm'
 
 const TITLE = 'Share food'
 

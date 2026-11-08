@@ -6,7 +6,7 @@ import { Form, Formik, type FormikErrors, type FormikTouched } from 'formik'
 import * as Yup from 'yup'
 import { Plus } from 'lucide-react'
 import { PageHeader } from '@/components/layouts/PageHeader'
-import { StatusBadge } from '@/components/common/StatusBadge'
+import { StatusBadge } from '@/components/content/listings/shared/StatusBadge'
 import {
   FormCheckbox,
   FormDate,

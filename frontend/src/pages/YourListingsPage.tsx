@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/layouts/PageHeader'
 import { Button } from '@/components/ui/button/button'
 import { ROUTES } from '@/utilities/constants/routes'
 import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
-import { YourListings } from '@/sections/your-listings/YourListings'
+import { YourListings } from '@/components/content/listings/your-listings/YourListings'
 
 const TITLE = 'Your listings'
 

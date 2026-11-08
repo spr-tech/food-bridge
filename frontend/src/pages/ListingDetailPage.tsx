@@ -2,7 +2,7 @@
 // S5). The section sets the tab title to the food's name once it loads.
 import { useParams } from 'react-router'
 import { PageContainer } from '@/components/layouts/PageContainer'
-import { ListingDetails } from '@/sections/listing-details/ListingDetails'
+import { ListingDetails } from '@/components/content/listings/listing-details/ListingDetails'
 
 export function ListingDetailPage() {
   // Spaces pasted along with the address (/listings/lst-01%20%20) are not part of the id.

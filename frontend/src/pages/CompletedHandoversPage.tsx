@@ -4,7 +4,7 @@ import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
 import {
   CompletedHandovers,
   CompletedHandoversHeader,
-} from '@/sections/completed-handovers/CompletedHandovers'
+} from '@/components/content/admin/completed-handovers/CompletedHandovers'
 
 export function CompletedHandoversPage() {
   useDocumentTitle('Completed handovers')

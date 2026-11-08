@@ -2,7 +2,7 @@
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { PageHeader } from '@/components/layouts/PageHeader'
 import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
-import { YourRequests } from '@/sections/your-requests/YourRequests'
+import { YourRequests } from '@/components/content/requests/your-requests/YourRequests'
 
 const TITLE = 'Your requests'
 

@@ -9,7 +9,7 @@ import { useSession } from '@/stores/sessionStore'
 import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
 import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { listingDetailPath } from '@/utilities/constants/routes'
-import { ShareFoodForm } from '@/sections/share-food/ShareFoodForm'
+import { ShareFoodForm } from '@/components/content/listings/share-food/forms/ShareFoodForm'
 import { errorStatus } from '@/utilities/helpers/apiErrors'
 import { useListing } from '@/services/listings'
 

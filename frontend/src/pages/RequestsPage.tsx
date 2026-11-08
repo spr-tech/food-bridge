@@ -12,7 +12,7 @@ import { ErrorState } from '@/components/ui/error-state/error-state'
 import { Skeleton } from '@/components/ui/skeleton/skeleton'
 import { listingDetailPath } from '@/utilities/constants/routes'
 import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
-import { RequestsPanel } from '@/sections/listing-details/RequestsPanel'
+import { RequestsPanel } from '@/components/content/listings/listing-details/RequestsPanel'
 import { useMyListings } from '@/services/listings'
 
 const TITLE = 'Requests'

@@ -4,7 +4,7 @@ import { useSession } from '@/stores/sessionStore'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { PageHeader } from '@/components/layouts/PageHeader'
 import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
-import { FindFood } from '@/sections/find-food/FindFood'
+import { FindFood } from '@/components/content/listings/find-food/FindFood'
 
 // The heading and description for each kind of user. The desktop description is the
 // long one; phones get the short one.

@@ -1,7 +1,7 @@
 import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
-import { LandingClosing } from '@/sections/landing/LandingClosing'
-import { LandingHero } from '@/sections/landing/LandingHero'
-import { LandingMiddle } from '@/sections/landing/LandingMiddle'
+import { LandingClosing } from '@/components/content/landing/LandingClosing'
+import { LandingHero } from '@/components/content/landing/LandingHero'
+import { LandingMiddle } from '@/components/content/landing/LandingMiddle'
 import '@/styles/landing.css'
 
 export function LandingPage() {

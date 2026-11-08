@@ -15,8 +15,8 @@ import { homePathFor } from '@/utilities/constants/roles'
 import { ROUTES } from '@/utilities/constants/routes'
 import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
 import { wakeService } from '@/configs/serviceConfig'
-import { SignInForm } from '@/sections/sign-in/SignInForm'
-import { SignInPanelDesktop, SignInPanelPhone } from '@/sections/sign-in/SignInPanel'
+import { SignInForm } from '@/components/content/auth/sign-in/forms/SignInForm'
+import { SignInPanelDesktop, SignInPanelPhone } from '@/components/content/auth/sign-in/SignInPanel'
 import type { Role } from '@/utilities/enums/role'
 
 // Only a path inside this app that the role may open: never another site, never back to
