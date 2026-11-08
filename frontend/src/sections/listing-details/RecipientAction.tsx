@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { CancelRequestButton } from '@/components/common/CancelRequestButton'
 import { StatusBadge } from '@/components/common/StatusBadge'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button/button'
+import { Skeleton } from '@/components/ui/skeleton/skeleton'
 import { useRequestFood } from '@/utilities/hooks/useRequestFood'
 import {
   REQUEST_NOT_APPROVED,

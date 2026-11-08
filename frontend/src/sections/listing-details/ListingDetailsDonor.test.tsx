@@ -11,7 +11,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { RequireSession } from '@/components/layout/RequireSession'
+import { RequireSession } from '@/components/layouts/RequireSession'
 import { listingDetailPath, ROUTES } from '@/utilities/constants/routes'
 import * as db from '@/mocks/db'
 import { ListingDetailPage } from '@/pages/ListingDetailPage'

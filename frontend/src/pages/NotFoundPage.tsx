@@ -1,7 +1,7 @@
 // Shown for any address that matches no route.
 import { Link } from 'react-router'
-import { PageContainer } from '@/components/common/PageContainer'
-import { PageHeader } from '@/components/common/PageHeader'
+import { PageContainer } from '@/components/layouts/PageContainer'
+import { PageHeader } from '@/components/layouts/PageHeader'
 import { homePathFor } from '@/utilities/constants/roles'
 import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
 import { useRole } from '@/utilities/hooks/useRole'

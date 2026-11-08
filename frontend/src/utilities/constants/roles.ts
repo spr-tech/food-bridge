@@ -1,7 +1,7 @@
 // What each role sees: its home page, role label and navigation. The organisation name
 // comes from the signed-in session.
 import { matchPath } from 'react-router'
-import type { NavIconName } from '@/components/layout/NavIcons'
+import type { NavIconName } from '@/components/layouts/NavIcons'
 import { ROUTES } from '@/utilities/constants/routes'
 import type { Role } from '@/utilities/enums/role'
 

@@ -8,9 +8,9 @@
 // take focus (tabIndex -1), so the panel can move focus to it when its buttons go.
 import { forwardRef, useId } from 'react'
 import { StatusBadge } from '@/components/common/StatusBadge'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { ConfirmDialog } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button/button'
+import { Card } from '@/components/ui/card/card'
+import { ConfirmDialog } from '@/components/ui/dialog/dialog'
 import { optionLabel, PICKUP_AREAS } from '@/utilities/constants/listingOptions'
 import { formatListingQuantity, formatRequested, initials } from '@/utilities/helpers/format'
 import type { Listing, ListingRequest } from '@/models/api'

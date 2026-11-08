@@ -1,6 +1,6 @@
 
 import { useCallback, useState } from 'react'
-import { useToast } from '@/components/ui/toast'
+import { useToast } from '@/components/ui/toast/toast'
 import { useIdempotencyKey } from '@/utilities/hooks/useIdempotencyKey'
 import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { errorCode, errorStatus } from '@/utilities/helpers/apiErrors'

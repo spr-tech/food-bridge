@@ -1,5 +1,5 @@
 // /admin/requests: requests waiting for a donor's decision, opened from the dashboard's card.
-import { PageContainer } from '@/components/common/PageContainer'
+import { PageContainer } from '@/components/layouts/PageContainer'
 import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
 import { AdminRequests, AdminRequestsHeader } from '@/sections/admin-requests/AdminRequests'
 

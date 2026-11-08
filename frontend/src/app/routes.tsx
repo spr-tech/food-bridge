@@ -5,8 +5,8 @@
 // The roles each guard allows are also kept on its route, so canOpen (used by sign-in
 // for ?next=) follows exactly the same rules as RequireRole.
 import { matchRoutes, type RouteObject } from 'react-router'
-import { RequireRole, RequireSession } from '@/components/layout/RequireSession'
-import { RootLayout } from '@/components/layout/RootLayout'
+import { RequireRole, RequireSession } from '@/components/layouts/RequireSession'
+import { RootLayout } from '@/components/layouts/RootLayout'
 import { ROUTES } from '@/utilities/constants/routes'
 import { ErrorPage } from '@/pages/ErrorPage'
 import { HomeRedirect } from '@/pages/HomeRedirect'

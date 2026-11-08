@@ -1,7 +1,7 @@
 // /listings/:id: one listing; the owning donor's view and everyone else's differ (spec S4,
 // S5). The section sets the tab title to the food's name once it loads.
 import { useParams } from 'react-router'
-import { PageContainer } from '@/components/common/PageContainer'
+import { PageContainer } from '@/components/layouts/PageContainer'
 import { ListingDetails } from '@/sections/listing-details/ListingDetails'
 
 export function ListingDetailPage() {

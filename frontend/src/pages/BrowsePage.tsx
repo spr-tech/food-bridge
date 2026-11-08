@@ -1,8 +1,8 @@
 // /listings: recipients find food on offer (spec S3, "Find food"); administrators see
 // the same list as "All listings", the name in their menu.
 import { useSession } from '@/stores/sessionStore'
-import { PageContainer } from '@/components/common/PageContainer'
-import { PageHeader } from '@/components/common/PageHeader'
+import { PageContainer } from '@/components/layouts/PageContainer'
+import { PageHeader } from '@/components/layouts/PageHeader'
 import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
 import { FindFood } from '@/sections/find-food/FindFood'
 

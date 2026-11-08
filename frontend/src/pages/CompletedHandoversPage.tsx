@@ -1,5 +1,5 @@
 // /admin/handovers: every completed handover, opened from the dashboard's card.
-import { PageContainer } from '@/components/common/PageContainer'
+import { PageContainer } from '@/components/layouts/PageContainer'
 import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
 import {
   CompletedHandovers,

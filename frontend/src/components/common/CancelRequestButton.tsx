@@ -7,9 +7,9 @@
 // - 500 or no connection: "Your request wasn't cancelled. Try again." with Try again.
 // The service decides who may cancel (only the recipient who made it, only while Pending);
 // callers show this button on the recipient's own Pending requests only.
-import { ConfirmDialog } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { useToast } from '@/components/ui/toast'
+import { ConfirmDialog } from '@/components/ui/dialog/dialog'
+import { Button } from '@/components/ui/button/button'
+import { useToast } from '@/components/ui/toast/toast'
 import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { errorCode, errorStatus } from '@/utilities/helpers/apiErrors'
 import { useCancelRequest } from '@/services/requests'

@@ -6,7 +6,7 @@ import userEvent from '@testing-library/user-event'
 import { Link } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getSession } from '@/stores/sessionStore'
-import { RequireRole, RequireSession } from '@/components/layout/RequireSession'
+import { RequireRole, RequireSession } from '@/components/layouts/RequireSession'
 import { ROUTES } from '@/utilities/constants/routes'
 import { renderRoutes, signInAs } from '@/test/render'
 

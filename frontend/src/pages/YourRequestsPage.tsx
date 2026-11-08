@@ -1,6 +1,6 @@
 // /your-requests: the recipient's requests and what happened to each (spec S7).
-import { PageContainer } from '@/components/common/PageContainer'
-import { PageHeader } from '@/components/common/PageHeader'
+import { PageContainer } from '@/components/layouts/PageContainer'
+import { PageHeader } from '@/components/layouts/PageHeader'
 import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
 import { YourRequests } from '@/sections/your-requests/YourRequests'
 

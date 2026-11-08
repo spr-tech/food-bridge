@@ -8,7 +8,7 @@ import { RouterProvider } from 'react-router/dom'
 import { expect } from 'vitest'
 import { saveSession } from '@/stores/sessionStore'
 import { makeStore } from '@/configs/storeConfig'
-import { ToastProvider } from '@/components/ui/toast'
+import { ToastProvider } from '@/components/ui/toast/toast'
 import { ACCOUNTS } from '@/mocks/seed'
 import type { Role } from '@/utilities/enums/role'
 

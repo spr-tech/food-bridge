@@ -4,7 +4,7 @@
 // form card fits one screen.
 // The headline is styled text, not a heading: "Welcome back" is the page's h1.
 import type { ReactNode } from 'react'
-import { Logo } from '@/components/layout/Logo'
+import { Logo } from '@/components/layouts/Logo'
 
 const HEADLINE = "Tonight's surplus is waiting."
 const DESCRIPTION = "Share what's left at closing time, or find good food nearby to collect this evening."

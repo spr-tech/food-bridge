@@ -5,7 +5,7 @@
 // the recipient's that show as Pending (getRecipientRequestStatus). The service can still
 // store a request as PENDING once its listing is reserved, collected or expired.
 import { useSession } from '@/stores/sessionStore'
-import type { NavCounts } from '@/components/layout/Sidebar'
+import type { NavCounts } from '@/components/layouts/Sidebar'
 import { ROUTES } from '@/utilities/constants/routes'
 import { getRecipientRequestStatus } from '@/utilities/helpers/request-status'
 import { useMyListings } from '@/services/listings'

@@ -13,9 +13,9 @@
 // The service decides who may delete; this button is not the safeguard.
 import { useId, useState } from 'react'
 import { useSession } from '@/stores/sessionStore'
-import { Button } from '@/components/ui/button'
-import { ConfirmDialog } from '@/components/ui/dialog'
-import { useToast } from '@/components/ui/toast'
+import { Button } from '@/components/ui/button/button'
+import { ConfirmDialog } from '@/components/ui/dialog/dialog'
+import { useToast } from '@/components/ui/toast/toast'
 import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { canDeleteListing, deleteBlockedReason } from '@/utilities/helpers/listing-permissions'
 import { errorStatus } from '@/utilities/helpers/apiErrors'

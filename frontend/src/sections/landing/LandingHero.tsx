@@ -1,7 +1,7 @@
 // Landing header and hero: the photo sits behind, fixed, with the text centred.
 import { Link } from 'react-router'
 import { ROUTES } from '@/utilities/constants/routes'
-import { Logo } from '@/components/layout/Logo'
+import { Logo } from '@/components/layouts/Logo'
 
 const navLinks = [
   { href: '#story', label: 'The story' },

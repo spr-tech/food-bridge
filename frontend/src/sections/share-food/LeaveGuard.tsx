@@ -3,7 +3,7 @@
 // Stay (danger tone). Closing or reloading the tab gets the browser's own warning.
 import { useEffect } from 'react'
 import { useBlocker } from 'react-router'
-import { ConfirmDialog } from '@/components/ui/dialog'
+import { ConfirmDialog } from '@/components/ui/dialog/dialog'
 
 type LeaveGuardProps = {
   // True while there are changes that would be lost.

@@ -1,8 +1,8 @@
 // The root route's error page, shown if a page crashes or fails to load. It replaces
 // the whole layout, so it brings its own demonstration line. Raw error text is never shown.
 import { Link } from 'react-router'
-import { PageHeader } from '@/components/common/PageHeader'
-import { DemoBanner } from '@/components/layout/DemoBanner'
+import { PageHeader } from '@/components/layouts/PageHeader'
+import { DemoBanner } from '@/components/layouts/DemoBanner'
 import { homePathFor } from '@/utilities/constants/roles'
 import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
 import { useRole } from '@/utilities/hooks/useRole'

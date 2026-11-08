@@ -1,6 +1,6 @@
 // /listings/new: a donor shares surplus food (spec S2, "Share food").
-import { PageContainer } from '@/components/common/PageContainer'
-import { PageHeader } from '@/components/common/PageHeader'
+import { PageContainer } from '@/components/layouts/PageContainer'
+import { PageHeader } from '@/components/layouts/PageHeader'
 import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
 import { ShareFoodForm } from '@/sections/share-food/ShareFoodForm'
 

@@ -18,11 +18,11 @@
 // States: skeleton rows; "No requests yet. Recipients nearby can see this listing until
 // [deadline]."; "We couldn't load requests." with Try again; "Updated …".
 import { useEffect, useRef, useState } from 'react'
-import { LoadingState } from '@/components/common/LoadingState'
-import { EmptyState } from '@/components/ui/empty-state'
-import { ErrorState } from '@/components/ui/error-state'
-import { Skeleton } from '@/components/ui/skeleton'
-import { useToast } from '@/components/ui/toast'
+import { LoadingState } from '@/components/ui/loading-state/LoadingState'
+import { EmptyState } from '@/components/ui/empty-state/empty-state'
+import { ErrorState } from '@/components/ui/error-state/error-state'
+import { Skeleton } from '@/components/ui/skeleton/skeleton'
+import { useToast } from '@/components/ui/toast/toast'
 import { useNow } from '@/utilities/hooks/useNow'
 import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { formatDateTime, formatUpdated } from '@/utilities/helpers/format'
