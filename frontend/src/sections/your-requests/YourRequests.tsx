@@ -13,7 +13,7 @@ import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { formatUpdated } from '@/utilities/helpers/format'
 import { getRecipientRequestStatus } from '@/utilities/helpers/request-status'
 import { RequestItem } from '@/sections/your-requests/RequestItem'
-import { errorStatus } from '@/services/errors'
+import { errorStatus } from '@/utilities/helpers/apiErrors'
 import { useMyRequests } from '@/services/requests'
 import type { ListingRequest } from '@/models/api'
 

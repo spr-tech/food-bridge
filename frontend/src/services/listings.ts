@@ -10,7 +10,7 @@ import { env } from '@/configs/env'
 import {
   extractImageReference,
   mapBackendListing,
-} from '@/services/backend-mappers'
+} from '@/services/mappers/backend-mappers'
 import { readAllPages, readPages } from '@/utilities/helpers/pagedQuery'
 
 import type {

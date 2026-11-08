@@ -6,7 +6,7 @@ import type { ReactNode } from 'react'
 import { Provider } from 'react-redux'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { makeStore } from '@/configs/storeConfig'
-import { errorStatus } from '@/services/errors'
+import { errorStatus } from '@/utilities/helpers/apiErrors'
 import { useDeleteListing, useMyListings } from '@/services/listings'
 import { signInAs } from '@/test/render'
 

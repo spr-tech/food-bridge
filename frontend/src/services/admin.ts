@@ -8,7 +8,7 @@ import {
   mapBackendActivity,
   mapBackendListing,
   mapBackendRequest,
-} from '@/services/backend-mappers'
+} from '@/services/mappers/backend-mappers'
 import { readAllPages, SERVICE_PAGE_LIMIT } from '@/utilities/helpers/pagedQuery'
 import type {
   ActivityEntry,

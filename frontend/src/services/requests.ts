@@ -4,7 +4,7 @@ import * as db from '@/mocks/db'
 import { simulate, simulateRivalApproval, simulateWrite } from '@/mocks/simulate'
 import { api, LIST_QUERY_OPTIONS } from '@/configs/serviceConfig'
 import { env } from '@/configs/env'
-import { mapBackendListing, mapBackendRequest } from '@/services/backend-mappers'
+import { mapBackendListing, mapBackendRequest } from '@/services/mappers/backend-mappers'
 import { listingsApi } from '@/services/listings'
 import type { BackendFoodRequest, BackendListingResponse, ListingRequest } from '@/models/api'
 

@@ -11,7 +11,7 @@ import { ConfirmDialog } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast'
 import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
-import { errorCode, errorStatus } from '@/services/errors'
+import { errorCode, errorStatus } from '@/utilities/helpers/apiErrors'
 import { useCancelRequest } from '@/services/requests'
 
 const NO_LONGER_PENDING = 'This request can no longer be cancelled.'

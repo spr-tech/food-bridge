@@ -26,7 +26,7 @@ import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { cn } from '@/utilities/helpers/cn'
 import { formatDateTime, formatListingQuantity, formatUpdated } from '@/utilities/helpers/format'
 import { usePendingRequests } from '@/services/admin'
-import { errorStatus } from '@/services/errors'
+import { errorStatus } from '@/utilities/helpers/apiErrors'
 import type { ListingRequest } from '@/models/api'
 import type { ListingStatus } from '@/utilities/enums/status'
 

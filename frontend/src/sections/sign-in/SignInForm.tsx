@@ -16,7 +16,7 @@ import { signInSchema, type SignInValues } from '@/models/validations/authValida
 import { DemoAccountsBox } from '@/sections/sign-in/DemoAccounts'
 import { api } from '@/configs/serviceConfig'
 import { useSignIn } from '@/services/auth'
-import { errorStatus } from '@/services/errors'
+import { errorStatus } from '@/utilities/helpers/apiErrors'
 
 const WRONG_DETAILS = "That email or password isn't right. Check them and try again."
 const UNREACHABLE = "We can't reach FoodBridge right now. Try again in a moment."

@@ -27,7 +27,7 @@ import {
   type ListingFormValues,
 } from '@/models/validations/listingValidation'
 import { LeaveGuard } from '@/sections/share-food/LeaveGuard'
-import { errorStatus, fieldErrors } from '@/services/errors'
+import { errorStatus, fieldErrors } from '@/utilities/helpers/apiErrors'
 import {
   useCreateListing,
   useUpdateListing,

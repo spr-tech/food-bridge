@@ -21,7 +21,7 @@ import { useNow } from '@/utilities/hooks/useNow'
 import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { formatUpdated } from '@/utilities/helpers/format'
 import { YourListingRow } from '@/sections/your-listings/YourListingRow'
-import { errorStatus } from '@/services/errors'
+import { errorStatus } from '@/utilities/helpers/apiErrors'
 import { useMyListings } from '@/services/listings'
 import type { Listing } from '@/models/api'
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { extractImageReference, mapBackendListing, mapBackendRequest } from '@/services/backend-mappers'
+import { extractImageReference, mapBackendListing, mapBackendRequest } from '@/services/mappers/backend-mappers'
 
 describe('backend response adapters', () => {
   it('maps backend listing fields into the existing frontend listing shape', () => {
@@ -125,4 +125,4 @@ describe('backend response adapters', () => {
 // Explanation
 // - Checks the mapper functions with made-up service responses. It does not call the
 //   real service, so a passing test does not prove the live replies match.
-// - Save as src/services/backend-mappers.test.ts.
+// - Save as src/services/mappers/backend-mappers.test.ts.

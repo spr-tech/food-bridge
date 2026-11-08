@@ -18,7 +18,7 @@ import { ConfirmDialog } from '@/components/ui/dialog'
 import { useToast } from '@/components/ui/toast'
 import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { canDeleteListing, deleteBlockedReason } from '@/utilities/helpers/listing-permissions'
-import { errorStatus } from '@/services/errors'
+import { errorStatus } from '@/utilities/helpers/apiErrors'
 import { useDeleteListing } from '@/services/listings'
 import type { Listing } from '@/models/api'
 

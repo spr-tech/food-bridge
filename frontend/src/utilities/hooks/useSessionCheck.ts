@@ -6,7 +6,7 @@ import { useEffect } from 'react'
 import { saveSession } from '@/stores/sessionStore'
 import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { useCurrentAccount } from '@/services/auth'
-import { errorStatus } from '@/services/errors'
+import { errorStatus } from '@/utilities/helpers/apiErrors'
 import type { Session } from '@/models/api'
 
 export function useSessionCheck(session: Session | null) {

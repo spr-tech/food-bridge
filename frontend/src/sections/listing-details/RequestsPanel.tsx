@@ -27,7 +27,7 @@ import { useNow } from '@/utilities/hooks/useNow'
 import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { formatDateTime, formatUpdated } from '@/utilities/helpers/format'
 import { RequestRow } from '@/sections/listing-details/RequestRow'
-import { errorCode, errorStatus } from '@/services/errors'
+import { errorCode, errorStatus } from '@/utilities/helpers/apiErrors'
 import {
   useDecideRequest,
   useListingRequests,

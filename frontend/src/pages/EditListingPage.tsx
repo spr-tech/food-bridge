@@ -10,7 +10,7 @@ import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
 import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { listingDetailPath } from '@/utilities/constants/routes'
 import { ShareFoodForm } from '@/sections/share-food/ShareFoodForm'
-import { errorStatus } from '@/services/errors'
+import { errorStatus } from '@/utilities/helpers/apiErrors'
 import { useListing } from '@/services/listings'
 
 const TITLE = 'Edit listing'

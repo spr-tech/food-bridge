@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react'
 import { useToast } from '@/components/ui/toast'
 import { useIdempotencyKey } from '@/utilities/hooks/useIdempotencyKey'
 import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
-import { errorCode, errorStatus } from '@/services/errors'
+import { errorCode, errorStatus } from '@/utilities/helpers/apiErrors'
 import { useCreateRequest } from '@/services/requests'
 
 const EXPIRED_WHILE_REQUESTING =

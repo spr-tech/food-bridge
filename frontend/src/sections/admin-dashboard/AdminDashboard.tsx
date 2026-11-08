@@ -21,7 +21,7 @@ import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { cn } from '@/utilities/helpers/cn'
 import { foodSavedByUnit } from '@/utilities/helpers/food-saved'
 import { formatDateTime, formatLongDay, formatUnit, formatUpdated, initials } from '@/utilities/helpers/format'
-import { errorStatus } from '@/services/errors'
+import { errorStatus } from '@/utilities/helpers/apiErrors'
 import {
   useAdminDashboard,
   useCompletedHandovers,

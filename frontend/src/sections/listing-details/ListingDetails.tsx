@@ -28,7 +28,7 @@ import { canDeleteListing, isListingEditable } from '@/utilities/helpers/listing
 import { ListingSummary } from '@/sections/listing-details/ListingSummary'
 import { RecipientAction } from '@/sections/listing-details/RecipientAction'
 import { RequestsPanel } from '@/sections/listing-details/RequestsPanel'
-import { errorStatus } from '@/services/errors'
+import { errorStatus } from '@/utilities/helpers/apiErrors'
 import { useListing } from '@/services/listings'
 import type { Listing } from '@/models/api'
 import type { Role } from '@/utilities/enums/role'

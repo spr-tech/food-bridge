@@ -12,7 +12,7 @@ import {
   useDistributionToday,
   useRecentActivity,
 } from '@/services/admin'
-import { errorStatus } from '@/services/errors'
+import { errorStatus } from '@/utilities/helpers/apiErrors'
 import { signInAs } from '@/test/render'
 
 vi.mock('@/configs/env', () => ({
