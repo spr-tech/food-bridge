@@ -14,7 +14,7 @@ import {
   formatListingQuantity,
   formatTime,
 } from '@/utilities/helpers/format'
-import type { Listing } from '@/types/api'
+import type { Listing } from '@/models/api'
 
 // "Pickup by 7:00 PM today" on a phone, as in m4; "on Mon 26 Oct" further out.
 function phoneDay(day: string): string {

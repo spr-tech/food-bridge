@@ -22,7 +22,7 @@ import { DEFAULT_STATUS, useListingFilters } from '@/sections/find-food/useListi
 import { errorStatus } from '@/services/errors'
 import { useListings } from '@/services/listings'
 import { useMyRequests } from '@/services/requests'
-import type { ListingRequest } from '@/types/api'
+import type { ListingRequest } from '@/models/api'
 
 const PAGE_SIZE = 12
 const SEARCH_DELAY_MS = 300

@@ -6,7 +6,7 @@ import { api, LIST_QUERY_OPTIONS } from '@/configs/serviceConfig'
 import { env } from '@/configs/env'
 import { mapBackendListing, mapBackendRequest } from '@/services/backend-mappers'
 import { listingsApi } from '@/services/listings'
-import type { BackendFoodRequest, BackendListingResponse, ListingRequest } from '@/types/api'
+import type { BackendFoodRequest, BackendListingResponse, ListingRequest } from '@/models/api'
 
 const touched = (listingId: string) => [
   { type: 'Request', id: `LISTING-${listingId}` },

@@ -14,7 +14,7 @@
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import { getSession } from '@/stores/sessionStore'
 import { approveRival, MockApiError } from '@/mocks/db'
-import type { Session } from '@/types/api'
+import type { Session } from '@/models/api'
 
 export type SimulateMode = 'error' | 'empty' | 'slow' | 'offline' | 'conflict'
 

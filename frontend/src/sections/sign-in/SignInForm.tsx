@@ -12,7 +12,7 @@ import { FocusFirstError, FormInput, FormPasswordInput } from '@/components/form
 import { Button } from '@/components/ui/button'
 import type { DemoAccount } from '@/utilities/constants/demoAccounts'
 import { useAppDispatch } from '@/utilities/hooks/useAppStore'
-import { signInSchema, type SignInValues } from '@/schema/signInSchema'
+import { signInSchema, type SignInValues } from '@/models/validations/authValidation'
 import { DemoAccountsBox } from '@/sections/sign-in/DemoAccounts'
 import { api } from '@/configs/serviceConfig'
 import { useSignIn } from '@/services/auth'

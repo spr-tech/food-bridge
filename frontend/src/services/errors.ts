@@ -1,6 +1,6 @@
 // Reading the service's errors (spec section 4). Screens decide what to say from the
 // status and code, and never show the service's own message text.
-import type { ApiErrorBody } from '@/types/api'
+import type { ApiErrorBody } from '@/models/api'
 
 type ErrorWithStatus = { status: number | string; data?: unknown }
 

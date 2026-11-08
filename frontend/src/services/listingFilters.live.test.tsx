@@ -11,7 +11,7 @@ import { makeStore } from '@/configs/storeConfig'
 import { pickupAreaValue } from '@/utilities/constants/listingOptions'
 import { useListings, useMyListings } from '@/services/listings'
 import { signInAs } from '@/test/render'
-import type { ListingFilters } from '@/types/api'
+import type { ListingFilters } from '@/models/api'
 
 vi.mock('@/configs/env', () => ({
   env: { apiUrl: 'https://api.test', useMocks: false },

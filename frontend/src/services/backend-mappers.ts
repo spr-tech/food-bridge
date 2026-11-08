@@ -7,7 +7,7 @@ import type {
   Listing,
   ListingRequest,
   ListingSummary,
-} from '@/types/api'
+} from '@/models/api'
 
 function asString(value: unknown, fallback = ''): string {
   return typeof value === 'string' ? value : fallback

@@ -3,7 +3,7 @@
 // not the simulated data. Storage can be blocked, so every access is guarded.
 // The token stays in sessionStorage until the auth approach is agreed (docs/decisions.md).
 import { useSyncExternalStore } from 'react'
-import type { Session } from '@/types/api'
+import type { Session } from '@/models/api'
 
 export const SESSION_STORAGE_KEY = 'foodbridge.session'
 

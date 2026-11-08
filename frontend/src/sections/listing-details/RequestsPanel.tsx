@@ -33,7 +33,7 @@ import {
   useListingRequests,
   useMarkCollected,
 } from '@/services/requests'
-import type { Listing, ListingRequest } from '@/types/api'
+import type { Listing, ListingRequest } from '@/models/api'
 
 const ALREADY_RESERVED =
   'This listing already has an approved request. Your approval was not saved.'

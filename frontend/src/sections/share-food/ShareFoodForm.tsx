@@ -25,7 +25,7 @@ import {
   DESCRIPTION_MAX,
   listingSchema,
   type ListingFormValues,
-} from '@/schema/listingSchema'
+} from '@/models/validations/listingValidation'
 import { LeaveGuard } from '@/sections/share-food/LeaveGuard'
 import { errorStatus, fieldErrors } from '@/services/errors'
 import {
@@ -33,7 +33,7 @@ import {
   useUpdateListing,
   useUploadListingImage,
 } from '@/services/listings'
-import type { Listing } from '@/types/api'
+import type { Listing } from '@/models/api'
 
 type ShareFoodFormProps = {
   listing?: Listing

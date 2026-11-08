@@ -24,7 +24,7 @@ import type {
   ListingRequest,
   RequestPage,
   Session,
-} from '@/types/api'
+} from '@/models/api'
 import type { ListingStatus, RequestStatus } from '@/utilities/enums/status'
 
 export const MOCK_DB_STORAGE_KEY = 'foodbridge.mock-db'

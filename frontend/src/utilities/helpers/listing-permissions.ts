@@ -9,7 +9,7 @@
 // handover, and a Reversed one of a handover that was undone: each is offered but disabled
 // (deleteBlockedReason), for the donor and administrator alike. The service refuses both
 // (409 LISTING_NOT_DELETABLE). Available and Expired listings can be deleted.
-import type { Listing, Session } from '@/types/api'
+import type { Listing, Session } from '@/models/api'
 
 export function canDeleteListing(
   session: Pick<Session, 'role' | 'accountId'> | null,

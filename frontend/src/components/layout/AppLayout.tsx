@@ -12,7 +12,7 @@ import { ROLE_CONFIG } from '@/utilities/constants/roles'
 import { useMediaQuery } from '@/utilities/hooks/useMediaQuery'
 import { useNavCounts } from '@/utilities/hooks/useNavCounts'
 import { useSignOut } from '@/utilities/hooks/useSignOut'
-import type { Session } from '@/types/api'
+import type { Session } from '@/models/api'
 
 const MAIN_ID = 'main-content'
 export const DESKTOP_QUERY = '(min-width: 768px)'

@@ -23,7 +23,7 @@ import type {
   ListingPage,
   ListingRequest,
   RequestPage,
-} from '@/types/api'
+} from '@/models/api'
 
 // How far the activity log reaches back (GET /api/activity allows 1 to 100).
 const ACTIVITY_REACH = 100

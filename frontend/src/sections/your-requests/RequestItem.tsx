@@ -11,7 +11,7 @@ import {
   getRecipientRequestStatus,
   wasNotApprovedAndListingClosed,
 } from '@/utilities/helpers/request-status'
-import type { ListingRequest } from '@/types/api'
+import type { ListingRequest } from '@/models/api'
 
 export function RequestItem({ request }: { request: ListingRequest }) {
   const { listing } = request

@@ -20,7 +20,7 @@ import type {
   Listing,
   ListingFilters,
   ListingPage,
-} from '@/types/api'
+} from '@/models/api'
 
 // The filters the service applies itself; readPages adds offset and limit.
 function queryParams(filters: ListingFilters) {

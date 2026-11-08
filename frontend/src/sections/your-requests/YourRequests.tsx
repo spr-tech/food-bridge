@@ -15,7 +15,7 @@ import { getRecipientRequestStatus } from '@/utilities/helpers/request-status'
 import { RequestItem } from '@/sections/your-requests/RequestItem'
 import { errorStatus } from '@/services/errors'
 import { useMyRequests } from '@/services/requests'
-import type { ListingRequest } from '@/types/api'
+import type { ListingRequest } from '@/models/api'
 
 type RequestView = 'open' | 'history'
 

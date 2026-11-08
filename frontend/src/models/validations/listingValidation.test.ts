@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import { ValidationError } from 'yup'
 import { lagosToday } from '@/utilities/helpers/deadline'
-import { listingSchema, type ListingFormValues } from '@/schema/listingSchema'
+import { listingSchema, type ListingFormValues } from '@/models/validations/listingValidation'
 
 const DAY = 24 * 60 * 60 * 1000
 
