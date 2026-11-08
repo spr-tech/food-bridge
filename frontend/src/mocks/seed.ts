@@ -4,8 +4,8 @@
 // that have no login (donors, and recipients so a listing can have several requests),
 // and listings and requests in every status. Deadlines are set relative to when the store is
 // first created, so the data always looks current.
-import { DEMO_PASSWORD } from '@/constants/demoAccounts'
-import type { Role } from '@/types/role'
+import { DEMO_PASSWORD } from '@/utilities/constants/demoAccounts'
+import type { Role } from '@/utilities/enums/role'
 
 // Every demo account uses the sign-in page's demo password (also in the root README).
 export { DEMO_PASSWORD }

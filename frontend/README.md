@@ -42,23 +42,17 @@ The frontend communicates with the backend through the service files in `src/ser
 frontend/
 ├── public/              # favicon and mock listing photos
 ├── src/
-│   ├── app/             # Routes, router, store, providers and the session
+│   ├── app/             # Routing only: routes, router, providers, and pages/ (thin route files)
 │   ├── assets/          # Logo icons and landing photos
-│   ├── components/      # ui/ (shared set), form/, common/, layout/
-│   ├── config/          # env.ts: VITE_API_URL and VITE_USE_MOCKS
-│   ├── constants/       # Routes, roles, statuses, listing options, demo accounts
-│   ├── contexts/        # Empty on purpose
-│   ├── docs/            # README.md explaining src/
-│   ├── hooks/           # Reusable application hooks
-│   ├── lib/             # Small helpers: formatting, deadlines, photos, request status
+│   ├── components/      # ui/ (generic, incl. the shared set and form/), layouts/, content/ (feature screens)
+│   ├── configs/         # env.ts, serviceConfig.ts (the one createApi), storeConfig.ts
 │   ├── mocks/           # Simulated data layer (used when mocks are on, and by tests)
-│   ├── pages/           # Thin route files
-│   ├── schema/          # Yup schemas
-│   ├── sections/        # Screen sections, one folder per screen
-│   ├── services/        # RTK Query endpoints and backend mappers
+│   ├── models/          # api.ts (TypeScript types) and validations/ (Yup schemas)
+│   ├── services/        # RTK Query endpoints and mappers/ (backend mappers)
+│   ├── stores/          # sessionStore.ts: the signed-in session
 │   ├── styles/          # Tokens, layout and landing styles
 │   ├── test/            # Vitest setup and render helpers
-│   ├── types/           # TypeScript types
+│   ├── utilities/       # hooks/, helpers/, constants/, enums/
 │   └── main.tsx
 ├── .env.example
 ├── package.json
@@ -89,7 +83,7 @@ VITE_USE_MOCKS=false
 
 For local mock-data development, set `VITE_USE_MOCKS=true`.
 
-How `src/config/env.ts` reads these:
+How `src/configs/env.ts` reads these:
 
 - `VITE_API_URL` is required in every mode. If it is missing the app throws at start-up with "VITE_API_URL is not set…".
 - Mocks are **on** unless `VITE_USE_MOCKS` is exactly `false`. The unchanged `.env.example` (which only sets `VITE_API_URL=http://127.0.0.1:4010`) therefore runs on simulated data.
@@ -152,14 +146,14 @@ Administrators land on the Dashboard (`/admin`): summary counts from the backend
 - A recipient can cancel only their own request, and only while it is genuinely pending (see the status table below).
 - Expired listings accept no requests, and Find food shows them only under the Expired status, with a disabled Expired button.
 - A listing the service marks `deleted: true` is Deleted, never Expired, even when its deadline has passed (`mapBackendListing`).
-- Delete: owning donor or administrator; not offered on Reserved listings, disabled on Collected listings and on listings whose handover was reversed (`canDeleteListing` and `deleteBlockedReason` in `src/lib/listing-permissions.ts`). The backend deletes only Available and Expired listings (409 `LISTING_NOT_DELETABLE` otherwise) and keeps them as a record, so the dialog says "taken off FoodBridge", not "deleted for good".
+- Delete: owning donor or administrator; not offered on Reserved listings, disabled on Collected listings and on listings whose handover was reversed (`canDeleteListing` and `deleteBlockedReason` in `src/utilities/helpers/listing-permissions.ts`). The backend deletes only Available and Expired listings (409 `LISTING_NOT_DELETABLE` otherwise) and keeps them as a record, so the dialog says "taken off FoodBridge", not "deleted for good".
 - Daily fairness rule (backend): a recipient who already has an approval today (Lagos time) can't be approved again while another recipient has none (409 `DAILY_DISTRIBUTION_PRIORITY`). The donor's panel explains the refusal and disables Approve for that organisation for the rest of the visit; Decline stays available.
 
 The backend is the authority for every rule. The frontend checks are for clarity and speed, not security.
 
 ## Request status display
 
-The backend stores a status on each request (`PENDING`, `APPROVED`, `DECLINED`, `CANCELLED`, `EXPIRED`, `REVERSED`) and on each listing (`AVAILABLE`, `RESERVED`, `COLLECTED`, `REVERSED`, `EXPIRED`, `DELETED`). Reversing a handover now sets the request to `REVERSED` and reopens the listing as `AVAILABLE`; a listing stored as `REVERSED` comes only from reversals made before that change. Both `REVERSED` statuses show as "Not collected". What a recipient sees is derived from both by `getRecipientRequestStatus` in `src/lib/request-status.ts`, used by `src/sections/listing-details/RecipientAction.tsx`, `src/sections/your-requests/RequestItem.tsx` and `src/sections/your-requests/YourRequests.tsx`.
+The backend stores a status on each request (`PENDING`, `APPROVED`, `DECLINED`, `CANCELLED`, `EXPIRED`, `REVERSED`) and on each listing (`AVAILABLE`, `RESERVED`, `COLLECTED`, `REVERSED`, `EXPIRED`, `DELETED`). Reversing a handover now sets the request to `REVERSED` and reopens the listing as `AVAILABLE`; a listing stored as `REVERSED` comes only from reversals made before that change. Both `REVERSED` statuses show as "Not collected". What a recipient sees is derived from both by `getRecipientRequestStatus` in `src/utilities/helpers/request-status.ts`, used by `src/components/content/listings/listing-details/RecipientAction.tsx`, `src/components/content/requests/your-requests/RequestItem.tsx` and `src/components/content/requests/your-requests/YourRequests.tsx`.
 
 | Stored request | Listing | Recipient sees | Where on Your requests | Can cancel? |
 |---|---|---|---|---|
@@ -183,14 +177,14 @@ A listing deleted by its donor shows "Deleted" and the note "The donor has remov
 
 ### Donor requests panel
 
-In `src/sections/listing-details/RequestsPanel.tsx` and `RequestRow.tsx`:
+In `src/components/content/listings/listing-details/RequestsPanel.tsx` and `RequestRow.tsx`:
 
 - Approve and Decline are shown only while the listing is Available **and** no request on it is Approved.
 - A pending request is displayed as Declined when another request is approved or the listing is Reserved, Collected or Reversed, and as Expired when the listing is Expired. Again this is display only. Approving still updates the panel straight away, marking the other pending requests Declined, without waiting for the service.
 - The approve dialog's "The other [n] pending requests will be declined." counts only requests that can still be decided.
 - After a `DAILY_DISTRIBUTION_PRIORITY` refusal, that organisation's Approve is shown disabled with the reason; Decline stays.
 
-The navigation counts (`src/hooks/useNavCounts.ts`) count only requests still awaiting a decision: a donor's on Available listings, and a recipient's that show as Pending.
+The navigation counts (`src/utilities/hooks/useNavCounts.ts`) count only requests still awaiting a decision: a donor's on Available listings, and a recipient's that show as Pending.
 
 ## Demo accounts
 
@@ -204,19 +198,19 @@ The frontend includes mock demo accounts for development and interface testing:
 
 These are mock credentials. They are not the same as the seeded accounts on the live backend.
 
-In live mode (`VITE_USE_MOCKS=false`) the sign-in page offers the backend's seeded accounts instead (`donor1@demo.foodbridge.invalid`, `recipient1@demo.foodbridge.invalid`, `admin@demo.foodbridge.invalid`), with passwords defined in `src/constants/demoAccounts.ts`. Confirm they still exist on the deployed backend before relying on them.
+In live mode (`VITE_USE_MOCKS=false`) the sign-in page offers the backend's seeded accounts instead (`donor1@demo.foodbridge.invalid`, `recipient1@demo.foodbridge.invalid`, `admin@demo.foodbridge.invalid`), with passwords defined in `src/utilities/constants/demoAccounts.ts`. Confirm they still exist on the deployed backend before relying on them.
 
 ## API integration
 
 The frontend service layer is organised into:
 
-- `src/services/api.ts` — the one `createApi`, base URL, auth and tracing headers.
+- `src/configs/serviceConfig.ts` — the one `createApi`, base URL, auth and tracing headers.
 - `src/services/auth.ts` — sign-in.
 - `src/services/listings.ts` — food listings and image uploads.
 - `src/services/requests.ts` — recipient requests, decisions and the collected handover.
 - `src/services/admin.ts` — administrator dashboard statistics.
-- `src/services/backend-mappers.ts` — maps backend responses to frontend types and extracts the uploaded image URL.
-- `src/services/errors.ts` — reads HTTP status, error code and field errors.
+- `src/services/mappers/backend-mappers.ts` — maps backend responses to frontend types and extracts the uploaded image URL.
+- `src/utilities/helpers/apiErrors.ts` — reads HTTP status, error code and field errors.
 
 Every endpoint checks `env.useMocks` first and calls the simulated store in `src/mocks/` instead of the backend when mocks are on. Screens use only the hooks exported from `src/services/`.
 
@@ -247,31 +241,31 @@ Every endpoint checks `env.useMocks` first and calls the simulated store in `src
 
 Documented by the backend but **not called** by the frontend: `GET /api/requests/{requestId}` and `PATCH /api/handovers/{handoverId}/reverse`.
 
-**Find food filtering** (`src/services/listings.ts`, `src/lib/listing-search.ts`). The backend's `pickupArea` filter matches only the exact stored text, and its `keyword` search covers only the food name and description. So with no search and no area, the frontend sends the filters and lets the backend page the results. With a search or an area, it sends only `availability` and `category`, reads every page (100 at a time, using `X-Total-Count`), and matches the area and the search (food name, description, donor, area and category) itself.
+**Find food filtering** (`src/services/listings.ts`, `src/utilities/helpers/listing-search.ts`). The backend's `pickupArea` filter matches only the exact stored text, and its `keyword` search covers only the food name and description. So with no search and no area, the frontend sends the filters and lets the backend page the results. With a search or an area, it sends only `availability` and `category`, reads every page (100 at a time, using `X-Total-Count`), and matches the area and the search (food name, description, donor, area and category) itself.
 
 Headers: every request sends `Authorization: Bearer <token>` when signed in, and an `X-Request-Id` UUID (see the contradiction noted in `../docs/decisions.md`, 2026-10-31). Requests time out after 45 seconds, sign-in after 90, because a sleeping service can take up to a minute to wake. While signing in, the form shows "Hang tight, we're getting things ready for you." and, after five seconds, explains that FoodBridge is waking up.
 
-**Ending a session.** The backend's tokens last 30 minutes and are lost whenever the service restarts. Any 401 (except a refused sign-in) goes through the base query in `src/services/api.ts`, which ends the session; `RequireSession` then sends the user to sign in with "Your session ended. Sign in again." and `?next=` back to the page. A late 401 for an earlier account never ends a newer session.
+**Ending a session.** The backend's tokens last 30 minutes and are lost whenever the service restarts. Any 401 (except a refused sign-in) goes through the base query in `src/configs/serviceConfig.ts`, which ends the session; `RequireSession` then sends the user to sign in with "Your session ended. Sign in again." and `?next=` back to the page. A late 401 for an earlier account never ends a newer session.
 
 **Request errors.** Screens choose their own plain wording from the status and code, never the backend's message. Requesting food handles `409 LISTING_ALREADY_RESERVED`, `404 LISTING_NOT_FOUND`, `403 FORBIDDEN` and `409 LISTING_EXPIRED` with a message and no Try again, since retrying can't change them; only an unreachable service offers Try again. `ALREADY_REQUESTED` is handled for when the backend adds it.
 
 **Request enrichment.** `GET /api/requests?mine=true` returns request fields only. To show the food, donor, area, photo and listing status on Your requests, `getMyRequests` fetches each request's listing and passes it to `mapBackendRequest`. If a listing can't be fetched, the request falls back to placeholder text ("Food listing", "Food donor") and listing status Available. These extra calls can be removed once the backend returns an enriched response.
 
-**Status mapping** (`src/services/backend-mappers.ts`): known listing statuses, `REVERSED` and `DELETED` included, are kept and unknown ones become `AVAILABLE`; known request statuses, `REVERSED` included, are kept, `COLLECTED` or `COMPLETED` become `APPROVED` (the listing carries Collected), and unknown ones become `PENDING`.
+**Status mapping** (`src/services/mappers/backend-mappers.ts`): known listing statuses, `REVERSED` and `DELETED` included, are kept and unknown ones become `AVAILABLE`; known request statuses, `REVERSED` included, are kept, `COLLECTED` or `COMPLETED` become `APPROVED` (the listing carries Collected), and unknown ones become `PENDING`.
 
-**Pickup area mapping.** `pickupAreaValue` (`src/constants/listingOptions.ts`) turns a stored area that starts with a known area into that option, so "Surulere, Lagos - …" shows, filters and edits as Surulere. Text that starts with no known area is kept as it is.
+**Pickup area mapping.** `pickupAreaValue` (`src/utilities/constants/listingOptions.ts`) turns a stored area that starts with a known area into that option, so "Surulere, Lagos - …" shows, filters and edits as Surulere. Text that starts with no known area is kept as it is.
 
 **Categories and units.** In live mode the form offers the backend values (`PREPARED_MEALS`, `PRODUCE`, `BAKERY`, `DAIRY`, `PANTRY`, `OTHER`; `PORTIONS`, `KG`, `LITRES`, `ITEMS`, `BOXES`). Simulated mode keeps the original lists (Bakery, Cooked meals, Produce, Pastries; loaves, portions, trays, baskets, pieces, boxes). Pickup areas are the same in both: Yaba, Surulere, Ikeja, Lekki, Ajegunle.
 
 ### Listing photos and Cloudinary
 
-1. The donor chooses a JPG or PNG of 5 MB or less (validated by `src/schema/listingSchema.ts`).
-2. On submit, the photo is compressed and uploaded with `POST /api/listings/images`. The backend accepts at most 1 MB (Spring's default; no larger limit is configured), so `compressPhoto` (`src/lib/photo.ts`) sends a photo already under 900 KB unchanged, and otherwise redraws it as a JPEG of at most 1600 px, lowering the quality and then the size until it is under 900 KB. If the browser can't redraw it, the photo is sent as chosen. The backend stores it in Cloudinary.
+1. The donor chooses a JPG or PNG of 5 MB or less (validated by `src/models/validations/listingValidation.ts`).
+2. On submit, the photo is compressed and uploaded with `POST /api/listings/images`. The backend accepts at most 1 MB (Spring's default; no larger limit is configured), so `compressPhoto` (`src/utilities/helpers/photo.ts`) sends a photo already under 900 KB unchanged, and otherwise redraws it as a JPEG of at most 1600 px, lowering the quality and then the size until it is under 900 KB. If the browser can't redraw it, the photo is sent as chosen. The backend stores it in Cloudinary.
 3. `extractImageReference` takes the image URL from the reply: a plain URL string, or the first `http(s)` URL found under `imageReference`, `imageUrl`, `url`, `secure_url`, `secureUrl` or `location`, then any other property (nested objects included). The deployed backend was observed replying `{ "imageUrl": "https://res.cloudinary.com/…" }` (2 November 2026).
 4. The listing is created or updated with that URL as `imageReference`. When editing without choosing a new photo, the existing URL is kept.
 5. If the upload fails, the form shows "Your photo couldn't be uploaded. Please try again." and the listing is not saved.
 
-In simulated mode the photo is shrunk to 600 px and stored as a JPEG data URL (`src/lib/photo.ts`). The OpenAPI document still describes the upload reply generically, so the extraction stays tolerant until the contract names the field.
+In simulated mode the photo is shrunk to 600 px and stored as a JPEG data URL (`src/utilities/helpers/photo.ts`). The OpenAPI document still describes the upload reply generically, so the extraction stays tolerant until the contract names the field.
 
 ## GitHub Actions and deployment
 

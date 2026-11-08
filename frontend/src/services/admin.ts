@@ -2,14 +2,14 @@
 // completed handovers. Screens use these hooks; the endpoints handle live and simulated data.
 import * as db from '@/mocks/db'
 import { simulate } from '@/mocks/simulate'
-import { api, LIST_QUERY_OPTIONS } from '@/services/api'
-import { env } from '@/config/env'
+import { api, LIST_QUERY_OPTIONS } from '@/configs/serviceConfig'
+import { env } from '@/configs/env'
 import {
   mapBackendActivity,
   mapBackendListing,
   mapBackendRequest,
-} from '@/services/backend-mappers'
-import { readAllPages, SERVICE_PAGE_LIMIT } from '@/services/pages'
+} from '@/services/mappers/backend-mappers'
+import { readAllPages, SERVICE_PAGE_LIMIT } from '@/utilities/helpers/pagedQuery'
 import type {
   ActivityEntry,
   AdminRequestFilters,
@@ -23,7 +23,7 @@ import type {
   ListingPage,
   ListingRequest,
   RequestPage,
-} from '@/types/api'
+} from '@/models/api'
 
 // How far the activity log reaches back (GET /api/activity allows 1 to 100).
 const ACTIVITY_REACH = 100

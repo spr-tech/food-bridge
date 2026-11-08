@@ -3,15 +3,15 @@
 
 import * as db from '@/mocks/db'
 import { simulate, simulateWrite } from '@/mocks/simulate'
-import { matchesListingSearch, matchesPickupArea } from '@/lib/listing-search'
-import { compressPhoto, shrinkPhoto } from '@/lib/photo'
-import { api, LIST_QUERY_OPTIONS } from '@/services/api'
-import { env } from '@/config/env'
+import { matchesListingSearch, matchesPickupArea } from '@/utilities/helpers/listing-search'
+import { compressPhoto, shrinkPhoto } from '@/utilities/helpers/photo'
+import { api, LIST_QUERY_OPTIONS } from '@/configs/serviceConfig'
+import { env } from '@/configs/env'
 import {
   extractImageReference,
   mapBackendListing,
-} from '@/services/backend-mappers'
-import { readAllPages, readPages } from '@/services/pages'
+} from '@/services/mappers/backend-mappers'
+import { readAllPages, readPages } from '@/utilities/helpers/pagedQuery'
 
 import type {
   BackendCreateListingRequest,
@@ -20,7 +20,7 @@ import type {
   Listing,
   ListingFilters,
   ListingPage,
-} from '@/types/api'
+} from '@/models/api'
 
 // The filters the service applies itself; readPages adds offset and limit.
 function queryParams(filters: ListingFilters) {

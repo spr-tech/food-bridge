@@ -6,16 +6,16 @@ import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { Provider } from 'react-redux'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { makeStore } from '@/app/store'
-import { compressPhoto } from '@/lib/photo'
+import { makeStore } from '@/configs/storeConfig'
+import { compressPhoto } from '@/utilities/helpers/photo'
 import { useUploadListingImage } from '@/services/listings'
 import { signInAs } from '@/test/render'
 
-vi.mock('@/config/env', () => ({
+vi.mock('@/configs/env', () => ({
   env: { apiUrl: 'https://api.test', useMocks: false },
 }))
 
-vi.mock('@/lib/photo', () => ({
+vi.mock('@/utilities/helpers/photo', () => ({
   compressPhoto: vi.fn(),
   shrinkPhoto: vi.fn(),
 }))

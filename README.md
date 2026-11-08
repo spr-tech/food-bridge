@@ -80,7 +80,7 @@ npm ci
 
 ### Environment configuration
 
-Create a `.env` file inside `frontend/` (`cp .env.example .env`). Two variables are read by `frontend/src/config/env.ts`:
+Create a `.env` file inside `frontend/` (`cp .env.example .env`). Two variables are read by `frontend/src/configs/env.ts`:
 
 | Variable | Required | Meaning |
 |---|---|---|
@@ -135,7 +135,7 @@ A pull request therefore never deploys; production changes when the merge reache
 
 ## Demonstration accounts
 
-The sign-in page shows a different set of demo accounts depending on the data mode (`frontend/src/constants/demoAccounts.ts`).
+The sign-in page shows a different set of demo accounts depending on the data mode (`frontend/src/utilities/constants/demoAccounts.ts`).
 
 **Simulated mode** (`VITE_USE_MOCKS` not `false`). Password for all accounts: `FoodBridge-demo-2026`
 
@@ -145,7 +145,7 @@ The sign-in page shows a different set of demo accounts depending on the data mo
 | Recipient | `recipient@foodbridge.test` | Hope Community Kitchen |
 | Administrator | `admin@foodbridge.test` | FoodBridge demo admin |
 
-**Live mode** (`VITE_USE_MOCKS=false`). The sign-in page offers the backend's seeded demo accounts (`donor1@demo.foodbridge.invalid`, `recipient1@demo.foodbridge.invalid`, `admin@demo.foodbridge.invalid`), with their passwords defined in `frontend/src/constants/demoAccounts.ts`. Confirm with the service engineers that these accounts still exist on the deployed backend before a demonstration.
+**Live mode** (`VITE_USE_MOCKS=false`). The sign-in page offers the backend's seeded demo accounts (`donor1@demo.foodbridge.invalid`, `recipient1@demo.foodbridge.invalid`, `admin@demo.foodbridge.invalid`), with their passwords defined in `frontend/src/utilities/constants/demoAccounts.ts`. Confirm with the service engineers that these accounts still exist on the deployed backend before a demonstration.
 
 All demonstration organisations and people are fictional. Records created through either set of accounts are demonstration activity, not real food redistribution.
 
@@ -201,7 +201,7 @@ Further technical details are maintained separately:
 
 - `frontend/CLAUDE.md` — frontend development instructions.
 - `frontend/README.md` — frontend-specific setup, API integration, status rules and troubleshooting.
-- `frontend/src/docs/README.md` — how `frontend/src/` is organised.
+- `frontend/STRUCTURE.md` — how `frontend/src/` is organised.
 - `docs/intent/foodbridge.md` — product intent and business rules.
 - `docs/spec/foodbridge-interface.md` — every screen, state and message (section 14 records the implementation as of PR #24).
 - `docs/design/` — the final visual design.
