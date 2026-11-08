@@ -54,7 +54,7 @@ Before saying a task is done, run `npm run lint`, `npm run typecheck`, `npm test
 ## Environment
 
 - `VITE_API_URL`: API base address.
-- `VITE_USE_MOCKS`: controls whether the frontend uses simulated data or the live backend, according to `src/config/env.ts`. Mocks are on unless it is exactly `false`; tests use mocks by default (`*.live.test.tsx` files mock `env` to switch them off and stub `fetch`). `VITE_API_URL` is required even with mocks on (start-up throws without it).
+- `VITE_USE_MOCKS`: controls whether the frontend uses simulated data or the live backend, according to `src/configs/env.ts`. Mocks are on unless it is exactly `false`; tests use mocks by default (`*.live.test.tsx` files mock `env` to switch them off and stub `fetch`). `VITE_API_URL` is required even with mocks on (start-up throws without it).
 - Local development against the deployed backend uses `https://foodbridge-backend-rg9f.onrender.com` as the API base URL.
 - The deployed backend's Swagger UI is at `https://foodbridge-backend-rg9f.onrender.com/swagger-ui/index.html`.
 - Its OpenAPI JSON is at `https://foodbridge-backend-rg9f.onrender.com/v3/api-docs`.
@@ -64,59 +64,93 @@ Before saying a task is done, run `npm run lint`, `npm run typecheck`, `npm test
 
 ## Folder structure
 
+The layout follows section 2 of the frontend structure guide, adapted for Vite + React Router. `STRUCTURE.md` describes each folder in more detail.
+
 ```text
 src/
-├── app/            # routes.tsx (route table, allowed roles and canOpen(role, path);
-│                   # the one place role rules live), router.tsx (browser router),
-│                   # store.ts (makeStore), providers.tsx (Redux Provider + RouterProvider),
-│                   # session.ts (signed-in session in sessionStorage; role comes from it;
-│                   # signOutSession() for deliberate sign-out, clearSession() for expiry)
-├── assets/         # images, logo-icon-dark.svg and logo-icon-light.svg (icon only; wordmark is text),
-│                   # landing/handover.jpg (temporary; see decisions 2026-10-27)
+├── app/                # Routing only.
+│   ├── routes.tsx      # route table, allowed roles and canOpen(role, path); the one place role rules live
+│   ├── router.tsx      # browser router
+│   ├── providers.tsx   # Redux Provider + RouterProvider
+│   └── pages/          # one thin file per route (lazy-loaded from routes.tsx); dev/ holds FormPreviewPage
+├── assets/             # images, logo-icon-dark.svg and logo-icon-light.svg (icon only; wordmark is text),
+│                       # landing/handover.jpg (temporary; see decisions 2026-10-27)
 ├── components/
-│   ├── ui/         # shared components copied from the shared repo
-│   ├── form/       # Formik adapters around shared FormField and controls
-│   ├── common/     # StatusBadge, PageHeader, LoadingState, ListingPhoto, MetaIcons,
-│   │               # CancelRequestButton and other reusable interface elements
-│   └── layout/     # RequireSession, RequireRole, RootLayout, AppLayout, Sidebar,
-│                   # TopBar, PhoneTopBar, AccountMenu, TabBar, Logo and navigation
-├── config/         # env.ts: reads VITE_API_URL and VITE_USE_MOCKS
-├── constants/      # routes.ts, roles.ts, status.ts, listingOptions.ts, demoAccounts.ts
-├── contexts/       # shared React contexts, if needed
-├── docs/           # README.md explaining this structure
-├── hooks/          # useRole, useIdempotencyKey, useDocumentTitle, useAppStore,
-│                   # useSessionEnded, useSignOut, useMediaQuery, useNavCounts,
-│                   # useNow, useRequestFood
-├── lib/            # cn.ts, format.ts (Lagos dates and quantity formatting),
-│                   # deadline.ts (combine/split date and time), photo.ts (mock photo shrink),
-│                   # request-status.ts (status a recipient sees, from request + listing status),
-│                   # listing-permissions.ts (who may delete or edit a listing),
-│                   # listing-search.ts (Find food search and area matching)
-├── mocks/          # simulated service: db.ts (rules), seed.ts (demo data),
-│                   # simulate.ts (controlled delays and demo error states)
-├── pages/          # thin route files; pages compose sections
-├── schema/         # Yup schemas, one per form
-├── sections/       # page-level blocks, one folder per screen
-├── services/       # api.ts (one base createApi), auth.ts, listings.ts, requests.ts, admin.ts,
-│                   # backend-mappers.ts (backend DTO to frontend model conversion),
-│                   # errors.ts (API error handling)
-├── styles/         # tokens.css, layout.css, landing.css
-├── test/           # Vitest setup, render helpers and test utilities
-└── types/          # shared types: Role, RequestStatus, ListingStatus, Listing, ListingRequest, Session
+│   ├── ui/             # generic, knows nothing about FoodBridge; one folder per component
+│   │   ├── <shared>/   # the 14 shared-repo components (see "UI components" below)
+│   │   ├── form/       # Formik adapters around the shared FormField and controls
+│   │   └── summary-strip/, view-tabs/, loading-state/   # our own generic pieces
+│   ├── layouts/        # page frame: RequireSession, RequireRole, RootLayout, AppLayout, Sidebar, TopBar,
+│   │                   # PhoneTopBar, AccountMenu, TabBar, Logo, navigation, PageContainer, PageHeader
+│   └── content/        # feature screens; knows the domain
+│       ├── auth/sign-in/            # forms/SignInForm
+│       ├── landing/
+│       ├── listings/                # find-food, share-food (forms/, modals/), listing-details, your-listings,
+│       │                            # shared/ (StatusBadge, ListingPhoto, MetaIcons, DeleteListingButton)
+│       ├── requests/                # your-requests, shared/ (CancelRequestButton)
+│       └── admin/                   # dashboard, requests, completed-handovers
+├── configs/            # env.ts (reads VITE_API_URL and VITE_USE_MOCKS), serviceConfig.ts (the one
+│                       # createApi), storeConfig.ts (makeStore)
+├── mocks/              # simulated service: db.ts (rules), seed.ts (demo data),
+│                       # simulate.ts (controlled delays and demo error states)
+├── models/             # api.ts (shared types: Listing, ListingRequest, Session, ...),
+│                       # validations/ (Yup schemas), requests/ and responses/ (empty for now)
+├── services/           # auth.ts, listings.ts, requests.ts, admin.ts (endpoints and hooks),
+│                       # mappers/backend-mappers.ts (backend DTO to frontend model conversion)
+├── stores/             # sessionStore.ts (signed-in session in sessionStorage; role comes from it;
+│                       # signOutSession() for deliberate sign-out, clearSession() for expiry)
+├── styles/             # tokens.css, layout.css, landing.css
+├── test/               # Vitest setup, render helpers and test utilities
+└── utilities/
+    ├── constants/      # routes.ts, roles.ts, status.ts, listingOptions.ts, demoAccounts.ts, activity.ts
+    ├── enums/          # role.ts, status.ts (Role, ListingStatus, RequestStatus as TypeScript types)
+    ├── helpers/        # cn.ts, format.ts, deadline.ts, photo.ts, request-status.ts, listing-permissions.ts,
+    │                   # listing-search.ts, food-saved.ts, pagedQuery.ts (read every page),
+    │                   # apiErrors.ts (read status, code and field errors)
+    └── hooks/          # useRole, useIdempotencyKey, useDocumentTitle, useAppStore, useSessionEnded,
+                        # useSignOut, useMediaQuery, useNavCounts, useNow, useRequestFood, useSessionCheck
 ```
+
+## Where things go
+
+| Adding a… | Put it in |
+|---|---|
+| Route | `src/app/routes.tsx`, plus a thin page in `src/app/pages/` that renders one content component and sets the title |
+| Screen (the real work of a page) | `src/components/content/<domain>/<screen>/` |
+| Form for a screen | `src/components/content/<domain>/<screen>/forms/` |
+| Modal or confirmation for a screen | `src/components/content/<domain>/<screen>/modals/` |
+| Domain piece used by several screens | `src/components/content/<domain>/shared/` |
+| Generic component (no FoodBridge knowledge) | `src/components/ui/<name>/` |
+| Formik field adapter | `src/components/ui/form/` |
+| Page frame, navigation, route guard | `src/components/layouts/` |
+| Endpoint and its hook | the matching file in `src/services/` (one per backend resource) |
+| Backend DTO conversion | `src/services/mappers/backend-mappers.ts` |
+| Request or response type | for now, `src/models/api.ts`. `models/requests/` and `models/responses/` stay empty until `api.ts` is split in a later pass |
+| Yup schema | `src/models/validations/` |
+| Client-only state | `src/stores/` |
+| Shared hook | `src/utilities/hooks/` |
+| Pure helper | `src/utilities/helpers/` |
+| Constant, label or option list | `src/utilities/constants/` |
+| Role or status type | `src/utilities/enums/` |
+| API client or environment setup | `src/configs/` |
+
+- **Dependency rule:** `src/components/ui/` never imports from `src/components/content/`, `src/services/`, `src/stores/` or `src/app/`. If a generic component needs domain behaviour, pass it in as a prop.
+- **Error messages** are chosen by the screen from the status and code, using `src/utilities/helpers/apiErrors.ts`. Never show the service's own message text (spec section 4). This is a deliberate departure from section 6 of the frontend structure guide.
+- Tests sit next to the file they test. Tests that render a page to check a feature live with that feature's content folder, not in `app/pages/`.
+- Imports use the `@/` alias, including inside the copied shared components.
 
 ## RTK Query rules
 
-- There is exactly one `createApi`, in `src/services/api.ts`, with `endpoints: () => ({})`. Never create a second one.
+- There is exactly one `createApi`, in `src/configs/serviceConfig.ts`, with `endpoints: () => ({})`. Never create a second one.
 - Each feature adds endpoints in its own file with `api.injectEndpoints({ endpoints: (build) => ({ ... }) })`, for example `src/services/listings.ts`, and exports its generated hooks from there.
-- `baseQuery` is `fetchBaseQuery` with `baseUrl: env.apiUrl` from `src/config/env.ts`.
+- `baseQuery` is `fetchBaseQuery` with `baseUrl: env.apiUrl` from `src/configs/env.ts`.
 - `prepareHeaders` adds the authenticated user's token using the authentication scheme defined by the current OpenAPI contract. It must not send credentials on login requests.
-- Add `X-Request-Id` only according to the agreed API contract. Do not assume a header exists merely because an older integration note proposed it. Note: `src/services/api.ts` currently still sends an `X-Request-Id` UUID on every request; this conflicts with the 2026-10-31 decision and needs resolving.
+- Add `X-Request-Id` only according to the agreed API contract. Do not assume a header exists merely because an older integration note proposed it. Note: `src/configs/serviceConfig.ts` currently still sends an `X-Request-Id` UUID on every request; this conflicts with the 2026-10-31 decision and needs resolving.
 - Every endpoint must exist in the current backend OpenAPI contract. Never call an undocumented path. Never use `fetch` or Axios directly for application API calls.
 - Screens use only hooks exported from `src/services/`. They must never import `src/mocks/` directly.
 - Mock and live data paths must be controlled by the existing environment configuration. Do not silently return mock data after a live API failure.
 - Request and response types must match the API contract. Never use `any` to bypass a type mismatch.
-- Convert backend DTOs into frontend types in `src/services/backend-mappers.ts`. Do not spread backend field-name conversions across screen components.
+- Convert backend DTOs into frontend types in `src/services/mappers/backend-mappers.ts`. Do not spread backend field-name conversions across screen components.
 - Use `tagTypes` and `providesTags` / `invalidatesTags` so affected lists and details refresh after successful writes. Tag listings by ID plus a `LIST` tag.
 - `POST /api/listings/{listingId}/requests` requires an `Idempotency-Key`. Generate one UUID for the user's submission and reuse it when retrying that same submission.
 - The current Swagger does not document an `Idempotency-Key` for `POST /api/listings`. Do not add one unless the backend contract is updated. Note: `createListing` in `src/services/listings.ts` currently does send one in live mode; confirm with the backend engineer whether it is accepted or ignored, then align code or contract.
@@ -147,7 +181,7 @@ Do not assume demo credentials work unless they have been verified against the d
 - `GET /api/listings`
   - Query parameters documented: `category`, `pickupArea`, `availability`, `keyword`, `mine`, `offset`, `limit` (100 at most; more gives 400 `INVALID_PAGE`).
   - The documented response is an array of listing objects; the total is in the `X-Total-Count` header.
-  - Deployed behaviour: `pickupArea` matches the exact stored text only, and `keyword` searches the food name and description only. With a search or an area set, `useListings` sends only `availability` and `category`, reads every page, and matches area and search in `src/lib/listing-search.ts`. Stored areas such as "Surulere, Lagos - …" are mapped to the area option by `pickupAreaValue` (`src/constants/listingOptions.ts`).
+  - Deployed behaviour: `pickupArea` matches the exact stored text only, and `keyword` searches the food name and description only. With a search or an area set, `useListings` sends only `availability` and `category`, reads every page, and matches area and search in `src/utilities/helpers/listing-search.ts`. Stored areas such as "Surulere, Lagos - …" are mapped to the area option by `pickupAreaValue` (`src/utilities/constants/listingOptions.ts`).
 - `GET /api/listings/{listingId}`
   - Retrieves one listing.
 - `POST /api/listings`
@@ -196,7 +230,7 @@ Do not silently map unsupported frontend categories or units to a different valu
 
 The image endpoint documents a multipart field named `file`, but its successful response schema is currently generic. Do not assume the response property containing the Cloudinary URL or image reference.
 
-Current implementation: `extractImageReference` in `src/services/backend-mappers.ts` accepts a plain URL string, or the first `http(s)` URL under `imageReference`, `imageUrl`, `url`, `secure_url`, `secureUrl` or `location`, then any other (nested) property. The form uploads the photo before creating or updating the listing and keeps the existing URL when editing without a new photo. This tolerant extraction is a stopgap.
+Current implementation: `extractImageReference` in `src/services/mappers/backend-mappers.ts` accepts a plain URL string, or the first `http(s)` URL under `imageReference`, `imageUrl`, `url`, `secure_url`, `secureUrl` or `location`, then any other (nested) property. The form uploads the photo before creating or updating the listing and keeps the existing URL when editing without a new photo. This tolerant extraction is a stopgap.
 
 The deployed endpoint was observed replying `{ "imageUrl": "https://res.cloudinary.com/…" }` (2 November 2026). Once the contract names this field, update the mapper and types to match it and drop the tolerant extraction.
 
@@ -310,14 +344,14 @@ The original brief states that only the donor who owns a listing, or the adminis
 
 The original brief says donors approve or decline recipient requests. Do not move this decision to administrators without a formally agreed change to the capstone requirements.
 
-The brief requires donors to create, edit and delete their own listings. The deployed backend also lets administrators delete listings (same status rule as donors), and the interface offers it to them (`canDeleteListing` in `src/lib/listing-permissions.ts`).
+The brief requires donors to create, edit and delete their own listings. The deployed backend also lets administrators delete listings (same status rule as donors), and the interface offers it to them (`canDeleteListing` in `src/utilities/helpers/listing-permissions.ts`).
 
 The backend is the final authority for permissions. Frontend role checks only control what actions are presented to the user; they are not security controls.
 
 ### Listing and request integrity
 
 - A listing requires a food name/title, category, quantity, pickup area, collection deadline and donor. The frontend form also requires a description (PR #18).
-- A listing can be edited only while it is `AVAILABLE` (`isListingEditable` in `src/lib/listing-permissions.ts`: Your listings shows Edit only then, and `src/pages/EditListingPage.tsx` explains otherwise; the form handles a backend `LISTING_NOT_EDITABLE` code). The simulated store does not enforce this rule.
+- A listing can be edited only while it is `AVAILABLE` (`isListingEditable` in `src/utilities/helpers/listing-permissions.ts`: Your listings shows Edit only then, and `src/app/pages/EditListingPage.tsx` explains otherwise; the form handles a backend `LISTING_NOT_EDITABLE` code). The simulated store does not enforce this rule.
 - Delete is offered to the owning donor and administrators on Available and Expired listings, disabled with the reason on Collected and Reversed listings (`deleteBlockedReason`), and not offered on Reserved or Deleted ones (`canDeleteListing`), since the backend refuses them. On Listing details, Edit and Delete sit together at the foot of the listing's card. The simulated store follows the backend's delete rule.
 - The backend's daily fairness rule refuses a second approval for a recipient on the same Lagos day while another recipient has none (409 `DAILY_DISTRIBUTION_PRIORITY`). Donors can't see who has been served, so the panel can only explain the refusal afterwards; don't invent a client-side eligibility rule.
 - An expired listing accepts no new requests.
@@ -330,9 +364,9 @@ The backend is the final authority for permissions. Frontend role checks only co
 
 ## Forms (Formik + Yup)
 
-- Every form uses Formik with a Yup schema. Schemas live in `src/schema/`, one per form, e.g. `src/schema/listingSchema.ts`.
+- Every form uses Formik with a Yup schema. Schemas live in `src/models/validations/`, one per form, e.g. `src/models/validations/listingValidation.ts`.
 - Error messages come word for word from the spec where defined.
-- Build fields with the adapters in `src/components/form/` (FormInput, FormPasswordInput, FormTextarea, FormSelect, FormCheckbox, FormDate, FormTime, FormImageUpload). They wrap the shared FormField and controls and show an error only after the field is left or the form submitted (`useFieldError`).
+- Build fields with the adapters in `src/components/ui/form/` (FormInput, FormPasswordInput, FormTextarea, FormSelect, FormCheckbox, FormDate, FormTime, FormImageUpload). They wrap the shared FormField and controls and show an error only after the field is left or the form submitted (`useFieldError`).
 - Submit with the shared `Button` and `type="submit"`.
 - Every field needs a visible label tied to the input, an error linked with `aria-describedby`, `aria-invalid` when invalid, and an error shown as text (not only a red border).
 - On submit with errors, move focus to the first invalid field: put `<FocusFirstError order={[...]} />` inside the form, and use `focusField(name)` after mapping a 400 response.
@@ -342,8 +376,9 @@ The backend is the final authority for permissions. Frontend role checks only co
 ## UI components (shared component set)
 
 - UI components come from the shared repo, github.com/spr-tech/interface-eng-shared-components. Its README is the reference for every prop; `.claude/skills/shared-components/` tells Claude Code when to use which.
-- The copied files in `src/components/ui/` and `src/lib/cn.ts` are shared components. Do not casually change their implementation in this product repository. Fixes go to the shared repo first, then are copied in unchanged. Record the shared commit in `../docs/decisions.md` each time.
-- FoodBridge-specific behaviour lives in our own wrappers: `src/components/form/` (Formik adapters) and `src/components/common/` (for example StatusBadge, which maps our statuses to the shared tones).
+- The copied shared components each have their own folder, `src/components/ui/<name>/<name>.tsx`: `button`, `card`, `checkbox`, `dialog`, `empty-state`, `error-state`, `filter-bar`, `form-field`, `input`, `select`, `skeleton`, `status-badge`, `textarea` and `toast`. Their `cn` helper is `src/utilities/helpers/cn.ts`. Do not casually change their implementation in this product repository. Fixes go to the shared repo first, then are copied in. Record the shared commit in `../docs/decisions.md` each time.
+- When copying a shared component in, put `<name>.tsx` in `src/components/ui/<name>/` and rewrite its import lines to the `@/` alias: `cn` to `@/utilities/helpers/cn`, and sibling components such as `./button` to `@/components/ui/button/button`. Those import lines are the only local change allowed.
+- Every other folder in `src/components/ui/` is ours, not the shared repo's: `form/` (Formik adapters), `summary-strip/`, `view-tabs/` and `loading-state/`. FoodBridge-specific behaviour lives in `src/components/content/`, for example `content/listings/shared/StatusBadge.tsx`, which maps our statuses to the shared tones.
 - Change the look through token values in `src/styles/tokens.css`, never the names the shared components read. No hard-coded colours.
 - Keep Radix's keyboard and focus behaviour intact. Don't remove focus rings.
 - Don't add another component library. If the shared set can't cover a need, say so and propose it for the shared repo.
@@ -354,13 +389,13 @@ Frontend labels:
 - Request: Pending, Approved, Declined, Expired, Cancelled.
 - Listing: Available, Reserved, Collected, Expired, Deleted.
 
-The backend response examples describe status as a string. Confirm actual values returned by the deployed service and normalise them centrally in `src/constants/status.ts` and `src/services/backend-mappers.ts`.
+The backend response examples describe status as a string. Confirm actual values returned by the deployed service and normalise them centrally in `src/utilities/constants/status.ts` and `src/services/mappers/backend-mappers.ts`.
 
 Do not invent backend status values. In particular, do not treat a frontend label such as Reversed as a confirmed backend listing status without checking the contract and actual response.
 
 Badges always show the word, never colour alone. Map API values to these labels in one place.
 
-The status a **recipient** sees is derived from both the request and the listing status by `getRecipientRequestStatus` in `src/lib/request-status.ts` (Pending + Reserved or Collected listing → Declined; Pending + Expired listing → Expired). Use it wherever a recipient's request status is shown or decides whether Cancel appears. It is a display fallback only: it never changes the stored status. The deployed backend leaves competing requests `PENDING`; it should persist them as `DECLINED`. See `README.md`, "Request status display", for the full table and the donor-panel equivalent.
+The status a **recipient** sees is derived from both the request and the listing status by `getRecipientRequestStatus` in `src/utilities/helpers/request-status.ts` (Pending + Reserved or Collected listing → Declined; Pending + Expired listing → Expired). Use it wherever a recipient's request status is shown or decides whether Cancel appears. It is a display fallback only: it never changes the stored status. The deployed backend leaves competing requests `PENDING`; it should persist them as `DECLINED`. See `README.md`, "Request status display", for the full table and the donor-panel equivalent.
 
 ## Every screen has five states
 

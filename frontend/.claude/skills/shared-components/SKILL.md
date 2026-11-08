@@ -9,12 +9,14 @@ Product UI in TeSA Cohort 6 is built from the shared components in `src/componen
 
 ## Before writing UI
 
-1. **Look first.** List `src/components/ui/` in the project. If a shared component covers the need, use it.
+1. **Look first.** List `src/components/ui/` in the project. Each shared component has its own folder, `src/components/ui/<name>/<name>.tsx`. The folders `form/`, `summary-strip/`, `view-tabs/` and `loading-state/` are FoodBridge's own pieces, not shared ones. If a shared component covers the need, use it.
 2. **Read the real API.** Open the component file and check what it exports, its prop types, its required props and its header comment. Don't guess prop names; the README and the source are the truth.
-3. **Bring its dependencies.** When copying a component into a product, also copy the files it imports:
-   - `src/lib/cn.ts`, for every component except Card
+3. **Bring its dependencies.** When copying a component into this product, put it at `src/components/ui/<name>/<name>.tsx` and also copy the files it imports:
+   - `cn.ts`, for every component except Card. Here it lives at `src/utilities/helpers/cn.ts`.
    - `button.tsx`, for Dialog, EmptyState, ErrorState and FilterBar
    - `form-field.tsx` and `input.tsx`, for FilterBar
+
+   Then rewrite the copied file's import lines to the `@/` alias: `cn` to `@/utilities/helpers/cn`, and siblings such as `./button` to `@/components/ui/button/button`. Those import lines are the only local change allowed.
 
    Also install the npm packages the component imports: `clsx`, `tailwind-merge`, `@radix-ui/*` and `lucide-react`.
 4. **Don't duplicate.** Don't write a one-off button, modal, spinner, badge, toast or form field when a shared one exists. If a shared component can't cover a need, say so. Propose the change to the shared repo instead of forking a local copy. Use `className` for layout tweaks only.
@@ -24,24 +26,24 @@ Product UI in TeSA Cohort 6 is built from the shared components in `src/componen
 
 | Need | Use | Import from |
 | --- | --- | --- |
-| Loading | `Skeleton` (`shape="text" \| "card" \| "image"`), with `aria-busy="true"` on the container | `@/components/ui/skeleton` |
-| Empty, or no filter results | `EmptyState` (title, description, optional `action`) | `@/components/ui/empty-state` |
-| Load or save failed | `ErrorState` (plain-string title and description, `onRetry`, `retrying`) | `@/components/ui/error-state` |
-| Success after an action | `useToast().toast({ variant: "success", ... })`; `<ToastProvider>` must wrap the app once | `@/components/ui/toast` |
-| Error notification after an action | `toast({ variant: "error", ... })` | `@/components/ui/toast` |
-| Populated list item | `Card` + `CardHeader` / `CardBody` / `CardFooter` | `@/components/ui/card` |
-| An item's status | `StatusBadge` (`tone`, status written as text) | `@/components/ui/status-badge` |
-| Actions | `Button` (`variant`, `size`, `loading`; `type="submit"` in forms) | `@/components/ui/button` |
-| Form control wiring | `FormField` around every control: `{(field) => <Input {...field} />}` | `@/components/ui/form-field` |
-| Text input | `Input` inside `FormField` | `@/components/ui/input` |
-| Pick one option | `Select` inside `FormField` (`allowAny` for filters) | `@/components/ui/select` |
-| Yes/no option | `Checkbox` (controlled: `checked`, `onCheckedChange`) | `@/components/ui/checkbox` |
-| Modal content | `Dialog` (`title` and `description` required) | `@/components/ui/dialog` |
-| "Are you sure?" | `ConfirmDialog` (`confirmLabel` names the action, `tone="danger"` for destructive, async `onConfirm`) | `@/components/ui/dialog` |
-| Search and filters above a list | `FilterBar`, plus `FilterGroup` for checkbox groups | `@/components/ui/filter-bar` |
-| Multi-line text | `Textarea` inside `FormField` (`maxLength` + `showCount` for a character count) | `@/components/ui/textarea` |
+| Loading | `Skeleton` (`shape="text" \| "card" \| "image"`), with `aria-busy="true"` on the container | `@/components/ui/skeleton/skeleton` |
+| Empty, or no filter results | `EmptyState` (title, description, optional `action`) | `@/components/ui/empty-state/empty-state` |
+| Load or save failed | `ErrorState` (plain-string title and description, `onRetry`, `retrying`) | `@/components/ui/error-state/error-state` |
+| Success after an action | `useToast().toast({ variant: "success", ... })`; `<ToastProvider>` must wrap the app once | `@/components/ui/toast/toast` |
+| Error notification after an action | `toast({ variant: "error", ... })` | `@/components/ui/toast/toast` |
+| Populated list item | `Card` + `CardHeader` / `CardBody` / `CardFooter` | `@/components/ui/card/card` |
+| An item's status | `StatusBadge` (`tone`, status written as text) | `@/components/ui/status-badge/status-badge` |
+| Actions | `Button` (`variant`, `size`, `loading`; `type="submit"` in forms) | `@/components/ui/button/button` |
+| Form control wiring | `FormField` around every control: `{(field) => <Input {...field} />}` | `@/components/ui/form-field/form-field` |
+| Text input | `Input` inside `FormField` | `@/components/ui/input/input` |
+| Pick one option | `Select` inside `FormField` (`allowAny` for filters) | `@/components/ui/select/select` |
+| Yes/no option | `Checkbox` (controlled: `checked`, `onCheckedChange`) | `@/components/ui/checkbox/checkbox` |
+| Modal content | `Dialog` (`title` and `description` required) | `@/components/ui/dialog/dialog` |
+| "Are you sure?" | `ConfirmDialog` (`confirmLabel` names the action, `tone="danger"` for destructive, async `onConfirm`) | `@/components/ui/dialog/dialog` |
+| Search and filters above a list | `FilterBar`, plus `FilterGroup` for checkbox groups | `@/components/ui/filter-bar/filter-bar` |
+| Multi-line text | `Textarea` inside `FormField` (`maxLength` + `showCount` for a character count) | `@/components/ui/textarea/textarea` |
 
-The `@/` alias assumes the product maps `@/*` to `src/*`. The shared repo's `tsconfig.json` does this. Otherwise use relative imports.
+The `@/` alias maps `@/*` to `src/*` (as in the shared repo's `tsconfig.json`). In FoodBridge every import uses it, including inside the copied shared components.
 
 ## The five screen states
 
