@@ -1,7 +1,7 @@
 // /your-requests: the recipient's requests and what happened to each (spec S7).
 import { PageContainer } from '@/components/common/PageContainer'
 import { PageHeader } from '@/components/common/PageHeader'
-import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
 import { YourRequests } from '@/sections/your-requests/YourRequests'
 
 const TITLE = 'Your requests'

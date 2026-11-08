@@ -6,7 +6,7 @@ import { FormField } from '@/components/ui/form-field'
 import { Input, type InputProps } from '@/components/ui/input'
 import { useFieldError } from '@/components/form/useFieldError'
 import type { FormFieldBaseProps } from '@/components/form/types'
-import { cn } from '@/lib/cn'
+import { cn } from '@/utilities/helpers/cn'
 
 export type FormInputProps = FormFieldBaseProps &
   Omit<InputProps, 'name' | 'id' | 'required' | 'value'> & {

@@ -1,6 +1,6 @@
 // Display formatting for dates, quantities and names. Times are always shown in Lagos
 // time, so everyone sees the same "Collect by" time whatever their device's zone.
-import { UNITS, type UnitOption } from '@/constants/listingOptions'
+import { UNITS, type UnitOption } from '@/utilities/constants/listingOptions'
 
 const TIME_ZONE = 'Africa/Lagos'
 const DAY_MS = 24 * 60 * 60 * 1000

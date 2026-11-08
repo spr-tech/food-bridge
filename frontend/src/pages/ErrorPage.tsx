@@ -3,9 +3,9 @@
 import { Link } from 'react-router'
 import { PageHeader } from '@/components/common/PageHeader'
 import { DemoBanner } from '@/components/layout/DemoBanner'
-import { homePathFor } from '@/constants/roles'
-import { useDocumentTitle } from '@/hooks/useDocumentTitle'
-import { useRole } from '@/hooks/useRole'
+import { homePathFor } from '@/utilities/constants/roles'
+import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
+import { useRole } from '@/utilities/hooks/useRole'
 
 const TITLE = 'Something went wrong'
 

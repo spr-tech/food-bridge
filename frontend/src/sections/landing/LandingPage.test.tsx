@@ -3,7 +3,7 @@
 // demonstration line. A signed-in user who opens "/" goes to their home page instead.
 import { screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES } from '@/utilities/constants/routes'
 import { HomeRedirect } from '@/pages/HomeRedirect'
 import { LandingPage } from '@/pages/LandingPage'
 import { renderRoutes, signInAs } from '@/test/render'

@@ -4,7 +4,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { PageContainer } from '@/components/common/PageContainer'
-import { listingDetailPath, ROUTES } from '@/constants/routes'
+import { listingDetailPath, ROUTES } from '@/utilities/constants/routes'
 import { BrowsePage } from '@/pages/BrowsePage'
 import { CompletedHandoversPage } from '@/pages/CompletedHandoversPage'
 import { CreateListingPage } from '@/pages/CreateListingPage'

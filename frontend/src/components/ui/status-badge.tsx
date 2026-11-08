@@ -20,7 +20,7 @@
 // success 5.0:1, warning 4.9:1, danger 6.5:1.
 
 import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
-import { cn } from "../../lib/cn";
+import { cn } from "@/utilities/helpers/cn";
 
 export type StatusBadgeTone = "neutral" | "info" | "success" | "warning" | "danger";
 

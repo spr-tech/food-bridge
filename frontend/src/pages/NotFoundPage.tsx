@@ -2,9 +2,9 @@
 import { Link } from 'react-router'
 import { PageContainer } from '@/components/common/PageContainer'
 import { PageHeader } from '@/components/common/PageHeader'
-import { homePathFor } from '@/constants/roles'
-import { useDocumentTitle } from '@/hooks/useDocumentTitle'
-import { useRole } from '@/hooks/useRole'
+import { homePathFor } from '@/utilities/constants/roles'
+import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
+import { useRole } from '@/utilities/hooks/useRole'
 
 const TITLE = 'Page not found'
 

@@ -18,7 +18,7 @@
 // - Fills the width of its container and never sets a fixed width, so it fits 360px.
 
 import { forwardRef, type HTMLAttributes } from "react";
-import { cn } from "../../lib/cn";
+import { cn } from "@/utilities/helpers/cn";
 
 type Shape = "text" | "card" | "image";
 

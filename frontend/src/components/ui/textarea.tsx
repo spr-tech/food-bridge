@@ -34,7 +34,7 @@ import {
   type ChangeEvent,
   type TextareaHTMLAttributes,
 } from "react";
-import { cn } from "../../lib/cn";
+import { cn } from "@/utilities/helpers/cn";
 
 export type TextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
   /** Show "120 / 500" under the field. Needs maxLength. */

@@ -6,8 +6,8 @@
 // store a request as PENDING once its listing is reserved, collected or expired.
 import { useSession } from '@/app/session'
 import type { NavCounts } from '@/components/layout/Sidebar'
-import { ROUTES } from '@/constants/routes'
-import { getRecipientRequestStatus } from '@/lib/request-status'
+import { ROUTES } from '@/utilities/constants/routes'
+import { getRecipientRequestStatus } from '@/utilities/helpers/request-status'
 import { useMyListings } from '@/services/listings'
 import { useMyRequests } from '@/services/requests'
 

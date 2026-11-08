@@ -1,4 +1,4 @@
-import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
 import { LandingClosing } from '@/sections/landing/LandingClosing'
 import { LandingHero } from '@/sections/landing/LandingHero'
 import { LandingMiddle } from '@/sections/landing/LandingMiddle'

@@ -4,7 +4,7 @@
 import { Link, useLocation } from 'react-router'
 import { NavIcon } from '@/components/layout/NavIcons'
 import type { NavCounts } from '@/components/layout/Sidebar'
-import { activeNavItem, type NavItem } from '@/constants/roles'
+import { activeNavItem, type NavItem } from '@/utilities/constants/roles'
 
 type TabBarProps = {
   items: NavItem[]

@@ -1,6 +1,6 @@
 // The one place API status values map to on-screen words and badge tones.
 // TODO: API values are placeholders until agreed with the service (spec section 3).
-import type { ListingStatus, RequestStatus, StatusTone } from '@/types/status'
+import type { ListingStatus, RequestStatus, StatusTone } from '@/utilities/enums/status'
 
 type StatusDisplay = {
   label: string

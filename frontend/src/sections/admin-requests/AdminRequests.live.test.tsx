@@ -8,7 +8,7 @@ import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { canOpen } from '@/app/routes'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES } from '@/utilities/constants/routes'
 import { AdminRequestsPage } from '@/pages/AdminRequestsPage'
 import { renderRoutes, signInAs } from '@/test/render'
 

@@ -4,7 +4,7 @@
 // focus to the avatar. The shared set has no menu; candidate to add there.
 import { useEffect, useId, useRef, useState } from 'react'
 import { SignOutIcon } from '@/components/layout/NavIcons'
-import { initials } from '@/lib/format'
+import { initials } from '@/utilities/helpers/format'
 
 type AccountMenuProps = {
   organisationName: string

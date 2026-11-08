@@ -3,7 +3,7 @@
 import { useSession } from '@/app/session'
 import { PageContainer } from '@/components/common/PageContainer'
 import { PageHeader } from '@/components/common/PageHeader'
-import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
 import { FindFood } from '@/sections/find-food/FindFood'
 
 // The heading and description for each kind of user. The desktop description is the

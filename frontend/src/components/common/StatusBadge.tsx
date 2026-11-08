@@ -4,8 +4,8 @@
 // That keeps the copied component untouched and the global role colours strong.
 import type { CSSProperties } from 'react'
 import { StatusBadge as SharedStatusBadge } from '@/components/ui/status-badge'
-import { LISTING_STATUS, REQUEST_STATUS } from '@/constants/status'
-import type { ListingStatus, RequestStatus, StatusTone } from '@/types/status'
+import { LISTING_STATUS, REQUEST_STATUS } from '@/utilities/constants/status'
+import type { ListingStatus, RequestStatus, StatusTone } from '@/utilities/enums/status'
 
 // kind is needed because EXPIRED is both a request and a listing status.
 type StatusBadgeProps =

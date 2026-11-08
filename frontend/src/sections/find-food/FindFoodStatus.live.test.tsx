@@ -9,7 +9,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES } from '@/utilities/constants/routes'
 import { BrowsePage } from '@/pages/BrowsePage'
 import { renderRoutes, signInAs } from '@/test/render'
 

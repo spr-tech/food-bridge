@@ -2,7 +2,7 @@
 // Each column holds a button per account, showing only its name. Choosing one fills in
 // the email and password; the form then moves focus to Sign in, so the user still signs
 // in themselves. On short windows the box is more compact.
-import { DEMO_ACCOUNT_GROUPS, type DemoAccount } from '@/constants/demoAccounts'
+import { DEMO_ACCOUNT_GROUPS, type DemoAccount } from '@/utilities/constants/demoAccounts'
 
 type DemoAccountsProps = {
   onPick: (account: DemoAccount) => void

@@ -4,7 +4,7 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { useRequestFood } from '@/hooks/useRequestFood'
+import { useRequestFood } from '@/utilities/hooks/useRequestFood'
 import { findToastAction, renderRoutes, signInAs } from '@/test/render'
 
 vi.mock('@/config/env', () => ({

@@ -2,8 +2,8 @@
 import { fireEvent, screen } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { ROUTES } from '@/constants/routes'
-import { lagosToday } from '@/lib/deadline'
+import { ROUTES } from '@/utilities/constants/routes'
+import { lagosToday } from '@/utilities/helpers/deadline'
 import { CreateListingPage } from '@/pages/CreateListingPage'
 import { renderRoutes, signInAs } from '@/test/render'
 

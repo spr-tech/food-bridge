@@ -1,7 +1,7 @@
 // A listing's photo, or the placeholder the spec asks for when there is none (S3, S4).
 // Decorative: the food name next to it already says what it shows. The caller sets the
 // size and corners through className.
-import { cn } from '@/lib/cn'
+import { cn } from '@/utilities/helpers/cn'
 
 type ListingPhotoProps = {
   photoUrl: string | null

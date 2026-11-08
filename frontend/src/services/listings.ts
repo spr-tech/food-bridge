@@ -3,8 +3,8 @@
 
 import * as db from '@/mocks/db'
 import { simulate, simulateWrite } from '@/mocks/simulate'
-import { matchesListingSearch, matchesPickupArea } from '@/lib/listing-search'
-import { compressPhoto, shrinkPhoto } from '@/lib/photo'
+import { matchesListingSearch, matchesPickupArea } from '@/utilities/helpers/listing-search'
+import { compressPhoto, shrinkPhoto } from '@/utilities/helpers/photo'
 import { api, LIST_QUERY_OPTIONS } from '@/services/api'
 import { env } from '@/config/env'
 import {

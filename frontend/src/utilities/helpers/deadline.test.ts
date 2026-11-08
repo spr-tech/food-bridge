@@ -1,7 +1,7 @@
 // Date and time combine into one Lagos-time deadline. Tests run in New York time (see
 // vite.config.ts), so these fail if the device's zone leaks in.
 import { describe, expect, it } from 'vitest'
-import { combineDeadline, isLaterThanNow, lagosToday } from '@/lib/deadline'
+import { combineDeadline, isLaterThanNow, lagosToday } from '@/utilities/helpers/deadline'
 
 describe('combineDeadline', () => {
   it('joins a date and a time as Lagos time', () => {

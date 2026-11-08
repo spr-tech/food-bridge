@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { StatusBadge } from '@/components/common/StatusBadge'
-import type { ListingStatus, RequestStatus } from '@/types/status'
+import type { ListingStatus, RequestStatus } from '@/utilities/enums/status'
 
 // Written out here rather than read from constants/status.ts, so a wrong label or tone
 // there fails. Each row: status, on-screen word, the background variable its shared tone

@@ -3,7 +3,7 @@
 // page title. Each figure is its label then its value, with an optional short hint.
 // Phones keep the figures in one row, without icons or hints; tablets drop the icons.
 import type { ReactNode } from 'react'
-import { cn } from '@/lib/cn'
+import { cn } from '@/utilities/helpers/cn'
 
 export type SummaryFigure = {
   label: string

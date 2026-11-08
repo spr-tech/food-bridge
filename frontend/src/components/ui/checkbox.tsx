@@ -12,7 +12,7 @@
 import * as RadixCheckbox from "@radix-ui/react-checkbox"
 import { Check } from "lucide-react"
 import { forwardRef, useId, type ReactNode } from "react"
-import { cn } from "../../lib/cn"
+import { cn } from "@/utilities/helpers/cn"
 
 export type CheckboxProps = {
   label: ReactNode

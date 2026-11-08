@@ -2,7 +2,7 @@
 // 1600px and at the highest quality that fits. jsdom has no image decoding or canvas
 // encoding, so both are stubbed: a JPEG's size here grows with its pixels and quality.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { compressPhoto, UPLOAD_MAX_BYTES } from '@/lib/photo'
+import { compressPhoto, UPLOAD_MAX_BYTES } from '@/utilities/helpers/photo'
 
 const close = vi.fn()
 const encoded: { width: number; height: number; quality: number }[] = []

@@ -8,7 +8,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { RequestItem } from '@/sections/your-requests/RequestItem'
 import { renderRoutes, signInAs } from '@/test/render'
 import type { ListingRequest } from '@/types/api'
-import type { ListingStatus, RequestStatus } from '@/types/status'
+import type { ListingStatus, RequestStatus } from '@/utilities/enums/status'
 
 const MESSAGE = 'This request was not approved. The food listing is no longer available for requests.'
 

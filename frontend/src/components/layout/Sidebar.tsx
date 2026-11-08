@@ -6,7 +6,7 @@
 import { Link, useLocation } from 'react-router'
 import { Logo } from '@/components/layout/Logo'
 import { ArchMark, NavIcon } from '@/components/layout/NavIcons'
-import { activeNavItem, type NavItem } from '@/constants/roles'
+import { activeNavItem, type NavItem } from '@/utilities/constants/roles'
 
 export type NavCounts = Partial<Record<string, number>>
 

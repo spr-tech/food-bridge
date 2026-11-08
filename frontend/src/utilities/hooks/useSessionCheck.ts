@@ -4,7 +4,7 @@
 // service's, so a changed role or organisation name takes effect without signing in again.
 import { useEffect } from 'react'
 import { saveSession } from '@/app/session'
-import { useSessionEnded } from '@/hooks/useSessionEnded'
+import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { useCurrentAccount } from '@/services/auth'
 import { errorStatus } from '@/services/errors'
 import type { Session } from '@/types/api'

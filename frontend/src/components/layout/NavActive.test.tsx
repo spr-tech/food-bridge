@@ -5,8 +5,8 @@ import { act, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
 import { RequireSession } from '@/components/layout/RequireSession'
-import { activeNavItem, ROLE_CONFIG } from '@/constants/roles'
-import { editListingPath, listingDetailPath, ROUTES } from '@/constants/routes'
+import { activeNavItem, ROLE_CONFIG } from '@/utilities/constants/roles'
+import { editListingPath, listingDetailPath, ROUTES } from '@/utilities/constants/routes'
 import { renderRoutes, signInAs } from '@/test/render'
 
 const originalMatchMedia = window.matchMedia

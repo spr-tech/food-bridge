@@ -8,7 +8,7 @@
 import { act, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { listingDetailPath, ROUTES } from '@/constants/routes'
+import { listingDetailPath, ROUTES } from '@/utilities/constants/routes'
 import { ListingDetailPage } from '@/pages/ListingDetailPage'
 import { YourListingsPage } from '@/pages/YourListingsPage'
 import { renderRoutes, signInAs } from '@/test/render'

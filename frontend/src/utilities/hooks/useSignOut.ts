@@ -3,8 +3,8 @@
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router'
 import { signOutSession } from '@/app/session'
-import { ROUTES } from '@/constants/routes'
-import { useAppDispatch } from '@/hooks/useAppStore'
+import { ROUTES } from '@/utilities/constants/routes'
+import { useAppDispatch } from '@/utilities/hooks/useAppStore'
 import { api } from '@/services/api'
 
 export function useSignOut() {

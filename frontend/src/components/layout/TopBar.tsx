@@ -1,7 +1,7 @@
 // The desktop top bar: account details and Sign out.
 // It stays white permanently; there is no animated cream layer.
 import { SignOutIcon } from '@/components/layout/NavIcons'
-import { initials } from '@/lib/format'
+import { initials } from '@/utilities/helpers/format'
 
 type TopBarProps = {
   organisationName: string

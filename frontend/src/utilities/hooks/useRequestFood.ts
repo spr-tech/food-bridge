@@ -1,8 +1,8 @@
 
 import { useCallback, useState } from 'react'
 import { useToast } from '@/components/ui/toast'
-import { useIdempotencyKey } from '@/hooks/useIdempotencyKey'
-import { useSessionEnded } from '@/hooks/useSessionEnded'
+import { useIdempotencyKey } from '@/utilities/hooks/useIdempotencyKey'
+import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { errorCode, errorStatus } from '@/services/errors'
 import { useCreateRequest } from '@/services/requests'
 

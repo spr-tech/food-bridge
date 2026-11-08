@@ -7,7 +7,7 @@ import { Link } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getSession } from '@/app/session'
 import { RequireRole, RequireSession } from '@/components/layout/RequireSession'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES } from '@/utilities/constants/routes'
 import { renderRoutes, signInAs } from '@/test/render'
 
 vi.mock('@/config/env', () => ({

@@ -4,7 +4,7 @@ import { FormField } from '@/components/ui/form-field'
 import { Select } from '@/components/ui/select'
 import { useFieldError } from '@/components/form/useFieldError'
 import type { FormFieldBaseProps } from '@/components/form/types'
-import type { Option } from '@/constants/listingOptions'
+import type { Option } from '@/utilities/constants/listingOptions'
 
 type FormSelectProps = FormFieldBaseProps & {
   options: Option[]

@@ -2,9 +2,9 @@
 // The simulated service enforces the same rules as the real backend,
 // using data kept in sessionStorage.
 
-import { CATEGORIES, PICKUP_AREAS, UNITS } from '@/constants/listingOptions'
-import { formatDay } from '@/lib/format'
-import { canDeleteListing } from '@/lib/listing-permissions'
+import { CATEGORIES, PICKUP_AREAS, UNITS } from '@/utilities/constants/listingOptions'
+import { formatDay } from '@/utilities/helpers/format'
+import { canDeleteListing } from '@/utilities/helpers/listing-permissions'
 import {
   createSeed,
   DB_VERSION,
@@ -25,7 +25,7 @@ import type {
   RequestPage,
   Session,
 } from '@/types/api'
-import type { ListingStatus, RequestStatus } from '@/types/status'
+import type { ListingStatus, RequestStatus } from '@/utilities/enums/status'
 
 export const MOCK_DB_STORAGE_KEY = 'foodbridge.mock-db'
 

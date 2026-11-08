@@ -1,4 +1,4 @@
-import { pickupAreaValue } from '@/constants/listingOptions'
+import { pickupAreaValue } from '@/utilities/constants/listingOptions'
 import type {
   ActivityEntry,
   BackendActivityResponse,

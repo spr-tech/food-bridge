@@ -7,10 +7,10 @@
 import { matchRoutes, type RouteObject } from 'react-router'
 import { RequireRole, RequireSession } from '@/components/layout/RequireSession'
 import { RootLayout } from '@/components/layout/RootLayout'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES } from '@/utilities/constants/routes'
 import { ErrorPage } from '@/pages/ErrorPage'
 import { HomeRedirect } from '@/pages/HomeRedirect'
-import type { Role } from '@/types/role'
+import type { Role } from '@/utilities/enums/role'
 
 type RoleHandle = { roles: Role[] }
 

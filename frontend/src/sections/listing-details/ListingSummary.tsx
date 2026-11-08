@@ -7,13 +7,13 @@
 import { ListingPhoto } from '@/components/common/ListingPhoto'
 import { ClockIcon, PinIcon, QuantityIcon } from '@/components/common/MetaIcons'
 import { StatusBadge } from '@/components/common/StatusBadge'
-import { CATEGORIES, optionLabel, PICKUP_AREAS } from '@/constants/listingOptions'
+import { CATEGORIES, optionLabel, PICKUP_AREAS } from '@/utilities/constants/listingOptions'
 import {
   formatDay,
   formatListed,
   formatListingQuantity,
   formatTime,
-} from '@/lib/format'
+} from '@/utilities/helpers/format'
 import type { Listing } from '@/types/api'
 
 // "Pickup by 7:00 PM today" on a phone, as in m4; "on Mon 26 Oct" further out.

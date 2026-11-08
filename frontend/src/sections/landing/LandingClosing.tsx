@@ -2,7 +2,7 @@
 // from four sides and "go to waste." drops in letter by letter (src/styles/landing.css).
 import type { CSSProperties } from 'react'
 import { Link } from 'react-router'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES } from '@/utilities/constants/routes'
 
 const words = ['Tonight,', 'let', 'nothing', 'good']
 const accent = 'go to waste.'

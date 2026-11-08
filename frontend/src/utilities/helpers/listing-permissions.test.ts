@@ -1,7 +1,7 @@
 // Who is offered Delete listing, and when a listing can be edited, for every role and
 // listing status.
 import { describe, expect, it } from 'vitest'
-import { canDeleteListing, deleteBlockedReason, isListingEditable } from '@/lib/listing-permissions'
+import { canDeleteListing, deleteBlockedReason, isListingEditable } from '@/utilities/helpers/listing-permissions'
 import type { Listing } from '@/types/api'
 
 const OWNER = '6b1f6c1e-3c43-4a59-9d1e-0d6c8a1f2b11'

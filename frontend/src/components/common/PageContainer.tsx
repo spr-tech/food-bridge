@@ -2,7 +2,7 @@
 // content, up to the page's max width and centred in the content area, so wide screens
 // don't leave it hugging the left. Phones are narrower than every width, so it fills them.
 import type { ReactNode } from 'react'
-import { cn } from '@/lib/cn'
+import { cn } from '@/utilities/helpers/cn'
 
 const MAX_WIDTH = {
   details: 'max-w-200', // 800px: Listing details

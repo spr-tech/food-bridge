@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { activityLabel } from '@/constants/activity'
+import { activityLabel } from '@/utilities/constants/activity'
 
 describe('activityLabel', () => {
   it.each([

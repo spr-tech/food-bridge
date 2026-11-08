@@ -1,7 +1,7 @@
 
 import { describe, expect, it } from 'vitest'
 import { ValidationError } from 'yup'
-import { lagosToday } from '@/lib/deadline'
+import { lagosToday } from '@/utilities/helpers/deadline'
 import { listingSchema, type ListingFormValues } from '@/schema/listingSchema'
 
 const DAY = 24 * 60 * 60 * 1000

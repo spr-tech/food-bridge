@@ -2,7 +2,7 @@
 // and sign-in panel, and the light icon on the cream phone bar.
 import iconDark from '@/assets/logo-icon-dark.svg'
 import iconLight from '@/assets/logo-icon-light.svg'
-import { cn } from '@/lib/cn'
+import { cn } from '@/utilities/helpers/cn'
 
 type LogoProps = {
   variant: 'sidebar' | 'cream' | 'dark'

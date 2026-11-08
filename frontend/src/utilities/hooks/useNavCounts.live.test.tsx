@@ -6,8 +6,8 @@ import type { ReactNode } from 'react'
 import { Provider } from 'react-redux'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { makeStore } from '@/app/store'
-import { ROUTES } from '@/constants/routes'
-import { useNavCounts } from '@/hooks/useNavCounts'
+import { ROUTES } from '@/utilities/constants/routes'
+import { useNavCounts } from '@/utilities/hooks/useNavCounts'
 import { signInAs } from '@/test/render'
 
 vi.mock('@/config/env', () => ({

@@ -2,7 +2,7 @@
 // service's keyword search only looks at the food name and description, and its area
 // filter only matches the exact stored text, so services/listings.ts applies these two
 // here instead (spec S3: "Search by food name, donor or area").
-import { CATEGORIES, optionLabel, PICKUP_AREAS } from '@/constants/listingOptions'
+import { CATEGORIES, optionLabel, PICKUP_AREAS } from '@/utilities/constants/listingOptions'
 import type { Listing } from '@/types/api'
 
 // Whether the search text appears in the food name, description, donor, area or category.

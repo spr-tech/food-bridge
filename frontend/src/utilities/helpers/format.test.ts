@@ -9,7 +9,7 @@ import {
   formatRequested,
   formatUpdated,
   initials,
-} from '@/lib/format'
+} from '@/utilities/helpers/format'
 
 // 2:00 PM in Lagos (UTC+1), 9:00 AM in New York.
 const NOW = new Date('2026-10-24T13:00:00Z')

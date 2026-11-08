@@ -1,7 +1,7 @@
 // Landing middle: the story (one evening), the food band, How it works,
 // the promise and Join. Animations are classes from src/styles/landing.css.
 import { Link } from 'react-router'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES } from '@/utilities/constants/routes'
 
 const storySteps = [
   { time: '6:00', title: 'The ovens cool. Forty loaves are left.', body: "Good bread, baked this morning. Tomorrow it can't be sold." },

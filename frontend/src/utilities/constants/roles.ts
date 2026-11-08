@@ -2,8 +2,8 @@
 // comes from the signed-in session.
 import { matchPath } from 'react-router'
 import type { NavIconName } from '@/components/layout/NavIcons'
-import { ROUTES } from '@/constants/routes'
-import type { Role } from '@/types/role'
+import { ROUTES } from '@/utilities/constants/routes'
+import type { Role } from '@/utilities/enums/role'
 
 export type NavItem = {
   label: string

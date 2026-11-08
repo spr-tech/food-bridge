@@ -11,13 +11,13 @@ import { Navigate, useSearchParams } from 'react-router'
 import { canOpen } from '@/app/routes'
 import { useSession } from '@/app/session'
 import { DemoBanner } from '@/components/layout/DemoBanner'
-import { homePathFor } from '@/constants/roles'
-import { ROUTES } from '@/constants/routes'
-import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { homePathFor } from '@/utilities/constants/roles'
+import { ROUTES } from '@/utilities/constants/routes'
+import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
 import { wakeService } from '@/services/api'
 import { SignInForm } from '@/sections/sign-in/SignInForm'
 import { SignInPanelDesktop, SignInPanelPhone } from '@/sections/sign-in/SignInPanel'
-import type { Role } from '@/types/role'
+import type { Role } from '@/utilities/enums/role'
 
 // Only a path inside this app that the role may open: never another site, never back to
 // sign in, and never a page that would only say "You don't have access to this."

@@ -4,7 +4,7 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES } from '@/utilities/constants/routes'
 import * as db from '@/mocks/db'
 import { CompletedHandoversPage } from '@/pages/CompletedHandoversPage'
 import { DashboardPage } from '@/pages/DashboardPage'

@@ -1,6 +1,6 @@
 // What a recipient's request shows, given its listing. The service can leave a request
 // PENDING after its listing has moved on (it doesn't decline the others on approval).
-import type { ListingStatus, RequestStatus } from '@/types/status'
+import type { ListingStatus, RequestStatus } from '@/utilities/enums/status'
 
 export function getRecipientRequestStatus(
   requestStatus: RequestStatus,

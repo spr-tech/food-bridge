@@ -10,11 +10,11 @@ import { Link, Navigate, Outlet, useLocation } from 'react-router'
 import { useSession, wasExpired, wasSignedOut } from '@/app/session'
 import { PageHeader } from '@/components/common/PageHeader'
 import { AppLayout } from '@/components/layout/AppLayout'
-import { homePathFor } from '@/constants/roles'
-import { ROUTES } from '@/constants/routes'
-import { useDocumentTitle } from '@/hooks/useDocumentTitle'
-import { useSessionCheck } from '@/hooks/useSessionCheck'
-import type { Role } from '@/types/role'
+import { homePathFor } from '@/utilities/constants/roles'
+import { ROUTES } from '@/utilities/constants/routes'
+import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
+import { useSessionCheck } from '@/utilities/hooks/useSessionCheck'
+import type { Role } from '@/utilities/enums/role'
 
 export function RequireSession() {
   const session = useSession()

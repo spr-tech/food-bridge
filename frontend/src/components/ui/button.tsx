@@ -22,7 +22,7 @@
 // - Icon-only buttons must pass iconOnly and an aria-label (TypeScript enforces this).
 
 import { forwardRef, type ButtonHTMLAttributes, type MouseEvent } from "react";
-import { cn } from "../../lib/cn";
+import { cn } from "@/utilities/helpers/cn";
 
 type Variant = "primary" | "secondary" | "danger" | "ghost";
 type Size = "sm" | "md" | "lg";

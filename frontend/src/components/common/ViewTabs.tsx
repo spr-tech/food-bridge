@@ -1,7 +1,7 @@
 // Two or more views of one list as pill tabs (Your listings / Listing history, Open
 // requests / Request history), in the dashboard's style. The page owns which view is
 // selected and renders each panel with the matching id.
-import { cn } from '@/lib/cn'
+import { cn } from '@/utilities/helpers/cn'
 
 export type ViewTab = {
   id: string

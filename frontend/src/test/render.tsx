@@ -10,7 +10,7 @@ import { saveSession } from '@/app/session'
 import { makeStore } from '@/app/store'
 import { ToastProvider } from '@/components/ui/toast'
 import { ACCOUNTS } from '@/mocks/seed'
-import type { Role } from '@/types/role'
+import type { Role } from '@/utilities/enums/role'
 
 type RenderRoutesOptions = {
   initialEntries?: string[]

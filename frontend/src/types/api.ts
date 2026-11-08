@@ -3,8 +3,8 @@
 // Backend types describe Esther's API contract.
 // Frontend types describe the data used by the screens.
 
-import type { Role } from '@/types/role'
-import type { ListingStatus, RequestStatus } from '@/types/status'
+import type { Role } from '@/utilities/enums/role'
+import type { ListingStatus, RequestStatus } from '@/utilities/enums/status'
 
 // ---------------------------------------------------------------------------
 // Backend API types — based on Esther's latest Swagger contract.

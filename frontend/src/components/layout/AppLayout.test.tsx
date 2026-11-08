@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { SESSION_STORAGE_KEY } from '@/app/session'
 import { RequireSession } from '@/components/layout/RequireSession'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES } from '@/utilities/constants/routes'
 import { renderRoutes, signInAs } from '@/test/render'
 
 const originalMatchMedia = window.matchMedia

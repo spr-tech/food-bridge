@@ -1,7 +1,7 @@
 // The estimate of food saved: listed quantities of completed handovers, totalled per unit.
 import { describe, expect, it } from 'vitest'
-import { foodSavedByUnit } from '@/lib/food-saved'
-import { formatUnit } from '@/lib/format'
+import { foodSavedByUnit } from '@/utilities/helpers/food-saved'
+import { formatUnit } from '@/utilities/helpers/format'
 import type { CompletedHandover } from '@/types/api'
 
 const handover = (quantity: number, unit: string): CompletedHandover => ({

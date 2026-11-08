@@ -1,6 +1,6 @@
 
 import * as Yup from 'yup'
-import { combineDeadline, isLaterThanNow } from '@/lib/deadline'
+import { combineDeadline, isLaterThanNow } from '@/utilities/helpers/deadline'
 
 export const PHOTO_TYPES = ['image/jpeg', 'image/png']
 export const PHOTO_MAX_BYTES = 5 * 1024 * 1024

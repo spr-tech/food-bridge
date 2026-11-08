@@ -5,7 +5,7 @@
 // focus returns to the opener. Title and description are required props.
 //
 // Needs from teammates (same-named exports expected):
-// - ../../lib/cn.ts          -> cn(...classes)           (Muizz)
+// - @/utilities/helpers/cn.ts          -> cn(...classes)           (Muizz)
 // - ./button.tsx             -> Button with `variant` ("primary" | "secondary" | "danger" | "ghost"),
 //                               `size` ("sm" | "md" | "lg"), `loading` (boolean), forwarded ref (Muizz)
 // - tokens.css variables used: --color-surface, --color-text, --color-text-muted, --color-border,
@@ -32,7 +32,7 @@
 
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { cn } from "../../lib/cn";
+import { cn } from "@/utilities/helpers/cn";
 import { Button } from "./button";
 
 const focusRing =

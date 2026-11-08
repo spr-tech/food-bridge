@@ -30,9 +30,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { StatusBadge as SharedStatusBadge } from '@/components/ui/status-badge'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/components/ui/toast'
-import { PICKUP_AREAS, CATEGORIES } from '@/constants/listingOptions'
-import { useDocumentTitle } from '@/hooks/useDocumentTitle'
-import type { ListingStatus, RequestStatus } from '@/types/status'
+import { PICKUP_AREAS, CATEGORIES } from '@/utilities/constants/listingOptions'
+import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
+import type { ListingStatus, RequestStatus } from '@/utilities/enums/status'
 
 // ---- Formik adapters ---------------------------------------------------------------
 

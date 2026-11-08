@@ -6,8 +6,8 @@
 // (allowDeleted), the only accounts the service shows deleted listings to.
 import { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router'
-import { CATEGORIES, PICKUP_AREAS } from '@/constants/listingOptions'
-import type { ListingStatus } from '@/types/status'
+import { CATEGORIES, PICKUP_AREAS } from '@/utilities/constants/listingOptions'
+import type { ListingStatus } from '@/utilities/enums/status'
 
 export type StatusFilter = 'available' | 'reserved' | 'collected' | 'expired' | 'deleted' | 'all'
 

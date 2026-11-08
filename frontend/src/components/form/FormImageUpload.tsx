@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { FormField } from '@/components/ui/form-field'
 import { useFieldError } from '@/components/form/useFieldError'
 import type { FormFieldBaseProps } from '@/components/form/types'
-import { cn } from '@/lib/cn'
+import { cn } from '@/utilities/helpers/cn'
 
 type FormImageUploadProps = FormFieldBaseProps & {
   disabled?: boolean

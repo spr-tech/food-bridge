@@ -3,12 +3,12 @@ import { CancelRequestButton } from '@/components/common/CancelRequestButton'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useRequestFood } from '@/hooks/useRequestFood'
+import { useRequestFood } from '@/utilities/hooks/useRequestFood'
 import {
   REQUEST_NOT_APPROVED,
   getRecipientRequestStatus,
   wasNotApprovedAndListingClosed,
-} from '@/lib/request-status'
+} from '@/utilities/helpers/request-status'
 import { useMyRequests } from '@/services/requests'
 import type { Listing, ListingRequest } from '@/types/api'
 

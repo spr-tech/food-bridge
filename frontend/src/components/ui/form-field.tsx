@@ -16,7 +16,7 @@
 // Works with Input, Textarea and Select (pass the props to Radix Select's Trigger).
 
 import { useId, type ReactNode } from "react";
-import { cn } from "../../lib/cn";
+import { cn } from "@/utilities/helpers/cn";
 
 export type FieldControlProps = {
   id: string;

@@ -10,7 +10,7 @@
 import { ConfirmDialog } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast'
-import { useSessionEnded } from '@/hooks/useSessionEnded'
+import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { errorCode, errorStatus } from '@/services/errors'
 import { useCancelRequest } from '@/services/requests'
 

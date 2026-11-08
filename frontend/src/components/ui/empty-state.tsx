@@ -27,7 +27,7 @@
 
 import { forwardRef, type HTMLAttributes, type MouseEvent, type ReactNode } from "react";
 import { Button } from "./button";
-import { cn } from "../../lib/cn";
+import { cn } from "@/utilities/helpers/cn";
 
 export type EmptyStateHeadingLevel = "h2" | "h3" | "h4" | "h5" | "h6";
 

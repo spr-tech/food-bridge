@@ -1,7 +1,7 @@
 // What a recipient's request shows, given its listing. The service leaves a request
 // PENDING after its listing has been reserved, collected, reversed, deleted or expired.
 import { describe, expect, it } from 'vitest'
-import { getRecipientRequestStatus, REQUEST_NOT_APPROVED, wasNotApprovedAndListingClosed } from '@/lib/request-status'
+import { getRecipientRequestStatus, REQUEST_NOT_APPROVED, wasNotApprovedAndListingClosed } from '@/utilities/helpers/request-status'
 
 describe('getRecipientRequestStatus', () => {
   it.each([

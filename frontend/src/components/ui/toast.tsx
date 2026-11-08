@@ -5,7 +5,7 @@
 // useToast() anywhere below it.
 //
 // Needs from teammates:
-// - ../../lib/cn.ts  -> cn(...classes)   (Muizz)
+// - @/utilities/helpers/cn.ts  -> cn(...classes)   (Muizz)
 // - tokens.css variables used: --color-surface, --color-text, --color-text-muted, --color-border,
 //                               --color-primary, --color-success, --color-danger, --color-focus, --radius
 //
@@ -33,7 +33,7 @@
 
 import * as React from "react";
 import * as ToastPrimitive from "@radix-ui/react-toast";
-import { cn } from "../../lib/cn";
+import { cn } from "@/utilities/helpers/cn";
 
 export type ToastVariant = "success" | "error" | "info";
 
