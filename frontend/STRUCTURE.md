@@ -27,8 +27,16 @@ The layout follows section 2 of the frontend structure guide, adapted for Vite +
   `injectEndpoints` in its own file (`auth.ts`, `listings.ts`, `requests.ts`, `admin.ts`).
   Each endpoint calls the live backend, or the simulated store when mocks are on.
   `mappers/backend-mappers.ts` turns backend responses into our types.
-- `configs/`: `env.ts` (environment settings), `serviceConfig.ts` (the one `createApi`) and
-  `storeConfig.ts` (the Redux store).
+- `configs/`: `env.ts` (environment settings), `serviceConfig.ts` (the one `createApi`),
+  `storeConfig.ts` (the Redux store), `i18nConfig.ts` (translations: i18next with English,
+  French and Spanish bundled up front) and `i18next.d.ts` (types every `t()` key from the
+  English files, so a mistyped key is a TypeScript error).
+- `locales/<lang>/<namespace>.json`: all user-facing text, for `en`, `fr` and `es`. One
+  namespace per content area: `common` (buttons, navigation, statuses, roles), `landing`,
+  `auth`, `listings`, `requests`, `admin` and `validation`. Components show it with
+  `const { t } = useTranslation()` and `t('nav.findFood')` (`t('auth:...')` for another
+  namespace). Never hard-code new text in a component. Constants hold translation keys, not
+  words, and never call `t()` themselves. English is the source: add a key there first.
 - `models/`: the TypeScript shapes and the Yup schemas, one file per backend controller or
   subject. Import each type from the file it lives in; there is no re-export index.
   - `requests/`: what we send: backend request bodies (`BackendLoginRequest`,
@@ -53,6 +61,8 @@ The layout follows section 2 of the frontend structure guide, adapted for Vite +
     food's search and pickup area matching), `pagedQuery.ts` (reads every page of a list) and
     `apiErrors.ts` (reads status, code and field errors, so screens choose their own message).
   - `constants/`: routes, roles, status labels and form options. Paths come only from `routes.ts`.
+    New text here is a translation key, turned into words by `t()` in the component. So far
+    only the nav labels (`labelKey` in `roles.ts`) are converted; the rest follow screen by screen.
   - `enums/`: fixed value lists as TypeScript types: the app's `Role`, `ListingStatus` and
     `RequestStatus`, and the backend's `BackendRole`, `BackendListingState`,
     `BackendRequestState`, `BackendFoodCategory` and `BackendFoodUnit`.

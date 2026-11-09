@@ -3,7 +3,9 @@
 // There is no flood animation or theme transition when navigating.
 // The current link (activeNavItem) also covers the pages opened from it, such as a listing.
 // Only pages that exist are listed: unfinished ideas are left out rather than shown disabled.
+// All its text comes from src/locales/<lang>/common.json (nav.*).
 import { Link, useLocation } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import { Logo } from '@/components/layouts/Logo'
 import { ArchMark, NavIcon } from '@/components/layouts/NavIcons'
 import { activeNavItem, type NavItem } from '@/utilities/constants/roles'
@@ -16,6 +18,7 @@ type SidebarProps = {
 }
 
 export function Sidebar({ items, counts }: SidebarProps) {
+  const { t } = useTranslation()
   const active = activeNavItem(items, useLocation().pathname)
 
   return (
@@ -24,7 +27,7 @@ export function Sidebar({ items, counts }: SidebarProps) {
 
       <nav aria-label="Main">
         <p className="fb-sect" aria-hidden="true">
-          Menu
+          {t('nav.menu')}
         </p>
         <ul className="fb-nav">
           {items.map((item) => {
@@ -40,12 +43,12 @@ export function Sidebar({ items, counts }: SidebarProps) {
                   <span className="fb-link__icon">
                     <NavIcon name={item.icon} />
                   </span>
-                  {item.label}
+                  {t(item.labelKey)}
 
                   {count !== undefined && (
                     <span className="fb-count">
                       <span aria-hidden="true">{count}</span>
-                      <span className="sr-only">, {count} pending</span>
+                      <span className="sr-only">{t('nav.pendingCount', { count })}</span>
                     </span>
                   )}
                 </Link>
@@ -59,7 +62,7 @@ export function Sidebar({ items, counts }: SidebarProps) {
         <span className="fb-tag__mark">
           <ArchMark />
         </span>
-        <p className="fb-tag__title">Together we reduce food waste.</p>
+        <p className="fb-tag__title">{t('nav.tagline')}</p>
       </div>
     </aside>
   )

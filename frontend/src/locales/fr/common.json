@@ -1,1 +1,16 @@
-{}
+{
+  "nav": {
+    "menu": "Menu",
+    "yourListings": "Vos annonces",
+    "shareFood": "Partager des aliments",
+    "requests": "Demandes",
+    "findFood": "Trouver des aliments",
+    "yourRequests": "Vos demandes",
+    "dashboard": "Tableau de bord",
+    "allListings": "Toutes les annonces",
+    "handovers": "Remises",
+    "pendingCount_one": ", {{count}} en attente",
+    "pendingCount_other": ", {{count}} en attente",
+    "tagline": "Ensemble, réduisons le gaspillage alimentaire."
+  }
+}

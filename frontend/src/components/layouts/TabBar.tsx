@@ -2,6 +2,7 @@
 // with white links and a lighter green active tab. Like the sidebar, the current tab
 // (activeNavItem) also covers the pages opened from it.
 import { Link, useLocation } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import { NavIcon } from '@/components/layouts/NavIcons'
 import type { NavCounts } from '@/components/layouts/Sidebar'
 import { activeNavItem, type NavItem } from '@/utilities/constants/roles'
@@ -12,6 +13,7 @@ type TabBarProps = {
 }
 
 export function TabBar({ items, counts }: TabBarProps) {
+  const { t } = useTranslation()
   const active = activeNavItem(items, useLocation().pathname)
 
   return (
@@ -29,7 +31,7 @@ export function TabBar({ items, counts }: TabBarProps) {
               >
                 <NavIcon name={item.icon} size={22} />
                 <span>
-                  {item.label}
+                  {t(item.labelKey)}
                   {count !== undefined && ` · ${count}`}
                 </span>
               </Link>
