@@ -15,7 +15,7 @@ import * as db from '@/mocks/db'
 import { ListingDetailPage } from '@/app/pages/ListingDetailPage'
 import { YourListingsPage } from '@/app/pages/YourListingsPage'
 import { renderRoutes, signInAs } from '@/test/render'
-import type { Session } from '@/models/api'
+import type { Session } from '@/models/entities/session'
 
 // When set, the store refuses every delete with this status.
 const refusal = vi.hoisted(() => ({ status: null as null | number }))

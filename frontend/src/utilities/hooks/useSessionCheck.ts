@@ -7,7 +7,7 @@ import { saveSession } from '@/stores/sessionStore'
 import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { useCurrentAccount } from '@/services/auth'
 import { errorStatus } from '@/utilities/helpers/apiErrors'
-import type { Session } from '@/models/api'
+import type { Session } from '@/models/entities/session'
 
 export function useSessionCheck(session: Session | null) {
   const me = useCurrentAccount(session?.accountId)

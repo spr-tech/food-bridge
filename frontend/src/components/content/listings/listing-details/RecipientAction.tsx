@@ -10,7 +10,8 @@ import {
   wasNotApprovedAndListingClosed,
 } from '@/utilities/helpers/request-status'
 import { useMyRequests } from '@/services/requests'
-import type { Listing, ListingRequest } from '@/models/api'
+import type { Listing } from '@/models/entities/listing'
+import type { ListingRequest } from '@/models/entities/foodRequest'
 
 const NOTE = 'mt-2.5 text-[12.5px] leading-[1.55] text-text-muted md:text-[13px]'
 

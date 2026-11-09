@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import { foodSavedByUnit } from '@/utilities/helpers/food-saved'
 import { formatUnit } from '@/utilities/helpers/format'
-import type { CompletedHandover } from '@/models/api'
+import type { CompletedHandover } from '@/models/entities/handover'
 
 const handover = (quantity: number, unit: string): CompletedHandover => ({
   listingId: `${quantity}-${unit}`,

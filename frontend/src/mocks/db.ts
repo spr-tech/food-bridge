@@ -12,19 +12,13 @@ import {
   type StoredListing,
   type StoredRequest,
 } from '@/mocks/seed'
-import type {
-  Account,
-  ActivityEntry,
-  AdminRequestFilters,
-  CreateListingInput,
-  DailyDistribution,
-  Listing,
-  ListingFilters,
-  ListingPage,
-  ListingRequest,
-  RequestPage,
-  Session,
-} from '@/models/api'
+import type { Account, Session } from '@/models/entities/session'
+import type { ActivityEntry } from '@/models/entities/activity'
+import type { AdminRequestFilters } from '@/models/requests/adminRequest'
+import type { CreateListingInput, ListingFilters } from '@/models/requests/listingRequest'
+import type { DailyDistribution } from '@/models/entities/distribution'
+import type { Listing, ListingPage } from '@/models/entities/listing'
+import type { ListingRequest, RequestPage } from '@/models/entities/foodRequest'
 import type { ListingStatus, RequestStatus } from '@/utilities/enums/status'
 
 export const MOCK_DB_STORAGE_KEY = 'foodbridge.mock-db'

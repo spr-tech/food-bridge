@@ -1,13 +1,10 @@
 import { pickupAreaValue } from '@/utilities/constants/listingOptions'
-import type {
-  ActivityEntry,
-  BackendActivityResponse,
-  BackendFoodRequest,
-  BackendListingResponse,
-  Listing,
-  ListingRequest,
-  ListingSummary,
-} from '@/models/api'
+import type { ActivityEntry } from '@/models/entities/activity'
+import type { BackendActivityResponse } from '@/models/responses/activityResponse'
+import type { BackendFoodRequest } from '@/models/responses/foodRequestResponse'
+import type { BackendListingResponse } from '@/models/responses/listingResponse'
+import type { Listing, ListingSummary } from '@/models/entities/listing'
+import type { ListingRequest } from '@/models/entities/foodRequest'
 
 function asString(value: unknown, fallback = ''): string {
   return typeof value === 'string' ? value : fallback

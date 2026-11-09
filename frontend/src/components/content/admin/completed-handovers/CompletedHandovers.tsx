@@ -24,7 +24,7 @@ import { cn } from '@/utilities/helpers/cn'
 import { formatDateTime, formatListingQuantity, formatUpdated } from '@/utilities/helpers/format'
 import { useCompletedHandovers } from '@/services/admin'
 import { errorStatus } from '@/utilities/helpers/apiErrors'
-import type { CompletedHandover } from '@/models/api'
+import type { CompletedHandover } from '@/models/entities/handover'
 
 const CARD = 'rounded-3xl border border-border bg-surface shadow-card'
 const NOT_RECORDED = 'Not recorded'

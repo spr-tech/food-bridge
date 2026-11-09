@@ -33,7 +33,7 @@ import {
   useUpdateListing,
   useUploadListingImage,
 } from '@/services/listings'
-import type { Listing } from '@/models/api'
+import type { Listing } from '@/models/entities/listing'
 
 type ShareFoodFormProps = {
   listing?: Listing

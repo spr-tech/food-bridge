@@ -22,7 +22,7 @@ import { DEFAULT_STATUS, useListingFilters } from '@/components/content/listings
 import { errorStatus } from '@/utilities/helpers/apiErrors'
 import { useListings } from '@/services/listings'
 import { useMyRequests } from '@/services/requests'
-import type { ListingRequest } from '@/models/api'
+import type { ListingRequest } from '@/models/entities/foodRequest'
 
 const PAGE_SIZE = 12
 const SEARCH_DELAY_MS = 300

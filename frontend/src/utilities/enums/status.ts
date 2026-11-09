@@ -13,3 +13,21 @@ export type RequestStatus = 'PENDING' | 'APPROVED' | 'DECLINED' | 'EXPIRED' | 'C
 export type ListingStatus = 'AVAILABLE' | 'RESERVED' | 'COLLECTED' | 'REVERSED' | 'EXPIRED' | 'DELETED'
 
 export type StatusTone = 'success' | 'warning' | 'info' | 'neutral'
+
+// Backend API types — based on Esther's latest Swagger contract.
+
+export type BackendListingState =
+  | 'AVAILABLE'
+  | 'RESERVED'
+  | 'COLLECTED'
+  | 'REVERSED'
+  | 'EXPIRED'
+  | 'DELETED'
+
+export type BackendRequestState =
+  | 'PENDING'
+  | 'APPROVED'
+  | 'DECLINED'
+  | 'CANCELLED'
+  | 'EXPIRED'
+  | 'REVERSED'

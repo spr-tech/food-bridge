@@ -4,7 +4,8 @@ import * as db from '@/mocks/db'
 import { simulate } from '@/mocks/simulate'
 import { api } from '@/configs/serviceConfig'
 import { env } from '@/configs/env'
-import type { Account, BackendLoginResponse, BackendMeResponse, Session } from '@/models/api'
+import type { Account, Session } from '@/models/entities/session'
+import type { BackendLoginResponse, BackendMeResponse } from '@/models/responses/authResponse'
 import type { Role } from '@/utilities/enums/role'
 
 export const SIGN_IN_TIMEOUT_MS = 90_000

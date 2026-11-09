@@ -29,8 +29,16 @@ The layout follows section 2 of the frontend structure guide, adapted for Vite +
   `mappers/backend-mappers.ts` turns backend responses into our types.
 - `configs/`: `env.ts` (environment settings), `serviceConfig.ts` (the one `createApi`) and
   `storeConfig.ts` (the Redux store).
-- `models/`: `api.ts` (shared TypeScript types) and `validations/` (Yup schemas, one per
-  form). `requests/` and `responses/` are empty until `api.ts` is split.
+- `models/`: the TypeScript shapes and the Yup schemas, one file per backend controller or
+  subject. Import each type from the file it lives in; there is no re-export index.
+  - `requests/`: what we send: backend request bodies (`BackendLoginRequest`,
+    `BackendCreateListingRequest`) and the inputs and filters the services take
+    (`CreateListingInput`, `ListingFilters`, `AdminRequestFilters`).
+  - `responses/`: what the backend sends back, as its contract describes it
+    (`BackendListingResponse`, `BackendFoodRequest`, ...), plus the error body (`ApiErrorBody`).
+  - `entities/`: the app's own shapes that screens use, produced by the mappers
+    (`Listing`, `ListingRequest`, `Session`, `CompletedHandover`, ...).
+  - `validations/`: Yup schemas, one per form.
 - `stores/`: client-only state. `sessionStore.ts` holds the signed-in session, where the role
   comes from.
 - `mocks/`: the simulated service, used when `VITE_USE_MOCKS` is not `false` and by the
@@ -45,7 +53,9 @@ The layout follows section 2 of the frontend structure guide, adapted for Vite +
     food's search and pickup area matching), `pagedQuery.ts` (reads every page of a list) and
     `apiErrors.ts` (reads status, code and field errors, so screens choose their own message).
   - `constants/`: routes, roles, status labels and form options. Paths come only from `routes.ts`.
-  - `enums/`: the `Role`, `ListingStatus` and `RequestStatus` types.
+  - `enums/`: fixed value lists as TypeScript types: the app's `Role`, `ListingStatus` and
+    `RequestStatus`, and the backend's `BackendRole`, `BackendListingState`,
+    `BackendRequestState`, `BackendFoodCategory` and `BackendFoodUnit`.
 - `styles/tokens.css`: every colour, font and radius. No hard-coded colours elsewhere.
 - `styles/layout.css`: the app frame. The sidebar stays dark green; there is no longer a
   sidebar flood animation.
