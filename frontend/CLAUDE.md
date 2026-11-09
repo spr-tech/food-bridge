@@ -93,8 +93,9 @@ src/
 │                       # createApi), storeConfig.ts (makeStore)
 ├── mocks/              # simulated service: db.ts (rules), seed.ts (demo data),
 │                       # simulate.ts (controlled delays and demo error states)
-├── models/             # api.ts (shared types: Listing, ListingRequest, Session, ...),
-│                       # validations/ (Yup schemas), requests/ and responses/ (empty for now)
+├── models/             # requests/ (outgoing shapes), responses/ (backend response shapes),
+│                       # entities/ (the app's own shapes: Listing, ListingRequest, Session, ...),
+│                       # validations/ (Yup schemas)
 ├── services/           # auth.ts, listings.ts, requests.ts, admin.ts (endpoints and hooks),
 │                       # mappers/backend-mappers.ts (backend DTO to frontend model conversion)
 ├── stores/             # sessionStore.ts (signed-in session in sessionStorage; role comes from it;
@@ -103,7 +104,8 @@ src/
 ├── test/               # Vitest setup, render helpers and test utilities
 └── utilities/
     ├── constants/      # routes.ts, roles.ts, status.ts, listingOptions.ts, demoAccounts.ts, activity.ts
-    ├── enums/          # role.ts, status.ts (Role, ListingStatus, RequestStatus as TypeScript types)
+    ├── enums/          # role.ts, status.ts, food.ts: fixed value lists as TypeScript types, the app's
+    │                   # (Role, ListingStatus, RequestStatus) and the backend's (BackendRole, ...)
     ├── helpers/        # cn.ts, format.ts, deadline.ts, photo.ts, request-status.ts, listing-permissions.ts,
     │                   # listing-search.ts, food-saved.ts, pagedQuery.ts (read every page),
     │                   # apiErrors.ts (read status, code and field errors)
@@ -125,15 +127,18 @@ src/
 | Page frame, navigation, route guard | `src/components/layouts/` |
 | Endpoint and its hook | the matching file in `src/services/` (one per backend resource) |
 | Backend DTO conversion | `src/services/mappers/backend-mappers.ts` |
-| Request or response type | for now, `src/models/api.ts`. `models/requests/` and `models/responses/` stay empty until `api.ts` is split in a later pass |
+| Outgoing shape (request body, filters, form input sent to a service) | `src/models/requests/` |
+| Backend response shape | `src/models/responses/` |
+| The app's own shape (what screens use, e.g. `Listing`) | `src/models/entities/` |
 | Yup schema | `src/models/validations/` |
 | Client-only state | `src/stores/` |
 | Shared hook | `src/utilities/hooks/` |
 | Pure helper | `src/utilities/helpers/` |
 | Constant, label or option list | `src/utilities/constants/` |
-| Role or status type | `src/utilities/enums/` |
+| Fixed value list (role, status, food category or unit; app or backend) | `src/utilities/enums/` |
 | API client or environment setup | `src/configs/` |
 
+- **Types:** one file per backend controller or subject in `models/requests/`, `models/responses/` and `models/entities/` (e.g. `listingRequest.ts`, `listingResponse.ts`, `listing.ts`). Import each type from the file it lives in; there is no re-export index.
 - **Dependency rule:** `src/components/ui/` never imports from `src/components/content/`, `src/services/`, `src/stores/` or `src/app/`. If a generic component needs domain behaviour, pass it in as a prop.
 - **Error messages** are chosen by the screen from the status and code, using `src/utilities/helpers/apiErrors.ts`. Never show the service's own message text (spec section 4). This is a deliberate departure from section 6 of the frontend structure guide.
 - Tests sit next to the file they test. Tests that render a page to check a feature live with that feature's content folder, not in `app/pages/`.

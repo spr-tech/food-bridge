@@ -47,7 +47,7 @@ frontend/
 │   ├── components/      # ui/ (generic, incl. the shared set and form/), layouts/, content/ (feature screens)
 │   ├── configs/         # env.ts, serviceConfig.ts (the one createApi), storeConfig.ts
 │   ├── mocks/           # Simulated data layer (used when mocks are on, and by tests)
-│   ├── models/          # api.ts (TypeScript types) and validations/ (Yup schemas)
+│   ├── models/          # requests/, responses/, entities/ (TypeScript types) and validations/ (Yup schemas)
 │   ├── services/        # RTK Query endpoints and mappers/ (backend mappers)
 │   ├── stores/          # sessionStore.ts: the signed-in session
 │   ├── styles/          # Tokens, layout and landing styles
