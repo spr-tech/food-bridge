@@ -15,7 +15,7 @@ import {
 import { listingDetailPath } from '@/utilities/constants/routes'
 import { formatListingQuantity, formatPickup } from '@/utilities/helpers/format'
 import { isListingEditable } from '@/utilities/helpers/listing-permissions'
-import type { Listing } from '@/models/api'
+import type { Listing } from '@/models/entities/listing'
 
 function waitingText(count: number): string | null {
   if (count === 0) return null

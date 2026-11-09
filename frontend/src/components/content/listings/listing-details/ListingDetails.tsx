@@ -30,7 +30,7 @@ import { RecipientAction } from '@/components/content/listings/listing-details/R
 import { RequestsPanel } from '@/components/content/listings/listing-details/RequestsPanel'
 import { errorStatus } from '@/utilities/helpers/apiErrors'
 import { useListing } from '@/services/listings'
-import type { Listing } from '@/models/api'
+import type { Listing } from '@/models/entities/listing'
 import type { Role } from '@/utilities/enums/role'
 
 const CARD = 'md:max-w-190 md:rounded-3xl md:border md:border-border md:bg-surface md:p-6 md:shadow-card'

@@ -10,20 +10,16 @@ import {
   mapBackendRequest,
 } from '@/services/mappers/backend-mappers'
 import { readAllPages, SERVICE_PAGE_LIMIT } from '@/utilities/helpers/pagedQuery'
-import type {
-  ActivityEntry,
-  AdminRequestFilters,
-  BackendActivityResponse,
-  BackendDailyDistributionSummary,
-  BackendFoodRequest,
-  BackendListingResponse,
-  CompletedHandover,
-  DailyDistribution,
-  Listing,
-  ListingPage,
-  ListingRequest,
-  RequestPage,
-} from '@/models/api'
+import type { ActivityEntry } from '@/models/entities/activity'
+import type { AdminRequestFilters } from '@/models/requests/adminRequest'
+import type { BackendActivityResponse } from '@/models/responses/activityResponse'
+import type { BackendDailyDistributionSummary } from '@/models/responses/adminResponse'
+import type { BackendFoodRequest } from '@/models/responses/foodRequestResponse'
+import type { BackendListingResponse } from '@/models/responses/listingResponse'
+import type { CompletedHandover } from '@/models/entities/handover'
+import type { DailyDistribution } from '@/models/entities/distribution'
+import type { Listing, ListingPage } from '@/models/entities/listing'
+import type { ListingRequest, RequestPage } from '@/models/entities/foodRequest'
 
 // How far the activity log reaches back (GET /api/activity allows 1 to 100).
 const ACTIVITY_REACH = 100

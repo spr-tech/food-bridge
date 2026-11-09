@@ -2,7 +2,7 @@
 // per unit. Units are never added together or converted (45 portions and 12 kg stay two
 // figures), and only Collected listings count, so a reversed handover drops out: its
 // listing is REVERSED, or AVAILABLE again once the service reopens it.
-import type { CompletedHandover } from '@/models/api'
+import type { CompletedHandover } from '@/models/entities/handover'
 
 export type UnitTotal = { unit: string; quantity: number }
 

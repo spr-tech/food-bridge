@@ -7,7 +7,7 @@ import * as db from '@/mocks/db'
 import { ACCOUNTS, DEMO_PASSWORD } from '@/mocks/seed'
 import { simulate, simulateRivalApproval, simulateWrite } from '@/mocks/simulate'
 import { signInAs } from '@/test/render'
-import type { CreateListingInput } from '@/models/api'
+import type { CreateListingInput } from '@/models/requests/listingRequest'
 
 // Expects fn to throw a MockApiError with this status and code.
 function expectError(fn: () => unknown, status: number, code: string) {

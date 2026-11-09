@@ -18,7 +18,8 @@ import { useRequestFood } from '@/utilities/hooks/useRequestFood'
 import { cn } from '@/utilities/helpers/cn'
 import { formatListingQuantity, formatPickup } from '@/utilities/helpers/format'
 import { usePrefetchListing } from '@/services/listings'
-import type { Listing, ListingRequest } from '@/models/api'
+import type { Listing } from '@/models/entities/listing'
+import type { ListingRequest } from '@/models/entities/foodRequest'
 
 function Meta({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (

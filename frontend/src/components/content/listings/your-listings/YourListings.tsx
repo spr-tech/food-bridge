@@ -23,7 +23,7 @@ import { formatUpdated } from '@/utilities/helpers/format'
 import { YourListingRow } from '@/components/content/listings/your-listings/YourListingRow'
 import { errorStatus } from '@/utilities/helpers/apiErrors'
 import { useMyListings } from '@/services/listings'
-import type { Listing } from '@/models/api'
+import type { Listing } from '@/models/entities/listing'
 
 type ListingView = 'active' | 'history'
 

@@ -20,7 +20,7 @@ import { useSessionEnded } from '@/utilities/hooks/useSessionEnded'
 import { canDeleteListing, deleteBlockedReason } from '@/utilities/helpers/listing-permissions'
 import { errorStatus } from '@/utilities/helpers/apiErrors'
 import { useDeleteListing } from '@/services/listings'
-import type { Listing } from '@/models/api'
+import type { Listing } from '@/models/entities/listing'
 
 // Thrown to keep the dialog open after a refusal; the message is already on screen.
 class NotDeleted extends Error {}

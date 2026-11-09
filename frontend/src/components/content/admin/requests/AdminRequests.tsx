@@ -27,7 +27,7 @@ import { cn } from '@/utilities/helpers/cn'
 import { formatDateTime, formatListingQuantity, formatUpdated } from '@/utilities/helpers/format'
 import { usePendingRequests } from '@/services/admin'
 import { errorStatus } from '@/utilities/helpers/apiErrors'
-import type { ListingRequest } from '@/models/api'
+import type { ListingRequest } from '@/models/entities/foodRequest'
 import type { ListingStatus } from '@/utilities/enums/status'
 
 const CARD = 'rounded-3xl border border-border bg-surface shadow-card'

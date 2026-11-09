@@ -13,14 +13,9 @@ import {
 } from '@/services/mappers/backend-mappers'
 import { readAllPages, readPages } from '@/utilities/helpers/pagedQuery'
 
-import type {
-  BackendCreateListingRequest,
-  BackendListingResponse,
-  CreateListingInput,
-  Listing,
-  ListingFilters,
-  ListingPage,
-} from '@/models/api'
+import type { BackendCreateListingRequest, CreateListingInput, ListingFilters } from '@/models/requests/listingRequest'
+import type { BackendListingResponse } from '@/models/responses/listingResponse'
+import type { Listing, ListingPage } from '@/models/entities/listing'
 
 // The filters the service applies itself; readPages adds offset and limit.
 function queryParams(filters: ListingFilters) {

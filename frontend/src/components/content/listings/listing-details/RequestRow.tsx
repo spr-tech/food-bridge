@@ -13,7 +13,8 @@ import { Card } from '@/components/ui/card/card'
 import { ConfirmDialog } from '@/components/ui/dialog/dialog'
 import { optionLabel, PICKUP_AREAS } from '@/utilities/constants/listingOptions'
 import { formatListingQuantity, formatRequested, initials } from '@/utilities/helpers/format'
-import type { Listing, ListingRequest } from '@/models/api'
+import type { Listing } from '@/models/entities/listing'
+import type { ListingRequest } from '@/models/entities/foodRequest'
 
 function othersLine(count: number): string {
   if (count === 0) return ''

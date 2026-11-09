@@ -2,7 +2,7 @@
 // listing status.
 import { describe, expect, it } from 'vitest'
 import { canDeleteListing, deleteBlockedReason, isListingEditable } from '@/utilities/helpers/listing-permissions'
-import type { Listing } from '@/models/api'
+import type { Listing } from '@/models/entities/listing'
 
 const OWNER = '6b1f6c1e-3c43-4a59-9d1e-0d6c8a1f2b11'
 const OTHER = '0f3a9e52-7d1b-4f0e-8a2c-5b9d4e6f7a88'
