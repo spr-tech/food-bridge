@@ -5,12 +5,13 @@
 // The handover photo covers the whole page and the form sits on a white card. From
 // 1024px up, the welcome panel fills the left half; below that, only the logo shows.
 // On short windows (laptops with Windows display scaling) the spacing tightens, so the
-// whole page fits at 100% zoom.
+// whole page fits at 100% zoom. The language switcher sits in the top-right corner.
 import { useEffect } from 'react'
 import { Navigate, useSearchParams } from 'react-router'
 import { canOpen } from '@/app/routes'
 import { useSession } from '@/stores/sessionStore'
 import { DemoBanner } from '@/components/layouts/DemoBanner'
+import { LanguageSwitcher } from '@/components/layouts/LanguageSwitcher'
 import { homePathFor } from '@/utilities/constants/roles'
 import { ROUTES } from '@/utilities/constants/routes'
 import { useDocumentTitle } from '@/utilities/hooks/useDocumentTitle'
@@ -39,7 +40,10 @@ export function SignInPage() {
   }
 
   return (
-    <main className='photo-backdrop grid min-h-screen content-start lg:grid-cols-2 lg:content-stretch'>
+    <main className='photo-backdrop relative grid min-h-screen content-start lg:grid-cols-2 lg:content-stretch'>
+      {/* Over the photo, never the card: on phones top right beside the logo (globe only);
+          from 1024px the top-right corner of the photo half, as the card can reach the top. */}
+      <LanguageSwitcher variant='dark' iconOnlyOnPhone className='absolute top-5 right-4 z-10 lg:top-6 lg:right-[calc(50%+1.5rem)]' />
       <div className='hidden lg:flex lg:flex-col *:flex-1'>
         <SignInPanelDesktop />
       </div>

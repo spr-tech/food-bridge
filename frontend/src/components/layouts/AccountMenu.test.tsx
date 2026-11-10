@@ -1,5 +1,6 @@
-// AccountMenu (phone): the avatar opens a panel with the organisation, role and Sign out;
-// Escape and a tap outside close it, and Escape puts focus back on the avatar.
+// AccountMenu (phone): the avatar opens a panel with the organisation, role, the language
+// switcher and Sign out; Escape and a tap outside close it, and Escape puts focus back on
+// the avatar.
 import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
@@ -36,6 +37,8 @@ describe('AccountMenu', () => {
     const avatar = renderMenu()
 
     await user.click(avatar)
+    await user.tab()
+    expect(screen.getByRole('combobox', { name: 'Language' })).toHaveFocus()
     await user.tab()
     expect(screen.getByRole('button', { name: 'Sign out' })).toHaveFocus()
 

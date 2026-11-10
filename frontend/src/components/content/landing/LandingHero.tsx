@@ -1,6 +1,8 @@
 // Landing header and hero: the photo sits behind, fixed, with the text centred.
+// The header ends with the language switcher, top right.
 import { Link } from 'react-router'
 import { ROUTES } from '@/utilities/constants/routes'
+import { LanguageSwitcher } from '@/components/layouts/LanguageSwitcher'
 import { Logo } from '@/components/layouts/Logo'
 
 const navLinks = [
@@ -13,27 +15,31 @@ export function LandingHero() {
   return (
     <>
       <header className='sticky top-0 z-10 border-b border-pill-on-dark bg-sidebar-dark'>
-        <div className='mx-auto flex max-w-295 flex-wrap items-center justify-between gap-4 px-6 py-4'>
+        <div className='mx-auto flex max-w-295 flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6'>
 <a href='#top' className='no-underline'>
   <Logo variant='dark' size='md' />
 </a>
-          <nav aria-label='Main' className='flex flex-wrap items-center gap-1'>
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className='hidden px-3 py-2.5 font-medium text-on-dark-label no-underline sm:inline'
+          <div className='flex items-center gap-2'>
+            <nav aria-label='Main' className='flex flex-wrap items-center gap-1'>
+              {navLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className='hidden px-3 py-2.5 font-medium text-on-dark-label no-underline sm:inline'
+                >
+                  {link.label}
+                </a>
+              ))}
+              <Link
+                to={ROUTES.signIn}
+                className='rounded-md bg-highlight-on-dark px-4.5 py-2.75 font-bold text-sidebar-dark no-underline sm:ml-2'
               >
-                {link.label}
-              </a>
-            ))}
-            <Link
-              to={ROUTES.signIn}
-              className='ml-2 rounded-md bg-highlight-on-dark px-4.5 py-2.75 font-bold text-sidebar-dark no-underline'
-            >
-              Sign in
-            </Link>
-          </nav>
+                Sign in
+              </Link>
+            </nav>
+            {/* Not navigation, so outside the nav; globe only on phones to keep one row. */}
+            <LanguageSwitcher variant='dark' iconOnlyOnPhone />
+          </div>
         </div>
       </header>
 

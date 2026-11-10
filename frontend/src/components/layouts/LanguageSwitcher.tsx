@@ -3,8 +3,8 @@
 // <html lang> and every t() re-renders. It never reads the session, so it works signed out
 // (landing, sign-in) and signed in (top bar, phone account menu).
 // variant "dark" sits on dark green or the photo (landing header, sign-in); "light" on
-// white (top bar, account menu). iconOnlyOnPhone: below 640px only the globe shows; the
-// language name stays in the trigger for screen readers.
+// white (top bar, account menu). iconOnlyOnPhone: below 640px a square 40px globe button,
+// so a phone header keeps one row; the language name stays in it for screen readers.
 import { Globe } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Select } from '@/components/ui/select/select'
@@ -45,7 +45,7 @@ export function LanguageSwitcher({ variant, iconOnlyOnPhone = false, className }
           variant === 'dark' &&
             'border-outline-on-dark bg-transparent text-on-dark-heading [&>svg]:text-on-dark-label focus-visible:outline-focus-on-dark!',
           // The first span holds the language name: hidden visually, still read out.
-          iconOnlyOnPhone && 'max-sm:gap-1 max-sm:pr-2 max-sm:[&>span:first-child]:sr-only',
+          iconOnlyOnPhone && 'max-sm:w-10 max-sm:px-0 max-sm:[&>span:first-child]:sr-only max-sm:[&>svg]:hidden',
         )}
       />
     </div>
