@@ -1,0 +1,16 @@
+{
+  "nav": {
+    "menu": "Menu",
+    "yourListings": "Your listings",
+    "shareFood": "Share food",
+    "requests": "Requests",
+    "findFood": "Find food",
+    "yourRequests": "Your requests",
+    "dashboard": "Dashboard",
+    "allListings": "All listings",
+    "handovers": "Handovers",
+    "pendingCount_one": ", {{count}} pending",
+    "pendingCount_other": ", {{count}} pending",
+    "tagline": "Together we reduce food waste."
+  }
+}

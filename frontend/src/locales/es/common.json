@@ -1,0 +1,16 @@
+{
+  "nav": {
+    "menu": "Menú",
+    "yourListings": "Tus anuncios",
+    "shareFood": "Compartir comida",
+    "requests": "Solicitudes",
+    "findFood": "Buscar comida",
+    "yourRequests": "Tus solicitudes",
+    "dashboard": "Panel",
+    "allListings": "Todos los anuncios",
+    "handovers": "Entregas",
+    "pendingCount_one": ", {{count}} pendiente",
+    "pendingCount_other": ", {{count}} pendientes",
+    "tagline": "Juntos reducimos el desperdicio de alimentos."
+  }
+}

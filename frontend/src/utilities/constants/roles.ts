@@ -1,12 +1,14 @@
 // What each role sees: its home page, role label and navigation. The organisation name
-// comes from the signed-in session.
+// comes from the signed-in session. Nav labels are translation keys in
+// src/locales/<lang>/common.json; the sidebar and tab bar turn them into text with t().
+import type { ParseKeys } from 'i18next'
 import { matchPath } from 'react-router'
 import type { NavIconName } from '@/components/layouts/NavIcons'
 import { ROUTES } from '@/utilities/constants/routes'
 import type { Role } from '@/utilities/enums/role'
 
 export type NavItem = {
-  label: string
+  labelKey: ParseKeys<'common'>
   to: string
   icon: NavIconName
   // Pages under this link that have no link of their own, e.g. a listing opened from it.
@@ -27,30 +29,30 @@ export const ROLE_CONFIG: Record<Role, RoleConfig> = {
     roleLabel: 'Donor',
     nav: [
       {
-        label: 'Your listings',
+        labelKey: 'nav.yourListings',
         to: ROUTES.yourListings,
         icon: 'home',
         includes: [ROUTES.listingDetail, ROUTES.editListing],
       },
-      { label: 'Share food', to: ROUTES.createListing, icon: 'share' },
-      { label: 'Requests', to: ROUTES.requests, icon: 'inbox' },
+      { labelKey: 'nav.shareFood', to: ROUTES.createListing, icon: 'share' },
+      { labelKey: 'nav.requests', to: ROUTES.requests, icon: 'inbox' },
     ],
   },
   recipient: {
     homePath: ROUTES.listings,
     roleLabel: 'Recipient',
     nav: [
-      { label: 'Find food', to: ROUTES.listings, icon: 'search', includes: [ROUTES.listingDetail] },
-      { label: 'Your requests', to: ROUTES.yourRequests, icon: 'requests-list' },
+      { labelKey: 'nav.findFood', to: ROUTES.listings, icon: 'search', includes: [ROUTES.listingDetail] },
+      { labelKey: 'nav.yourRequests', to: ROUTES.yourRequests, icon: 'requests-list' },
     ],
   },
   admin: {
     homePath: ROUTES.admin,
     roleLabel: 'Administrator',
     nav: [
-      { label: 'Dashboard', to: ROUTES.admin, icon: 'home', includes: [ROUTES.adminRequests] },
-      { label: 'All listings', to: ROUTES.listings, icon: 'search', includes: [ROUTES.listingDetail] },
-      { label: 'Handovers', to: ROUTES.completedHandovers, icon: 'handover' },
+      { labelKey: 'nav.dashboard', to: ROUTES.admin, icon: 'home', includes: [ROUTES.adminRequests] },
+      { labelKey: 'nav.allListings', to: ROUTES.listings, icon: 'search', includes: [ROUTES.listingDetail] },
+      { labelKey: 'nav.handovers', to: ROUTES.completedHandovers, icon: 'handover' },
     ],
   },
 }

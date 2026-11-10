@@ -4,6 +4,7 @@
 import { act, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
+import i18next from '@/configs/i18nConfig'
 import { RequireSession } from '@/components/layouts/RequireSession'
 import { activeNavItem, ROLE_CONFIG } from '@/utilities/constants/roles'
 import { editListingPath, listingDetailPath, ROUTES } from '@/utilities/constants/routes'
@@ -29,8 +30,10 @@ afterEach(() => {
   sessionStorage.clear()
 })
 
-const labelAt = (role: keyof typeof ROLE_CONFIG, path: string) =>
-  activeNavItem(ROLE_CONFIG[role].nav, path)?.label
+const labelAt = (role: keyof typeof ROLE_CONFIG, path: string) => {
+  const key = activeNavItem(ROLE_CONFIG[role].nav, path)?.labelKey
+  return key && i18next.t(key)
+}
 
 describe('activeNavItem', () => {
   it.each([

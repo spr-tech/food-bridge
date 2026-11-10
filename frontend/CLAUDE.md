@@ -134,12 +134,14 @@ src/
 | Client-only state | `src/stores/` |
 | Shared hook | `src/utilities/hooks/` |
 | Pure helper | `src/utilities/helpers/` |
-| Constant, label or option list | `src/utilities/constants/` |
+| User-facing text (labels, headings, messages) | `src/locales/<lang>/<namespace>.json` for `en`, `fr` and `es`, shown with `t()` from `useTranslation()` |
+| Constant or option list (text in it is a translation key, not words) | `src/utilities/constants/` |
 | Fixed value list (role, status, food category or unit; app or backend) | `src/utilities/enums/` |
-| API client or environment setup | `src/configs/` |
+| API client, environment or translation setup | `src/configs/` |
 
 - **Types:** one file per backend controller or subject in `models/requests/`, `models/responses/` and `models/entities/` (e.g. `listingRequest.ts`, `listingResponse.ts`, `listing.ts`). Import each type from the file it lives in; there is no re-export index.
 - **Dependency rule:** `src/components/ui/` never imports from `src/components/content/`, `src/services/`, `src/stores/` or `src/app/`. If a generic component needs domain behaviour, pass it in as a prop.
+- **Text:** never hard-code new user-facing text in a component. Add the key to the English file in `src/locales/en/<namespace>.json` first (it types every key), then to `fr` and `es`, and show it with `const { t } = useTranslation()` and `t('nav.findFood')` (`t('auth:...')` for another namespace). Constants hold the key and never call `t()`. Namespaces: `common` (buttons, navigation, statuses, roles), `landing`, `auth`, `listings`, `requests`, `admin`, `validation`.
 - **Error messages** are chosen by the screen from the status and code, using `src/utilities/helpers/apiErrors.ts`. Never show the service's own message text (spec section 4). This is a deliberate departure from section 6 of the frontend structure guide.
 - Tests sit next to the file they test. Tests that render a page to check a feature live with that feature's content folder, not in `app/pages/`.
 - Imports use the `@/` alias, including inside the copied shared components.

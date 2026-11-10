@@ -1,5 +1,7 @@
 // Runs before every test file: adds DOM matchers (toHaveAttribute, toBeInTheDocument),
-// fills in browser APIs jsdom lacks, and unmounts rendered components after each test.
+// fills in browser APIs jsdom lacks, sets up translations (English, as in the app), and
+// unmounts rendered components after each test.
+import '@/configs/i18nConfig'
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach } from 'vitest'
