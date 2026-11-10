@@ -12,5 +12,8 @@
     "pendingCount_one": ", {{count}} pendiente",
     "pendingCount_other": ", {{count}} pendientes",
     "tagline": "Juntos reducimos el desperdicio de alimentos."
+  },
+  "language": {
+    "label": "Idioma"
   }
 }

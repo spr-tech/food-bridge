@@ -12,5 +12,8 @@
     "pendingCount_one": ", {{count}} pending",
     "pendingCount_other": ", {{count}} pending",
     "tagline": "Together we reduce food waste."
+  },
+  "language": {
+    "label": "Language"
   }
 }
