@@ -1,11 +1,12 @@
 // Runs before every test file: adds DOM matchers (toHaveAttribute, toBeInTheDocument),
 // fills in browser APIs jsdom lacks, sets up translations (English, as in the app), and
 // unmounts rendered components after each test.
-import '@/configs/i18nConfig'
+import i18next from '@/configs/i18nConfig'
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach } from 'vitest'
 import { clearSession } from '@/stores/sessionStore'
+import { LANGUAGE_STORAGE_KEY } from '@/utilities/helpers/language'
 
 // Radix (the shared Checkbox and Select) measures elements and captures the pointer.
 // jsdom has neither, so these stand-ins do nothing, as a browser would in a test.
@@ -44,6 +45,10 @@ afterEach(async () => {
   cleanup()
   clearSession()
   sessionStorage.clear()
+  // Back to English with nothing saved, so no test leaks French into the next. In this
+  // order: switching to English saves 'en', which the removal then clears.
+  await i18next.changeLanguage('en')
+  localStorage.removeItem(LANGUAGE_STORAGE_KEY)
   const [{ resetMockDb }, { resetSimulateSwitches }] = await Promise.all([
     import('@/mocks/db'),
     import('@/mocks/simulate'),

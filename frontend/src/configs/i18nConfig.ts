@@ -1,8 +1,11 @@
 // Translation setup (i18next): English, French and Spanish, all bundled up front from
 // src/locales/<lang>/<namespace>.json, so nothing loads over the network. Imported once at
 // the top of main.tsx and in the test setup; components get text with useTranslation().
+// Starts in the language saved on this device (English if none) and saves every change.
 import i18next from 'i18next'
 import { initReactI18next } from 'react-i18next'
+import { LANGUAGES } from '@/utilities/constants/languages'
+import { isLanguage, readSavedLanguage, saveLanguage } from '@/utilities/helpers/language'
 import enAdmin from '@/locales/en/admin.json'
 import enAuth from '@/locales/en/auth.json'
 import enCommon from '@/locales/en/common.json'
@@ -66,12 +69,12 @@ i18next.on('languageChanged', (lng) => {
 
 void i18next.use(initReactI18next).init({
   resources,
-  // Choosing a language comes later; until then everyone sees English.
-  lng: 'en',
+  // The language chosen earlier on this device, or English.
+  lng: readSavedLanguage(),
   // Required since v27 (the default became false): a key missing in French or Spanish
   // shows the English text instead of the key itself.
   fallbackLng: 'en',
-  supportedLngs: ['en', 'fr', 'es'],
+  supportedLngs: LANGUAGES.map((language) => language.code),
   ns: Object.keys(resources.en),
   defaultNS,
   // React escapes text itself; escaping here too would show "&amp;".
@@ -79,6 +82,14 @@ void i18next.use(initReactI18next).init({
   // The resources are already in memory, so finish init now: t() works on the first render
   // and useTranslation never suspends.
   initAsync: false,
+})
+
+// Every change after start-up is saved, whoever makes it (the switcher today, a profile
+// setting later), so callers only call changeLanguage. Registered after init on purpose:
+// init's own languageChanged would save English for every first-time visitor, a default
+// that would then look like a choice they made.
+i18next.on('languageChanged', (lng) => {
+  if (isLanguage(lng)) saveLanguage(lng)
 })
 
 export default i18next
