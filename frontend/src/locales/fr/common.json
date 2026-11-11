@@ -12,5 +12,8 @@
     "pendingCount_one": ", {{count}} en attente",
     "pendingCount_other": ", {{count}} en attente",
     "tagline": "Ensemble, réduisons le gaspillage alimentaire."
+  },
+  "language": {
+    "label": "Langue"
   }
 }

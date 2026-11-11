@@ -1,5 +1,6 @@
-// The desktop top bar: account details and Sign out.
+// The desktop top bar: the language switcher, account details and Sign out.
 // It stays white permanently; there is no animated cream layer.
+import { LanguageSwitcher } from '@/components/layouts/LanguageSwitcher'
 import { SignOutIcon } from '@/components/layouts/NavIcons'
 import { initials } from '@/utilities/helpers/format'
 
@@ -12,6 +13,8 @@ type TopBarProps = {
 export function TopBar({ organisationName, roleLabel, onSignOut }: TopBarProps) {
   return (
     <header className="fb-top">
+      <LanguageSwitcher variant="light" />
+
       <span className="fb-avatar" aria-hidden="true">
         {initials(organisationName)}
       </span>
