@@ -59,13 +59,13 @@ The layout follows section 2 of the frontend structure guide, adapted for Vite +
     and saves the chosen language in localStorage), `deadline.ts`
     (collection date and time), `photo.ts` (shrinks a photo for the simulated store),
     `request-status.ts` (the status a recipient sees, from the request and listing status),
-    `listing-permissions.ts` (who is offered Delete and Edit), `listing-search.ts` (Find
+    `listing-permissions.ts` (who is offered Delete and Edit), `accent-heading.ts` (splits the landing closing heading, one translation, into flying words and dropping letters), `listing-search.ts` (Find
     food's search and pickup area matching), `pagedQuery.ts` (reads every page of a list) and
     `apiErrors.ts` (reads status, code and field errors, so screens choose their own message).
   - `constants/`: routes, roles, status labels, form options and `languages.ts` (the supported
     languages, each named in its own language). Paths come only from `routes.ts`.
     New text here is a translation key, turned into words by `t()` in the component. So far
-    only the nav labels (`labelKey` in `roles.ts`) are converted; the rest follow screen by screen.
+    the nav labels (`labelKey` in `roles.ts`) and the landing page are converted; the rest follow screen by screen.
   - `enums/`: fixed value lists as TypeScript types: the app's `Role`, `ListingStatus` and
     `RequestStatus`, and the backend's `BackendRole`, `BackendListingState`,
     `BackendRequestState`, `BackendFoodCategory` and `BackendFoodUnit`.

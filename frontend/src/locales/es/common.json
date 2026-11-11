@@ -11,9 +11,11 @@
     "handovers": "Entregas",
     "pendingCount_one": ", {{count}} pendiente",
     "pendingCount_other": ", {{count}} pendientes",
-    "tagline": "Juntos reducimos el desperdicio de alimentos."
+    "tagline": "Juntos reducimos el desperdicio de alimentos.",
+    "main": "Principal"
   },
   "language": {
     "label": "Idioma"
-  }
+  },
+  "demoData": "Datos de demostración · las organizaciones y las personas son ficticias"
 }

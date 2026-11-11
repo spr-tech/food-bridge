@@ -11,9 +11,11 @@
     "handovers": "Remises",
     "pendingCount_one": ", {{count}} en attente",
     "pendingCount_other": ", {{count}} en attente",
-    "tagline": "Ensemble, réduisons le gaspillage alimentaire."
+    "tagline": "Ensemble, réduisons le gaspillage alimentaire.",
+    "main": "Principal"
   },
   "language": {
     "label": "Langue"
-  }
+  },
+  "demoData": "Données de démonstration · les organisations et les personnes sont fictives"
 }

@@ -1,1 +1,60 @@
-{}
+{
+  "title": "La bonne nourriture mérite une autre table",
+  "header": {
+    "story": "L'histoire",
+    "howItWorks": "Comment ça marche",
+    "join": "Rejoindre",
+    "signIn": "Se connecter"
+  },
+  "hero": {
+    "heading": "La bonne nourriture mérite <highlight>une autre table.</highlight>",
+    "intro": "À l'heure de la fermeture, boulangeries, traiteurs et restaurants partagent les aliments qu'ils ne peuvent pas vendre. Des cuisines communautaires voisines les récupèrent et les servent le soir même.",
+    "shareFood": "Partager des invendus",
+    "findFood": "Trouver des aliments pour votre groupe",
+    "scroll": "Faites défiler pour suivre une soirée"
+  },
+  "story": {
+    "eyebrow": "Une soirée à Yaba",
+    "heading": "Du bord de la poubelle à l'assiette de quelqu'un, en une soirée.",
+    "steps": [
+      { "badge": "18:00", "time": "18 h 00", "title": "Les fours refroidissent. Il reste quarante pains.", "body": "Du bon pain, cuit ce matin. Demain, il ne pourra plus être vendu." },
+      { "badge": "18:05", "time": "18 h 05", "title": "Une minute sur un téléphone.", "body": "Le boulanger les publie : quarante pains, Yaba, à récupérer avant 20 h." },
+      { "badge": "18:20", "time": "18 h 20", "title": "Trois cuisines voient l'annonce. Trois mains se lèvent.", "body": "Une cuisine communautaire, une banque alimentaire et un foyer d'accueil la demandent chacun." },
+      { "badge": "18:30", "time": "18 h 30", "title": "Un oui. Deux non bienveillants.", "body": "Le boulanger en accepte une. Les autres sont prévenus aussitôt, pour que personne ne se déplace pour rien." },
+      { "badge": "19:30", "time": "19 h 30", "title": "Le dîner est servi.", "body": "Le pain qui partait à la poubelle est sur la table, encore moelleux." }
+    ],
+    "note": "Une illustration du fonctionnement de FoodBridge. Les lieux sont réels ; la soirée est imaginée."
+  },
+  "foodBand": {
+    "foods": ["Puff-puff", "Riz jollof", "Pain Agege", "Moi moi", "Small chops", "Friand à la viande", "Riz frit", "Akara", "Chin chin", "Ragoût ofada"],
+    "line": "Rien de bon ne devrait être gaspillé.",
+    "accentLine": "Ni la nourriture. Ni la bienveillance."
+  },
+  "howItWorks": {
+    "eyebrow": "Comment ça marche",
+    "heading": "Assez simple pour la fin d'une longue journée.",
+    "steps": [
+      { "title": "Publiez l'annonce", "body": "Ce que c'est, la quantité, le lieu et l'échéance. Une photo si vous en avez une." },
+      { "title": "Ils la demandent", "body": "Les groupes communautaires proches la trouvent par aliment, quartier et échéance, puis la demandent." },
+      { "title": "Vous en choisissez un", "body": "Acceptez une demande ; tous les autres sont prévenus aussitôt. Le groupe retenu récupère avant l'échéance." }
+    ]
+  },
+  "promise": {
+    "heading": "Une promesse sur laquelle compter.",
+    "body": "Chaque annonce va à un seul groupe, même quand plusieurs la demandent à la même seconde. Les aliments dont l'échéance est passée ne peuvent plus être demandés. Chacun sait toujours où il en est."
+  },
+  "join": {
+    "heading": "De quel côté de la table êtes-vous ?",
+    "sides": [
+      { "eyebrow": "J'ai de la nourriture", "title": "Boulangeries, traiteurs, restaurants", "body": "Transformez ce qui reste à la fermeture en dîner de ce soir pour quelqu'un près de chez vous. C'est vous qui décidez qui le reçoit.", "action": "Partager des invendus" },
+      { "eyebrow": "Je nourris des gens", "title": "Cuisines communautaires, banques alimentaires, foyers", "body": "Repérez de bons aliments près de chez vous, demandez ce que vous pouvez récupérer et sachez aussitôt où vous en êtes.", "action": "Trouver des aliments" }
+    ]
+  },
+  "closing": {
+    "heading": "Ce soir, ne laissez rien de bon <accent>se perdre.</accent>",
+    "signIn": "Se connecter à FoodBridge"
+  },
+  "footer": {
+    "credit": "FoodBridge · TeSA Cohort 6 · Équipe 1"
+  }
+}

@@ -107,7 +107,7 @@ src/
     ├── enums/          # role.ts, status.ts, food.ts: fixed value lists as TypeScript types, the app's
     │                   # (Role, ListingStatus, RequestStatus) and the backend's (BackendRole, ...)
     ├── helpers/        # cn.ts, format.ts, deadline.ts, photo.ts, request-status.ts, listing-permissions.ts,
-    │                   # listing-search.ts, food-saved.ts, pagedQuery.ts (read every page),
+    │                   # listing-search.ts, food-saved.ts, accent-heading.ts (landing closing heading), pagedQuery.ts (read every page),
     │                   # apiErrors.ts (read status, code and field errors)
     └── hooks/          # useRole, useIdempotencyKey, useDocumentTitle, useAppStore, useSessionEnded,
                         # useSignOut, useMediaQuery, useNavCounts, useNow, useRequestFood, useSessionCheck

@@ -11,9 +11,11 @@
     "handovers": "Handovers",
     "pendingCount_one": ", {{count}} pending",
     "pendingCount_other": ", {{count}} pending",
-    "tagline": "Together we reduce food waste."
+    "tagline": "Together we reduce food waste.",
+    "main": "Main"
   },
   "language": {
     "label": "Language"
-  }
+  },
+  "demoData": "Demonstration data · organisations and people are fictional"
 }
