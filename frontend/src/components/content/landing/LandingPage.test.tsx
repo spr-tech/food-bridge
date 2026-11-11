@@ -1,8 +1,9 @@
 // The landing page (spec S0) at "/": shown to signed-out visitors with one h1, every call
 // to action going to sign in, the animated closing heading read once in full, and the
 // demonstration line. A signed-in user who opens "/" goes to their home page instead.
-import { screen } from '@testing-library/react'
+import { act, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
+import i18next from '@/configs/i18nConfig'
 import { ROUTES } from '@/utilities/constants/routes'
 import { HomeRedirect } from '@/app/pages/HomeRedirect'
 import { LandingPage } from '@/app/pages/LandingPage'
@@ -49,6 +50,25 @@ describe('Landing page', () => {
     renderHome()
 
     expect(screen.getByText('Demonstration data · organisations and people are fictional')).toBeInTheDocument()
+  })
+
+  it('shows the hero heading and the animated closing phrase in French, then English again', async () => {
+    renderHome()
+    try {
+      await act(() => i18next.changeLanguage('fr'))
+
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('La bonne nourriture mérite une autre table.')
+      expect(
+        screen.getByRole('heading', { level: 2, name: 'Ce soir, ne laissez rien de bon se perdre.' }),
+      ).toBeInTheDocument()
+      // The letters dropped in one by one spell the French accent, not "go to waste."
+      const letters = [...document.querySelectorAll('.landing-letter')].map((letter) => letter.textContent || ' ')
+      expect(letters.join('')).toBe('se perdre.')
+    } finally {
+      await act(() => i18next.changeLanguage('en'))
+    }
+
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Good food deserves another table.')
   })
 
   it.each([

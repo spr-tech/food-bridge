@@ -1,1 +1,60 @@
-{}
+{
+  "title": "La buena comida merece otra mesa",
+  "header": {
+    "story": "La historia",
+    "howItWorks": "Cómo funciona",
+    "join": "Únase",
+    "signIn": "Iniciar sesión"
+  },
+  "hero": {
+    "heading": "La buena comida merece <highlight>otra mesa.</highlight>",
+    "intro": "Al cierre, panaderías, servicios de banquetes y restaurantes comparten la comida que no pueden vender. Las cocinas comunitarias cercanas la recogen y la sirven esa misma noche.",
+    "shareFood": "Compartir excedentes",
+    "findFood": "Buscar comida para su grupo",
+    "scroll": "Desplácese para seguir una tarde"
+  },
+  "story": {
+    "eyebrow": "Una tarde en Yaba",
+    "heading": "Del borde de la basura al plato de alguien, en una sola tarde.",
+    "steps": [
+      { "badge": "18:00", "time": "18:00", "title": "Los hornos se enfrían. Quedan cuarenta panes.", "body": "Buen pan, horneado esta mañana. Mañana ya no se podrá vender." },
+      { "badge": "18:05", "time": "18:05", "title": "Un minuto en el celular.", "body": "El panadero los publica: cuarenta panes, Yaba, recoger antes de las 20:00." },
+      { "badge": "18:20", "time": "18:20", "title": "Tres cocinas lo ven. Tres manos se levantan.", "body": "Una cocina comunitaria, un banco de alimentos y un albergue lo solicitan." },
+      { "badge": "18:30", "time": "18:30", "title": "Un sí. Dos amables noes.", "body": "El panadero aprueba una solicitud. A los demás se les avisa al instante, para que nadie haga un viaje en vano." },
+      { "badge": "19:30", "time": "19:30", "title": "La cena está servida.", "body": "El pan que iba a la basura está en la mesa, todavía suave." }
+    ],
+    "note": "Una ilustración de cómo funciona FoodBridge. Los lugares son reales; la tarde es imaginada."
+  },
+  "foodBand": {
+    "foods": ["Puff-puff", "Arroz jollof", "Pan Agege", "Moi moi", "Small chops", "Empanada de carne", "Arroz frito", "Akara", "Chin chin", "Guiso ofada"],
+    "line": "Nada bueno debería desperdiciarse.",
+    "accentLine": "Ni la comida. Ni la bondad."
+  },
+  "howItWorks": {
+    "eyebrow": "Cómo funciona",
+    "heading": "Lo bastante sencillo para el final de un largo día.",
+    "steps": [
+      { "title": "Publíquelo", "body": "Qué es, cuánto hay, dónde y para cuándo. Una foto si la tiene." },
+      { "title": "Lo solicitan", "body": "Los grupos comunitarios cercanos lo encuentran por comida, zona y plazo, y lo solicitan." },
+      { "title": "Usted elige uno", "body": "Apruebe una solicitud; todos los demás lo saben al instante. Recogen antes del plazo." }
+    ]
+  },
+  "promise": {
+    "heading": "Una promesa con la que puede contar.",
+    "body": "Cada anuncio va a un solo grupo, incluso cuando varios lo piden en el mismo segundo. La comida con el plazo vencido no se puede solicitar. Todos saben siempre en qué punto están."
+  },
+  "join": {
+    "heading": "¿De qué lado de la mesa está usted?",
+    "sides": [
+      { "eyebrow": "Tengo comida", "title": "Panaderías, servicios de banquetes, restaurantes", "body": "Convierta lo que sobra al cierre en la cena de esta noche para alguien cercano. Usted decide quién lo recibe.", "action": "Compartir excedentes" },
+      { "eyebrow": "Doy de comer a personas", "title": "Cocinas comunitarias, bancos de alimentos, albergues", "body": "Vea comida en buen estado cerca de usted, pida lo que pueda recoger y sepa al instante en qué punto está.", "action": "Buscar comida ahora" }
+    ]
+  },
+  "closing": {
+    "heading": "Esta noche, no deje que nada bueno <accent>se desperdicie.</accent>",
+    "signIn": "Iniciar sesión en FoodBridge"
+  },
+  "footer": {
+    "credit": "FoodBridge · TeSA Cohort 6 · Equipo 1"
+  }
+}

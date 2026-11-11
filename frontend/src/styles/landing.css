@@ -94,11 +94,12 @@
   .landing-iris { animation-name: landing-iris; animation-range: entry 0% entry 70% }
   .landing-zoom { animation-name: landing-zoom; animation-range: entry 20% entry 60% }
   .landing-word { animation-range: entry 30% entry 75% }
-  .landing-word-1 { animation-name: landing-in-left }
-  .landing-word-2 { animation-name: landing-in-top }
-  .landing-word-3 { animation-name: landing-in-bottom }
-  .landing-word-4 { animation-name: landing-in-right }
-  /* Each letter starts a little later: --i is set per letter in LandingClosing.tsx */
+  .landing-word-left { animation-name: landing-in-left }
+  .landing-word-top { animation-name: landing-in-top }
+  .landing-word-bottom { animation-name: landing-in-bottom }
+  .landing-word-right { animation-name: landing-in-right }
+  /* Each letter starts a little later: --i is set per letter in LandingClosing.tsx, in
+     fractional steps for an accent longer than 12 positions so it still ends by 78% */
   .landing-letter {
     animation-name: landing-drop;
     animation-range: entry calc(45% + var(--i) * 3%) entry 100%;

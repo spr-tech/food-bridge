@@ -1,1 +1,60 @@
-{}
+{
+  "title": "Good food deserves another table",
+  "header": {
+    "story": "The story",
+    "howItWorks": "How it works",
+    "join": "Join",
+    "signIn": "Sign in"
+  },
+  "hero": {
+    "heading": "Good food deserves <highlight>another table.</highlight>",
+    "intro": "At closing time, bakeries, caterers and restaurants share the food they can't sell. Community kitchens nearby collect it and serve it the same evening.",
+    "shareFood": "Share surplus food",
+    "findFood": "Find food for your group",
+    "scroll": "Scroll to follow one evening"
+  },
+  "story": {
+    "eyebrow": "One evening in Yaba",
+    "heading": "From the bin's edge to someone's plate, in one evening.",
+    "steps": [
+      { "badge": "6:00", "time": "6:00 PM", "title": "The ovens cool. Forty loaves are left.", "body": "Good bread, baked this morning. Tomorrow it can't be sold." },
+      { "badge": "6:05", "time": "6:05 PM", "title": "One minute on a phone.", "body": "The baker lists them: forty loaves, Yaba, collect by 8 PM." },
+      { "badge": "6:20", "time": "6:20 PM", "title": "Three kitchens see it. Three hands go up.", "body": "A community kitchen, a food bank and a shelter each ask for it." },
+      { "badge": "6:30", "time": "6:30 PM", "title": "One yes. Two kind no's.", "body": "The baker approves one. The others are told at once, so nobody makes a wasted trip." },
+      { "badge": "7:30", "time": "7:30 PM", "title": "Dinner is served.", "body": "The bread that was going to the bin is on the table, still soft." }
+    ],
+    "note": "An illustration of how FoodBridge works. The places are real; the evening is imagined."
+  },
+  "foodBand": {
+    "foods": ["Puff-puff", "Jollof rice", "Agege bread", "Moi moi", "Small chops", "Meat pie", "Fried rice", "Akara", "Chin chin", "Ofada stew"],
+    "line": "Nothing good should go to waste.",
+    "accentLine": "Not food. Not kindness."
+  },
+  "howItWorks": {
+    "eyebrow": "How it works",
+    "heading": "Simple enough for the end of a long day.",
+    "steps": [
+      { "title": "List it", "body": "What it is, how much, where, and by when. A photo if you have one." },
+      { "title": "They ask for it", "body": "Community groups nearby find it by food, area and deadline, and request it." },
+      { "title": "You choose one", "body": "Approve one request; everyone else knows straight away. They collect before the deadline." }
+    ]
+  },
+  "promise": {
+    "heading": "A promise you can plan around.",
+    "body": "Each listing goes to exactly one group, even when several ask in the same second. Food past its deadline can't be requested. Everyone always sees where they stand."
+  },
+  "join": {
+    "heading": "Which side of the table are you on?",
+    "sides": [
+      { "eyebrow": "I have food", "title": "Bakeries, caterers, restaurants", "body": "Turn what's left at closing time into tonight's dinner for someone nearby. You decide who gets it.", "action": "Share surplus food" },
+      { "eyebrow": "I feed people", "title": "Community kitchens, food banks, shelters", "body": "See good food close to you, ask for what you can collect, and know straight away where you stand.", "action": "Find food now" }
+    ]
+  },
+  "closing": {
+    "heading": "Tonight, let nothing good <accent>go to waste.</accent>",
+    "signIn": "Sign in to FoodBridge"
+  },
+  "footer": {
+    "credit": "FoodBridge · TeSA Cohort 6 · Team 1"
+  }
+}

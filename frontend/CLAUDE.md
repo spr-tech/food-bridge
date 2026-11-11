@@ -107,7 +107,7 @@ src/
     ├── enums/          # role.ts, status.ts, food.ts: fixed value lists as TypeScript types, the app's
     │                   # (Role, ListingStatus, RequestStatus) and the backend's (BackendRole, ...)
     ├── helpers/        # cn.ts, format.ts, deadline.ts, photo.ts, request-status.ts, listing-permissions.ts,
-    │                   # listing-search.ts, food-saved.ts, pagedQuery.ts (read every page),
+    │                   # listing-search.ts, food-saved.ts, accent-heading.ts (landing closing heading), pagedQuery.ts (read every page),
     │                   # apiErrors.ts (read status, code and field errors)
     └── hooks/          # useRole, useIdempotencyKey, useDocumentTitle, useAppStore, useSessionEnded,
                         # useSignOut, useMediaQuery, useNavCounts, useNow, useRequestFood, useSessionCheck
@@ -143,6 +143,8 @@ src/
 - **Dependency rule:** `src/components/ui/` never imports from `src/components/content/`, `src/services/`, `src/stores/` or `src/app/`. If a generic component needs domain behaviour, pass it in as a prop.
 - **Text:** never hard-code new user-facing text in a component. Add the key to the English file in `src/locales/en/<namespace>.json` first (it types every key), then to `fr` and `es`, and show it with `const { t } = useTranslation()` and `t('nav.findFood')` (`t('auth:...')` for another namespace). Constants hold the key and never call `t()`. Namespaces: `common` (buttons, navigation, statuses, roles), `landing`, `auth`, `listings`, `requests`, `admin`, `validation`.
 - **Language:** the switcher (`src/components/layouts/LanguageSwitcher.tsx`) only calls `i18n.changeLanguage`; `src/configs/i18nConfig.ts` saves the choice in localStorage (`foodbridge.language`, via `src/utilities/helpers/language.ts`) and starts from it next time. Never save the language anywhere else. Supported languages come only from `LANGUAGES` in `src/utilities/constants/languages.ts`; their names stay in their own language and are never translated. The shared `SelectOption` has no `lang` field yet, so the language options can't carry `lang="fr"`/`"es"` for screen-reader pronunciation; add it there before relying on it.
+- **Translation tone:** formal everywhere. French uses "vous" ("Vos annonces", never "Tes annonces"); Spanish uses "usted" ("Sus anuncios", never "Tus anuncios"), with verbs, imperatives and pronouns to match ("Compartir" or "Comparta", never "Comparte").
+- **Spanish variety:** neutral Latin American Spanish, not Spain's. Prefer words understood across the region: "celular" (not "móvil"), "computadora" (not "ordenador"), "basura" (not "cubo de basura"), "servicios de banquetes" (not "empresas de catering"); avoid "vosotros" and its verb forms.
 - **Error messages** are chosen by the screen from the status and code, using `src/utilities/helpers/apiErrors.ts`. Never show the service's own message text (spec section 4). This is a deliberate departure from section 6 of the frontend structure guide.
 - Tests sit next to the file they test. Tests that render a page to check a feature live with that feature's content folder, not in `app/pages/`.
 - Imports use the `@/` alias, including inside the copied shared components.

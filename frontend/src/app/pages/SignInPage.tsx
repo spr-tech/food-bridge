@@ -43,7 +43,7 @@ export function SignInPage() {
     <main className='photo-backdrop relative grid min-h-screen content-start lg:grid-cols-2 lg:content-stretch'>
       {/* Over the photo, never the card: on phones top right beside the logo (globe only);
           from 1024px the top-right corner of the photo half, as the card can reach the top. */}
-      <LanguageSwitcher variant='dark' iconOnlyOnPhone className='absolute top-5 right-4 z-10 lg:top-6 lg:right-[calc(50%+1.5rem)]' />
+      <LanguageSwitcher variant='dark' iconOnlyBelow='sm' className='absolute top-5 right-4 z-10 lg:top-6 lg:right-[calc(50%+1.5rem)]' />
       <div className='hidden lg:flex lg:flex-col *:flex-1'>
         <SignInPanelDesktop />
       </div>
