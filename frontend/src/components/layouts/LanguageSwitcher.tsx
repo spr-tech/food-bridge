@@ -3,8 +3,9 @@
 // <html lang> and every t() re-renders. It never reads the session, so it works signed out
 // (landing, sign-in) and signed in (top bar, phone account menu).
 // variant "dark" sits on dark green or the photo (landing header, sign-in); "light" on
-// white (top bar, account menu). iconOnlyOnPhone: below 640px a square 40px globe button,
-// so a phone header keeps one row; the language name stays in it for screen readers.
+// white (top bar, account menu). iconOnlyBelow: below that breakpoint ('sm' 640px, 'lg'
+// 1024px) a square 40px globe button, so a crowded header keeps one row; the language name
+// stays in it for screen readers.
 import { Globe } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Select } from '@/components/ui/select/select'
@@ -14,13 +15,13 @@ import { isLanguage } from '@/utilities/helpers/language'
 
 type LanguageSwitcherProps = {
   variant: 'dark' | 'light'
-  iconOnlyOnPhone?: boolean
+  iconOnlyBelow?: 'sm' | 'lg'
   className?: string
 }
 
 const OPTIONS = LANGUAGES.map((language) => ({ value: language.code, label: language.name }))
 
-export function LanguageSwitcher({ variant, iconOnlyOnPhone = false, className }: LanguageSwitcherProps) {
+export function LanguageSwitcher({ variant, iconOnlyBelow, className }: LanguageSwitcherProps) {
   const { t, i18n } = useTranslation()
 
   return (
@@ -45,7 +46,8 @@ export function LanguageSwitcher({ variant, iconOnlyOnPhone = false, className }
           variant === 'dark' &&
             'border-outline-on-dark bg-transparent text-on-dark-heading [&>svg]:text-on-dark-label focus-visible:outline-focus-on-dark!',
           // The first span holds the language name: hidden visually, still read out.
-          iconOnlyOnPhone && 'max-sm:w-10 max-sm:px-0 max-sm:[&>span:first-child]:sr-only max-sm:[&>svg]:hidden',
+          iconOnlyBelow === 'sm' && 'max-sm:w-10 max-sm:px-0 max-sm:[&>span:first-child]:sr-only max-sm:[&>svg]:hidden',
+          iconOnlyBelow === 'lg' && 'max-lg:w-10 max-lg:px-0 max-lg:[&>span:first-child]:sr-only max-lg:[&>svg]:hidden',
         )}
       />
     </div>

@@ -1,5 +1,6 @@
 // Landing header and hero: the photo sits behind, fixed, with the text centred.
-// The header ends with the language switcher, top right.
+// The header ends with the language switcher, top right. Below 1024px it keeps one row in
+// every language: section links hidden, globe-only switcher, and below 440px the logo icon only.
 import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { ROUTES } from '@/utilities/constants/routes'
@@ -18,29 +19,30 @@ export function LandingHero() {
     <>
       <header className='sticky top-0 z-10 border-b border-pill-on-dark bg-sidebar-dark'>
         <div className='mx-auto flex max-w-295 flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6'>
-<a href='#top' className='no-underline'>
-  <Logo variant='dark' size='md' />
-</a>
+          {/* Icon only below 440px, so "Se connecter" and "Iniciar sesión" fit on one row. */}
+          <a href='#top' className='no-underline'>
+            <Logo variant='dark' size='md' iconOnlyOnSmallPhone />
+          </a>
           <div className='flex items-center gap-2'>
             <nav aria-label={t('common:nav.main')} className='flex flex-wrap items-center gap-1'>
               {navLinks.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
-                  className='hidden px-3 py-2.5 font-medium text-on-dark-label no-underline sm:inline'
+                  className='hidden px-3 py-2.5 font-medium text-on-dark-label no-underline lg:inline'
                 >
                   {t(link.labelKey)}
                 </a>
               ))}
               <Link
                 to={ROUTES.signIn}
-                className='rounded-md bg-highlight-on-dark px-4.5 py-2.75 font-bold text-sidebar-dark no-underline sm:ml-2'
+                className='rounded-md bg-highlight-on-dark px-4.5 py-2.75 font-bold text-sidebar-dark no-underline lg:ml-2'
               >
                 {t('header.signIn')}
               </Link>
             </nav>
-            {/* Not navigation, so outside the nav; globe only on phones to keep one row. */}
-            <LanguageSwitcher variant='dark' iconOnlyOnPhone />
+            {/* Not navigation, so outside the nav; globe only below 1024px to keep one row. */}
+            <LanguageSwitcher variant='dark' iconOnlyBelow='lg' />
           </div>
         </div>
       </header>

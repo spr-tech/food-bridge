@@ -23,7 +23,7 @@ describe('LanguageSwitcher', () => {
 
   it('switches and saves the chosen language, and its own label follows', async () => {
     const user = userEvent.setup()
-    render(<LanguageSwitcher variant="dark" iconOnlyOnPhone />)
+    render(<LanguageSwitcher variant="dark" iconOnlyBelow="sm" />)
 
     await user.click(screen.getByRole('combobox', { name: 'Language' }))
     await user.click(await screen.findByRole('option', { name: 'Español' }))
